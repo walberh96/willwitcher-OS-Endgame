@@ -61,7 +61,6 @@
     hyprpicker
     hyprshot
     wl-clipboard
-    kitty
     ntfs3g
     udiskie
     swaynotificationcenter
