@@ -199,6 +199,7 @@
   home-manager = {
     useGlobalPkgs   = true;
     extraSpecialArgs = { inherit inputs; };
+    backupFileExtension = "backup";
     users.willwitcher = import ./home.nix;
   };
 
