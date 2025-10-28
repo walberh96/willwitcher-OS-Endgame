@@ -24,7 +24,7 @@
     ############################
     ## Enable our Hyprland mod
     ############################
-    ww.hyprland.enable = true;
+    willwitcher.hyprland.enable = true;
 
 
   #####################################
