@@ -146,4 +146,30 @@
   ## Let Home Manager manage itself
   #####################################
   programs.home-manager.enable = true;
+
+  # --- Stylix per-target toggles (opt-in)
+    stylix = {
+      autoEnable = true; # mirror system intent: only theme what you choose
+
+      targets = {
+        # Terminals
+        kitty.enable = true;              # kitty gets Stylix colors/fonts :contentReference[oaicite:4]{index=4}
+
+        # Compositor / wallpaper
+        hyprland.enable = true;           # Hyprland colors where applicable :contentReference[oaicite:5]{index=5}
+        hyprland.hyprpaper.enable = true; # sets hyprpaper to your Stylix wallpaper :contentReference[oaicite:6]{index=6}
+
+        # Panels & launchers
+        waybar.enable = true;             # can also addCss if you want extra rules :contentReference[oaicite:7]{index=7}
+        wofi.enable = true;               # launcher theming via Stylix :contentReference[oaicite:8]{index=8}
+
+        # Editors/viewers
+        neovim.enable = true;             # Stylix-curated base16 for Neovim/NixVim :contentReference[oaicite:9]{index=9}
+        zathura.enable = true;            # PDF viewer theming :contentReference[oaicite:10]{index=10}
+
+        # GTK
+        gtk.enable = true;                # match GTK apps to the scheme (icons/cursor via Stylix options)
+      };
+    };
+
 }

@@ -14,6 +14,7 @@
   imports = [
     ./hardware-configuration.nix
     inputs.home-manager.nixosModules.default
+    inputs.stylix.nixosModules.stylix   # ← Stylix system module
   ];
 
   #####################################
@@ -51,6 +52,41 @@
     layout = "us";
     variant = "";
   };
+
+  #####################################
+  ## Stylix
+  #####################################
+  # --- Stylix: define the global theme once at the system level
+    stylix = {
+      enable = true;                        # turn Stylix on system-wide
+      autoEnable = true;                   # we will opt-in per target in HM (your preference)
+      image = ./wallpapers/kenpachi.png;      # wallpaper path (change to your actual file)
+
+      # Color scheme: use a Base16 file (e.g., Catppuccin Mocha)
+      # You can swap to any ${pkgs.base16-schemes}/share/themes/*.yaml
+      base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
+
+      # Fonts used across apps; Stylix ensures availability + fontconfig
+      fonts = {
+        serif = {
+          package = pkgs.nerd-fonts.hack;
+          name    = "Hack Nerd Font";
+        };
+        sansSerif = {
+          package = pkgs.nerd-fonts.hack;
+          name    = "Hack Nerd Font";
+        };
+        monospace = {
+          package = pkgs.nerd-fonts.hack;
+          name    = "Hack Nerd Font Mono";
+        };
+        emoji = {
+          package = pkgs.noto-fonts-emoji;
+          name    = "Noto Color Emoji";
+        };
+      };
+    };
+
 
   #####################################
   ## Users
