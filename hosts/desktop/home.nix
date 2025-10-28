@@ -22,6 +22,7 @@
       ../../modules/home-manager/waybar.nix
       ../../modules/home-manager/wofi.nix
       ../../modules/home-manager/swaync.nix
+      ../../modules/home-manager/kitty.nix
     ];
 
     ############################
@@ -31,6 +32,7 @@
     willwitcher.waybar.enable = true;
     willwitcher.wofi.enable = true;
     willwitcher.swaync.enable = true;
+    willwitcher.kitty.enable = true;
 
 
   #####################################
