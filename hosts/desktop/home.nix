@@ -25,6 +25,7 @@
       ../../modules/home-manager/kitty.nix
       ../../modules/home-manager/starship.nix
       ../../modules/home-manager/btop.nix
+      ../../modules/home-manager/zed.nix
     ];
 
     ############################
@@ -37,6 +38,7 @@
     willwitcher.kitty.enable = true;
     willwitcher.starship.enable = true;
     willwitcher.btop.enable = true;
+    willwitcher.zed.enable = true;
 
 
   #####################################
