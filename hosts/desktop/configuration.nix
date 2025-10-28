@@ -11,10 +11,13 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # Bluetooth
+    hardware.bluetooth.enable = true;
+
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = "ww-desktop"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -51,10 +54,14 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.willwitcher = {
     isNormalUser = true;
+    shell = pkgs.zsh;
     description = "willwitcher";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [];
   };
+
+  # Add zsh to the environment
+  environment.shells = [ pkgs.zsh ];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -115,4 +122,52 @@ hardware.steam-hardware.enable = true;
 programs.steam.enable = true;
 programs.gamemode.enable = true;
 
+  programs.nix-ld.enable = true;
+
+  programs.nix-ld.libraries = with pkgs; [
+
+    # Here put libraries that can be shared between apps for non-nix executables
+
+    icu # Required by dotnet in vscode extension
+  ];
+  # Pipewire sound
+
+  services.pulseaudio.enable = false;
+    services.pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+      wireplumber.enable = true;
+    };
+
+    # Polkit (needed for GUI elevated prompts)
+    security.polkit.enable = true;
+
+    # Portals for Wayland/Hyprland
+    xdg.portal.enable = true;
+    xdg.portal.extraPortals = with pkgs; [
+      xdg-desktop-portal-gtk
+      xdg-desktop-portal-hyprland
+    ];
+
+    # Fonts (nerd + emojis)
+    fonts.packages = with pkgs; [
+      nerd-fonts.hack
+      noto-fonts
+      texlivePackages.noto-emoji
+      font-awesome
+    ];
+
+    # Integrations for Thunar
+      programs.xfconf.enable = true;
+      services.gvfs.enable = true;
+      services.tumbler.enable = true;
+      programs.thunar.enable = true;
+      programs.thunar.plugins = with pkgs.xfce; [
+      thunar-archive-plugin
+    ];
+
+    # Enable zsh system level
+    programs.zsh.enable = true;
 }

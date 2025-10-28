@@ -20,6 +20,7 @@
   home.packages = [
     pkgs.zed-editor
     pkgs.firefox
+    pkgs.xfce.thunar
     pkgs.signal-desktop
     pkgs.mpv
     pkgs.zathura
@@ -119,7 +120,7 @@
   #  /etc/profiles/per-user/willwitcher/etc/profile.d/hm-session-vars.sh
   #
   home.sessionVariables = {
-    # EDITOR = "zeditor";
+    EDITOR = "zeditor";
   };
 
   programs.git = {
@@ -130,5 +131,12 @@
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
-# programs.git.settings.user.email
+
+  programs.zsh = {
+      enable = true;
+      enableCompletion = true;
+      syntaxHighlighting.enable = true;
+    };
+
+  programs.starship.enable = true;
 }
