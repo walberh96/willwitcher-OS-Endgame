@@ -23,6 +23,7 @@
       ../../modules/home-manager/wofi.nix
       ../../modules/home-manager/swaync.nix
       ../../modules/home-manager/kitty.nix
+      ../../modules/home-manager/starship.nix
     ];
 
     ############################
@@ -33,6 +34,7 @@
     willwitcher.wofi.enable = true;
     willwitcher.swaync.enable = true;
     willwitcher.kitty.enable = true;
+    willwitcher.starship.enable = true;
 
 
   #####################################
