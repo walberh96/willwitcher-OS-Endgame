@@ -62,7 +62,15 @@ in
         };
 
         nodejs = { format = "via [$symbol$version]($style) "; };
-        python = { format = "via [${symbol}${pyenv_prefix}${version}]($style) "; };
+        python = {
+          # Emit literal: ${symbol}${pyenv_prefix}${version}
+          format =
+            "via ["
+            + "$" + "{symbol}"
+            + "$" + "{pyenv_prefix}"
+            + "$" + "{version}"
+            + "]($style) ";
+        };
         rust   = { format = "via [$symbol$version]($style) "; };
         dotnet = { format = "via [$symbol$version]($style) "; };
 
