@@ -62,6 +62,12 @@
       autoEnable = true;                   # we will opt-in per target in HM (your preference)
       image = ./wallpapers/kenpachi.png;      # wallpaper path (change to your actual file)
 
+      # 👉 Evita la autodetección que toca Plasma5
+        targets.qt = {
+          enable = true;      # opcional (por defecto sigue autoEnable)
+          platform = "qtct";  # fuerza Qt a usar qtct
+        };
+
       # Color scheme: use a Base16 file (e.g., Catppuccin Mocha)
       # You can swap to any ${pkgs.base16-schemes}/share/themes/*.yaml
       base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
