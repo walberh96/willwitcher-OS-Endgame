@@ -24,6 +24,7 @@
       ../../modules/home-manager/swaync.nix
       ../../modules/home-manager/kitty.nix
       ../../modules/home-manager/starship.nix
+      ../../modules/home-manager/btop.nix
     ];
 
     ############################
@@ -35,6 +36,7 @@
     willwitcher.swaync.enable = true;
     willwitcher.kitty.enable = true;
     willwitcher.starship.enable = true;
+    willwitcher.btop.enable = true;
 
 
   #####################################
