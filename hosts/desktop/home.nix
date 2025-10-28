@@ -115,8 +115,8 @@
   #####################################
   programs.git = {
     enable    = true;
-    userName  = "Willwitcher";
-    userEmail = "willgamedevelopment@gmail.com";
+    settings.user.name  = "Willwitcher";
+    settings.user.email = "willgamedevelopment@gmail.com";
     # For extra config use:
     # extraConfig = { init.defaultBranch = "main"; pull.rebase = false; };
   };
