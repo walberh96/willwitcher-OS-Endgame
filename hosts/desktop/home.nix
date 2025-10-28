@@ -21,6 +21,7 @@
       ../../modules/home-manager/hyprland.nix
       ../../modules/home-manager/waybar.nix
       ../../modules/home-manager/wofi.nix
+      ../../modules/home-manager/swaync.nix
     ];
 
     ############################
@@ -29,6 +30,7 @@
     willwitcher.hyprland.enable = true;
     willwitcher.waybar.enable = true;
     willwitcher.wofi.enable = true;
+    willwitcher.swaync.enable = true;
 
 
   #####################################
