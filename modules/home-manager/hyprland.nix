@@ -41,7 +41,7 @@ in
         ################################
         exec-once = [
           #''mpvpaper -o "no-audio --loop" DP-3 ~/Wallpapers/ww-os-green.mp4''
-          "waybar" "swaync" "nm-applet" "blueman-applet" "udiskie" "signal-desktop"
+          "swaync" "nm-applet" "blueman-applet" "udiskie" "signal-desktop"
           "steam -silent"
         ];
 

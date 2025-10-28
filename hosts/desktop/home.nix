@@ -19,12 +19,14 @@
     ############################
     imports = [
       ../../modules/home-manager/hyprland.nix
+      ../../modules/home-manager/waybar.nix
     ];
 
     ############################
     ## Enable our Hyprland mod
     ############################
     willwitcher.hyprland.enable = true;
+    willwitcher.waybar.enable = true;
 
 
   #####################################
