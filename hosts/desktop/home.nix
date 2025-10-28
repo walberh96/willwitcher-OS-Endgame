@@ -20,6 +20,7 @@
     imports = [
       ../../modules/home-manager/hyprland.nix
       ../../modules/home-manager/waybar.nix
+      ../../modules/home-manager/wofi.nix
     ];
 
     ############################
@@ -27,6 +28,7 @@
     ############################
     willwitcher.hyprland.enable = true;
     willwitcher.waybar.enable = true;
+    willwitcher.wofi.enable = true;
 
 
   #####################################
