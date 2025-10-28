@@ -14,6 +14,19 @@
   # Pin HM features; update only after reading HM release notes.
   home.stateVersion = "25.05";
 
+  ############################
+    ## Import your HM modules ##
+    ############################
+    imports = [
+      ../modules/home-manager/hyprland.nix
+    ];
+
+    ############################
+    ## Enable our Hyprland mod
+    ############################
+    ww.hyprland.enable = true;
+
+
   #####################################
   ## Fonts (user-scoped)
   ## Enable fontconfig for user and install fonts here.
