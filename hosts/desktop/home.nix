@@ -1,142 +1,149 @@
 { config, pkgs, ... }:
 
 {
-  # Home Manager needs a bit of information about you and the paths it should
-  # manage.
-  home.username = "willwitcher";
+  ################################################################################
+  # Home Manager (user scope)
+  # - User packages and fonts (user-scoped)
+  # - Dotfiles and per-user program configs (zsh, starship, git, etc.)
+  # - Environment variables for the user session
+  ################################################################################
+
+  home.username      = "willwitcher";
   home.homeDirectory = "/home/willwitcher";
 
-  # This value determines the Home Manager release that your configuration is
-  # compatible with. This helps avoid breakage when a new Home Manager release
-  # introduces backwards incompatible changes.
-  #
-  # You should not change this value, even if you update Home Manager. If you do
-  # want to update the value, then make sure to first check the Home Manager
-  # release notes.
-  home.stateVersion = "25.05"; # Please read the comment before changing.
+  # Pin HM features; update only after reading HM release notes.
+  home.stateVersion = "25.05";
 
-  # The home.packages option allows you to install Nix packages into your
-  # environment.
-  home.packages = [
-    pkgs.zed-editor
-    pkgs.firefox
-    pkgs.xfce.thunar
-    pkgs.signal-desktop
-    pkgs.mpv
-    pkgs.zathura
-    pkgs.qimgv
-    pkgs.libreoffice
-    pkgs.zoxide
-    pkgs.ripgrep-all
-    pkgs.fd
-    pkgs.fzf
-    pkgs.jq
-    pkgs.lsd
-    pkgs.bat
-    pkgs.gh
-    pkgs.nb
-    pkgs.pass
-    pkgs.gnupg
-    pkgs.neovim
-    pkgs.fastfetch
-    pkgs.btop
-    pkgs.git
-    pkgs.wofi
-    pkgs.hyprpaper
-    pkgs.hyprlock
-    pkgs.hyprpicker
-    pkgs.hyprshot
-    pkgs.wl-clipboard
-    pkgs.kitty
-    pkgs.starship
-    pkgs.ntfs3g
-    pkgs.udiskie
-    pkgs.swaynotificationcenter
-    pkgs.mangohud
-    pkgs.protontricks
-    pkgs.wineWowPackages.stable
-    pkgs.pwvucontrol
-    pkgs.networkmanagerapplet
-    pkgs.wofi-emoji
-    pkgs.waybar
-    pkgs.blueman
-    pkgs.mpvpaper
-    pkgs.xarchiver
-    pkgs.p7zip
-    pkgs.unar
-    pkgs.xz
-    pkgs.zstd
-    pkgs.bzip3
-    pkgs.gzip
-    pkgs.gnutar
-    pkgs.libarchive
-    pkgs.libnotify
-    pkgs.gpu-screen-recorder-gtk
-    pkgs.lutris
+  #####################################
+  ## Fonts (user-scoped)
+  ## Enable fontconfig for user and install fonts here.
+  ## NOTE: Using noto-fonts-emoji (fixes emoji rendering).
+  #####################################
+  fonts.fontconfig.enable = true;
 
-    # # It is sometimes useful to fine-tune packages, for example, by applying
-    # # overrides. You can do that directly here, just don't forget the
-    # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
-    # # fonts?
-    # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
+  #####################################
+  ## User packages (apps, CLIs, utilities)
+  ## Prefer installing here rather than system-wide.
+  #####################################
+  home.packages = with pkgs; [
+    # GUI / desktop apps
+    zed-editor
+    firefox
+    signal-desktop
+    mpv
+    zathura
+    qimgv
+    libreoffice
+    wofi
+    hyprpaper
+    hyprlock
+    hyprpicker
+    hyprshot
+    wl-clipboard
+    kitty
+    ntfs3g
+    udiskie
+    swaynotificationcenter
+    mangohud
+    protontricks
+    wineWowPackages.stable
+    pwvucontrol
+    networkmanagerapplet
+    wofi-emoji
+    waybar
+    blueman
+    mpvpaper
+    xarchiver
 
-    # # You can also create simple shell scripts directly inside your
-    # # configuration. For example, this adds a command 'my-hello' to your
-    # # environment:
-    # (pkgs.writeShellScriptBin "my-hello" ''
-    #   echo "Hello, ${config.home.username}!"
-    # '')
+    # Archives / compression tools
+    p7zip
+    unar
+    xz
+    zstd
+    bzip3
+    gzip
+    gnutar
+    libarchive
+
+    # Dev / CLI tools
+    zoxide
+    ripgrep-all
+    fd
+    fzf
+    jq
+    lsd
+    bat
+    gh
+    nb
+    pass
+    gnupg
+    neovim
+    fastfetch
+    btop
+    git
+    libnotify
+    gpu-screen-recorder-gtk
+    lutris
+
+    # Fonts (user-scoped)
+    nerd-fonts.hack
+    noto-fonts
+    noto-fonts-emoji   # <-- correct package for emoji
+    font-awesome
   ];
 
-  # Home Manager is pretty good at managing dotfiles. The primary way to manage
-  # plain files is through 'home.file'.
+  # Example of managing dotfiles (disabled for now).
   home.file = {
-    # # Building this configuration will create a copy of 'dotfiles/screenrc' in
-    # # the Nix store. Activating the configuration will then make '~/.screenrc' a
-    # # symlink to the Nix store copy.
-    # ".screenrc".source = dotfiles/screenrc;
-
-    # # You can also set the file content immediately.
+    # ".config/myapp/config.toml".text = "…";
     # ".gradle/gradle.properties".text = ''
     #   org.gradle.console=verbose
     #   org.gradle.daemon.idletimeout=3600000
     # '';
   };
 
-  # Home Manager can also manage your environment variables through
-  # 'home.sessionVariables'. These will be explicitly sourced when using a
-  # shell provided by Home Manager. If you don't want to manage your shell
-  # through Home Manager then you have to manually source 'hm-session-vars.sh'
-  # located at either
-  #
-  #  ~/.nix-profile/etc/profile.d/hm-session-vars.sh
-  #
-  # or
-  #
-  #  ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
-  #
-  # or
-  #
-  #  /etc/profiles/per-user/willwitcher/etc/profile.d/hm-session-vars.sh
-  #
+  #####################################
+  ## Environment variables (user session)
+  #####################################
   home.sessionVariables = {
+    # Make sure this is an actual editor in PATH (e.g., "zed" or "nvim").
+    # If you intended Zed, consider: EDITOR = "zed";
     EDITOR = "zeditor";
   };
 
+  #####################################
+  ## Git (user identity + config)
+  #####################################
   programs.git = {
-      enable = true;
-      settings.user.email = "willgamedevelopment@gmail.com";
-      settings.user.name = "Willwitcher";
-    };
+    enable    = true;
+    userName  = "Willwitcher";
+    userEmail = "willgamedevelopment@gmail.com";
+    # For extra config use:
+    # extraConfig = { init.defaultBranch = "main"; pull.rebase = false; };
+  };
 
-  # Let Home Manager install and manage itself.
-  programs.home-manager.enable = true;
-
+  #####################################
+  ## Zsh (interactive shell config)
+  ## NixOS provides the login shell + minimal /etc/zshrc;
+  ## HM owns your ~/.zshrc, plugins, aliases, theme, etc.
+  #####################################
   programs.zsh = {
-      enable = true;
-      enableCompletion = true;
-      syntaxHighlighting.enable = true;
-    };
+    enable = true;
+    enableCompletion = true;
+    syntaxHighlighting.enable = true;
 
+    # Put your aliases, prompt tweaks, and exports here.
+    # initExtra = ''
+    #   alias ls="lsd -alh"
+    # '';
+  };
+
+  #####################################
+  ## Starship prompt
+  #####################################
   programs.starship.enable = true;
+
+  #####################################
+  ## Let Home Manager manage itself
+  #####################################
+  programs.home-manager.enable = true;
 }
