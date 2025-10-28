@@ -39,8 +39,8 @@ in
 
         git_status = {
           conflicted = " ";
-          ahead      = " ⇡${count}";
-          behind     = " ⇣${count}";
+          ahead      = " ⇡$count";   # ← antes decía " ⇡${count}"
+          behind     = " ⇣$count";   # ← antes decía " ⇣${count}"
           diverged   = " ⇕";
           untracked  = " ";
           stashed    = " ";
@@ -50,6 +50,7 @@ in
           deleted    = " ";
           format     = "[$all_status$ahead_behind]($style)";
         };
+
 
         package = {
           symbol = "📦 ";
