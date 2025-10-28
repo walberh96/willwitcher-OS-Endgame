@@ -5,37 +5,32 @@ let
 in
 {
   options.willwitcher.btop.enable =
-    mkEnableOption "Enable WillWitcher btop config (palette comes from terminal / Stylix)";
+    mkEnableOption "Enable WillWitcher btop config (palette from Stylix)";
 
   config = mkIf config.willwitcher.btop.enable {
+    # Let Stylix own btop’s theme/colors
+    stylix.targets.btop.enable = true;
+
     programs.btop = {
       enable = true;
-
-      # We keep colors out; use the built-in "TTY" theme so btop follows Kitty's palette (which Stylix themes).
       settings = {
-        # --- Visuals (no hardcoded colors) ---
-        color_theme = "TTY";        # Uses terminal 16-color palette
-        truecolor = true;           # 24-bit color support if theme uses it (TTY sticks to 16)
-        theme_background = false;   # Show terminal background instead of theme bg when possible
-        rounded_corners = true;     # Aesthetics
+        # No color_theme here → Stylix sets it to "stylix"
+        truecolor = true;
+        theme_background = false;
+        rounded_corners = true;
 
-        # --- UX ---
-        vim_keys = true;            # Familiar keybinds
-        update_ms = 1000;           # Refresh rate (ms)
-        shown_boxes = "proc cpu mem net";  # Default visible boxes
-        proc_sorting = "cpu lazy";  # Practical default
-        proc_tree = true;           # Tree view for processes
+        # UX
+        vim_keys = true;
+        update_ms = 1000;
+        shown_boxes = "proc cpu mem net";
+        proc_sorting = "cpu lazy";
+        proc_tree = true;
         show_cpu_freq = true;
         show_coretemp = true;
-        temp_scale = "celsius";     # or "fahrenheit"
-        graph_symbol = "braille";   # Smooth graphs (fallbacks to block if unsupported)
-
-        # --- Misc ---
-        # If you dislike mouse, you can turn it off:
-        # mouse_support = false;
+        temp_scale = "celsius";
+        graph_symbol = "braille";
+        # mouse_support = false;  # uncomment if you prefer keyboard-only
       };
     };
-
-    # Tip: if btop was previously in `home.packages`, you can remove it now since HM installs it.
   };
 }
