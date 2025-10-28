@@ -9,9 +9,10 @@
        inputs.nixpkgs.follows = "nixpkgs";
      };
      # Stylix: theming framework for NixOS + HM
+     # Stylix on master (matches unstable)  ⬅️ change here
          stylix = {
-           url = "github:nix-community/stylix/release-25.05";
-           inputs.nixpkgs.follows = "nixpkgs"; # keep pkgs in sync
+           url = "github:nix-community/stylix";
+           inputs.nixpkgs.follows = "nixpkgs";
          };
   };
 
