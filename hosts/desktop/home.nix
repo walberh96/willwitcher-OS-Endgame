@@ -163,6 +163,17 @@
     settings.user.email = "willgamedevelopment@gmail.com";
     # For extra config use:
     # extraConfig = { init.defaultBranch = "main"; pull.rebase = false; };
+    extraConfig = {
+        credential.helper = "!gh auth git-credential";
+        # opcional: si quieres que Git trate cada path de GitHub como único
+        # 'https://github.com'.useHttpPath = true;
+      };
+  };
+
+  # si gestionas gh con HM, puedes fijar protocolo:
+  programs.gh = {
+    enable = true;
+    settings.git_protocol = "https"; # o "ssh"
   };
 
   #####################################
