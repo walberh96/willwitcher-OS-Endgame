@@ -1,44 +1,29 @@
-{ config, pkgs, lib, ... }:
+{ lib, ... }:
 
-let
-  inherit (lib) mkEnableOption mkIf;
-in
 {
-  options.willwitcher.zed.enable =
-    mkEnableOption "Enable WillWitcher Zed editor (minimal settings; theme follows system)";
+  # Solo escribimos el settings.json. Zed lo tienes instalado vía home.packages.
+  xdg.configFile."zed/settings.json".text = lib.generators.toJSON {} {
+    # Follow system theme
+    theme = "System";
 
-  config = mkIf config.willwitcher.zed.enable {
-    # Install Zed at the user level
-    home.packages = [ pkgs.zed-editor ];
+    # Fonts
+    ui_font_size = 12;
+    buffer_font_size = 12;
 
-    # Zed config directory: ~/.config/zed/
-    # We write a conservative starter settings.json.
-    # - No hardcoded colors so it follows your system/dark theme
-    # - Safe editor ergonomics (tabs -> spaces, format on save, soft wrap at 100)
-    xdg.configFile."zed/settings.json".text = builtins.toJSON {
-      # Follow the system theme (Dark/Light). You can also set "Dark" or "Light".
-      theme = "System";
+    # Saving / formatting
+    autosave = "on_focus_change";   # antes: auto_save
+    format_on_save = "on";          # "on" | "off"
 
-      # UI & editor font sizes (Zed ignores unknown keys harmlessly)
-      ui_font_size = 12;
-      buffer_font_size = 12;
+    # Wrapping / width
+    preferred_line_length = 100;
+    soft_wrap = "preferred_line_length";
 
-      # Editor behavior
-      soft_wrap = "preferred_line_length";  # wrap long lines
-      preferred_line_length = 100;
-      tab_size = 4;
-      translate_tabs_to_spaces = true;
-      format_on_save = true;
+    # Indentation
+    tab_size = 4;
+    hard_tabs = false;              # equivalente a “translate_tabs_to_spaces = true”
 
-      # Show small inline git diffs (if Zed supports it; otherwise ignored)
-      show_inline_git_diff = true;
-
-      # Save automatically when switching focus (safe default)
-      auto_save = "on_focus_change";
-    };
-
-    # If you later want custom keybindings or snippets, we can add:
-    # xdg.configFile."zed/keymap.json".text = builtins.toJSON [ ... ];
-    # xdg.configFile."zed/snippets.json".text = builtins.toJSON { ... };
+    # Git inline diff: se eliminó el viejo show_inline_git_diff.
+    # Si quieres indicadores en el scrollbar, Zed ya expone:
+    # "scrollbar": { "git_diff": true } por defecto.
   };
 }
