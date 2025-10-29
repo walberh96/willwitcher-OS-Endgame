@@ -221,7 +221,7 @@
           # Cursor: Catppuccin (Mocha + Mauve) a tamaño 28
           cursor = {
             package = pkgs.catppuccin-cursors;
-            name    = "catppuccin-mocha-mauve-cursors";  # ajusta el acento si quieres
+            name    = "mochaDark";  # ajusta el acento si quieres
             size    = 28;
           };
 
