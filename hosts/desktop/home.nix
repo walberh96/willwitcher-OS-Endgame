@@ -74,7 +74,6 @@
   #####################################
   home.packages = with pkgs; [
     # GUI / desktop apps
-    firefox
     signal-desktop
     mpv
     zathura
