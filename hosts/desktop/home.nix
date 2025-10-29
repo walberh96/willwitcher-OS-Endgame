@@ -187,6 +187,7 @@
         # Terminals
         kitty.enable = true;              # kitty gets Stylix colors/fonts :contentReference[oaicite:4]{index=4}
 
+        firefox.profileNames = ["default"];
         # Compositor / wallpaper
         hyprland.enable = true;           # Hyprland colors where applicable :contentReference[oaicite:5]{index=5}
         hyprland.hyprpaper.enable = true; # sets hyprpaper to your Stylix wallpaper :contentReference[oaicite:6]{index=6}
