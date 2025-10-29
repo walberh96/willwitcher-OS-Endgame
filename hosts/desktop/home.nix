@@ -153,7 +153,7 @@
   home.sessionVariables = {
     # Make sure this is an actual editor in PATH (e.g., "zed" or "nvim").
     # If you intended Zed, consider: EDITOR = "zed";
-    EDITOR = "code";
+    EDITOR = "nvim";
   };
 
   #####################################
