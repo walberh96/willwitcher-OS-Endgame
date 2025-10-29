@@ -26,6 +26,7 @@
       ../../modules/home-manager/starship.nix
       ../../modules/home-manager/btop.nix
       ../../modules/home-manager/zed.nix
+      ../../modules/home-manager/firefox.nix
     ];
 
     ############################
@@ -40,6 +41,12 @@
     willwitcher.btop.enable = true;
     willwitcher.zed.enable = true;
     willwitcher.zed.themeFromStylix = true;
+
+    # Firefox Options
+    willwitcher.firefox.enable = true;
+
+    # Use your chosen profile name
+    willwitcher.firefox.profileName = "default";
 
 
   #####################################
