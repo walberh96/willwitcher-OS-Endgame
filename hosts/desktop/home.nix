@@ -54,7 +54,6 @@
   #####################################
   home.packages = with pkgs; [
     # GUI / desktop apps
-    zed-editor
     firefox
     signal-desktop
     mpv
