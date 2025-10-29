@@ -155,18 +155,6 @@
   ];
   xdg.portal.config.common.default = [ "hyprland" "gnome" "gtk" ];
 
-    # Secret Service para Zed (login/API keys)
-    services.gnome.gnome-keyring.enable = true;  # instala/autostart
-    security.pam.services.login.enableGnomeKeyring = true; # TTY
-    #security.pam.services.ly.enableGnomeKeyring = true;    # si usas LY
-    # Si usas un DM concreto, añade su nombre:
-    # security.pam.services.ly.enableGnomeKeyring = true;   # si usas LY
-    security.pam.services.sddm.enableGnomeKeyring = true; # si usas SDDM
-    # security.pam.services.gdm.enableGnomeKeyring = true;  # si usas GDM
-
-    # RealtimeKit (el warning que ves)
-    security.rtkit.enable = true;
-
     # Entorno Wayland/Hyprland
     environment.sessionVariables = {
       XDG_CURRENT_DESKTOP = "Hyprland";
