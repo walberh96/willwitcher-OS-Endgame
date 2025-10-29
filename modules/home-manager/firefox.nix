@@ -170,6 +170,19 @@ in
             settings = basePrefs;
 
             # Extensions intentionally omitted here; add later if you want declarative add-ons.
+            extensions = {
+                          force = true;        # requerido si defines 'extensions.settings' o reemplazas el set
+                          #packages = addons;   # instala uBlock Origin y AdGuard si tu nixpkgs tiene 'firefox-addons'
+                          # settings = {       # opcional: políticas por extensión (policies.json / ExtensionSettings)
+                          #   "uBlock0@raymondhill.net" = {
+                          #     installation_mode = "allowed";
+                          #     # Nota: esto NO configura opciones internas de uBlock; es para políticas de instalación/actualización.
+                          #   };
+                          #   "adguardadblocker@adguard.com" = {
+                          #     installation_mode = "allowed";
+                          #   };
+                          # };
+                        };
           };
       };
     };
