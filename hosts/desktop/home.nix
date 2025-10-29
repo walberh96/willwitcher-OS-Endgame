@@ -143,7 +143,6 @@
     nb
     pass
     gnupg
-    neovim
     fastfetch
     btop
     git
