@@ -147,12 +147,34 @@
   #####################################
   ## XDG Portals (Wayland/Hyprland)
   #####################################
-  xdg.portal.enable = true;
-  xdg.portal.extraPortals = with pkgs; [
-    xdg-desktop-portal-gtk
-    xdg-desktop-portal-hyprland
-  ];
+  xdg.portal = {
+      enable = true;
+      extraPortals = with pkgs; [
+        xdg-desktop-portal-hyprland
+        xdg-desktop-portal-gtk
+      ];
+      # Fuerza orden (Hyprland para ventanas/screencast, GTK para FileChooser/OpenURI)
+      config.common.default = [ "hyprland" "gtk" ];
+    };
 
+    # Clave para Zed: Secret Service
+    services.gnome.gnome-keyring.enable = true;
+
+    # Si usas LY como display manager (parece que sí en tu stack):
+    security.pam.services = {
+      login.enableGnomeKeyring = true;  # login por TTY
+      ly.enableGnomeKeyring = true;     # desbloqueo al entrar por LY
+      # Si usas otro DM, cambia 'ly' por 'sddm' / 'gdm' / etc.
+    };
+
+    # RealtimeKit (quita esos warnings y mejora PipeWire)
+    services.rtkit.enable = true;
+
+  environment.sessionVariables = {
+      XDG_CURRENT_DESKTOP = "Hyprland";
+      XDG_SESSION_TYPE = "wayland";
+      NIXOS_OZONE_WL = "1";
+    };
   #####################################
   ## File manager integrations (system services)
   ## These are system-scoped so Thunar previews/mounts work everywhere.
