@@ -64,8 +64,8 @@
 
       # Color scheme: use a Base16 file (e.g., Catppuccin Mocha)
       # You can swap to any ${pkgs.base16-schemes}/share/themes/*.yaml
-      base16Scheme = ../../themes/circus.yaml;
-
+      base16Scheme = ../../themes/catppuccin-mocha.yaml;
+      #base16Scheme = ../../themes/catppuccin-latte.yaml;
       # Fonts used across apps; Stylix ensures availability + fontconfig
       fonts = {
         serif = {
