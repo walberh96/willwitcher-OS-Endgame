@@ -202,6 +202,8 @@
   #####################################
   programs.home-manager.enable = true;
 
+  services.gnome-keyring.enable = true;
+
   # --- Stylix per-target toggles (opt-in)
     stylix = {
       autoEnable = true; # mirror system intent: only theme what you choose

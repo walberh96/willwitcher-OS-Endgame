@@ -156,8 +156,6 @@
   xdg.portal.config.common.default = [ "hyprland" "gnome" "gtk" ];
 
     # Secret Service para Zed (login/API keys)
-    services.gnome.gnome-keyring.enable = true;
-
     services.gnome.gnome-keyring.enable = true;  # instala/autostart
     security.pam.services.login.enableGnomeKeyring = true; # TTY
     security.pam.services.ly.enableGnomeKeyring = true;    # si usas LY
