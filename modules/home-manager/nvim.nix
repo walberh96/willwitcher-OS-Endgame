@@ -62,7 +62,7 @@ let
       ++ optionals cfg.plugins.indent    [ indent-blankline-nvim ]
       # LSP + completion
       ++ optionals cfg.plugins.lsp       [ nvim-lspconfig ]
-      ++ optionals cfg.plugins.cmp       [ nvim-cmp cmp-nvim-lsp cmp-buffer cmp-path LuaSnip friendly-snippets ]
+      ++ optionals cfg.plugins.cmp       [ nvim-cmp cmp-nvim-lsp cmp-buffer cmp-path luasnip friendly-snippets ]
       # Treesitter
       ++ optionals cfg.plugins.treesitter[ nvim-treesitter ]
       # Fuzzy finder
@@ -136,7 +136,7 @@ let
       })
     ''}
 
-    -- Completion (nvim-cmp + LuaSnip)
+    -- Completion (nvim-cmp + luasnip)
     ${lib.optionalString cfg.plugins.cmp ''
       local cmp = require("cmp")
       local luasnip = require("luasnip")
@@ -244,7 +244,7 @@ in
       telescope = mkOption { type = types.bool; default = true;  description = "Enable telescope.nvim"; };
       treesitter= mkOption { type = types.bool; default = true;  description = "Enable nvim-treesitter"; };
       lsp       = mkOption { type = types.bool; default = true;  description = "Enable nvim-lspconfig"; };
-      cmp       = mkOption { type = types.bool; default = true;  description = "Enable nvim-cmp + LuaSnip"; };
+      cmp       = mkOption { type = types.bool; default = true;  description = "Enable nvim-cmp + luasnip"; };
 
       themeProvider = mkOption {
         type = types.enum [ "none" "catppuccin" ];
