@@ -168,10 +168,8 @@ let
       })
     ''}
 
-    -- LSP servers (Neovim 0.11+ native API with fallback to lspconfig)
+    -- LSP servers (Neovim 0.11+ native API, no lspconfig, no deprecations)
     ${lib.optionalString cfg.plugins.lsp ''
-      local has011 = (vim.fn.has("nvim-0.11") == 1) and vim.lsp and vim.lsp.start and vim.lsp.config
-
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       local ok_cmp, cmp_lsp = pcall(require, "cmp_nvim_lsp")
       if ok_cmp then
@@ -189,61 +187,39 @@ let
       ${lib.optionalString cfg.lsp.enable.yaml   ''table.insert(servers, "yamlls")''}
       ${lib.optionalString cfg.lsp.enable.toml   ''table.insert(servers, "taplo")''}
 
-      if has011 then
-        -- Native path (no lspconfig)
-        local function start(server, cfg)
-          cfg = cfg or {}
-          cfg.name = cfg.name or server
-          cfg.capabilities = vim.tbl_deep_extend("force", capabilities, cfg.capabilities or {})
-          vim.lsp.start(vim.lsp.config(cfg))
+      -- Command map (bin names come from your extraPackages)
+      local cmd_by_server = {
+        lua_ls         = { "lua-language-server" },
+        nil_ls         = { "nil" },
+        pyright        = { "pyright-langserver", "--stdio" },
+        rust_analyzer  = { "rust-analyzer" },
+        bashls         = { "bash-language-server", "start" },
+        html           = { "vscode-html-language-server",  "--stdio" },
+        cssls          = { "vscode-css-language-server",   "--stdio" },
+        jsonls         = { "vscode-json-language-server",  "--stdio" },
+        yamlls         = { "yaml-language-server",         "--stdio" },
+        taplo          = { "taplo", "lsp", "stdio" },
+      }
+
+      for _, server in ipairs(servers) do
+        local cfg = {
+          name = server,                        -- MUST be a plain string
+          cmd = cmd_by_server[server],
+          capabilities = capabilities,
+          -- root_dir = vim.fn.getcwd(),        -- optional: set a root rule if you want
+        }
+
+        if server == "lua_ls" then
+          cfg.settings = {
+            Lua = {
+              diagnostics = { globals = { "vim" } },
+              workspace   = { checkThirdParty = false },
+            }
+          }
         end
 
-        for _, server in ipairs(servers) do
-          if server == "lua_ls" then
-            start(server, {
-              cmd = { "lua-language-server" },
-              settings = {
-                Lua = {
-                  diagnostics = { globals = { "vim" } },
-                  workspace = { checkThirdParty = false },
-                }
-              }
-            })
-          elseif server == "nil_ls" then
-            start(server, { cmd = { "nil" } })
-          elseif server == "pyright" then
-            start(server, { cmd = { "pyright-langserver", "--stdio" } })
-          elseif server == "rust_analyzer" then
-            start(server, { cmd = { "rust-analyzer" } })
-          elseif server == "bashls" then
-            start(server, { cmd = { "bash-language-server", "start" } })
-          elseif server == "html" then
-            start(server, { cmd = { "vscode-html-language-server", "--stdio" } })
-          elseif server == "cssls" then
-            start(server, { cmd = { "vscode-css-language-server", "--stdio" } })
-          elseif server == "jsonls" then
-            start(server, { cmd = { "vscode-json-language-server", "--stdio" } })
-          elseif server == "yamlls" then
-            start(server, { cmd = { "yaml-language-server", "--stdio" } })
-          elseif server == "taplo" then
-            start(server, { cmd = { "taplo", "lsp", "stdio" } })
-          end
-        end
-      else
-        -- Fallback for older Neovim: lspconfig as before
-        local lspconfig = require("lspconfig")
-        for _, server in ipairs(servers) do
-          local opts = { capabilities = capabilities }
-          if server == "lua_ls" then
-            opts.settings = {
-              Lua = {
-                diagnostics = { globals = { "vim" } },
-                workspace = { checkThirdParty = false },
-              }
-            }
-          end
-          lspconfig[server].setup(opts)
-        end
+        -- Start client (native API; no deprecated framework)
+        vim.lsp.start(cfg)
       end
 
       -- Basic LSP keymaps
@@ -258,6 +234,7 @@ let
       map("n", "[d", vim.diagnostic.goto_prev, o)
       map("n", "]d", vim.diagnostic.goto_next, o)
     ''}
+
   '';
 in
 {
