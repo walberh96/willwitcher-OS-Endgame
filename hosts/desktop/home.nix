@@ -41,11 +41,25 @@
     willwitcher.btop.enable = true;
     willwitcher.zed.enable = true;
     willwitcher.zed.themeFromStylix = true;
-    willwitcher.firefox.enable = true;
-    # Name for the new HM-managed profile (predefined)
-    willwitcher.firefox.profileName = "willwitcher";
     # Optional: make it the default browser
-    willwitcher.firefox.makeDefault = true;
+    willwitcher.firefox = {
+      enable =true;
+      profileName = "willwitcher";
+      makeDefault = true;
+      # Añade/extiende tus extensiones declarativas aquí:
+          policyExtensions = [
+            { id = "uBlock0@raymondhill.net";    slug = "ublock-origin"; }
+            # { id = "otra@id"; slug = "otro-slug"; }
+          ];
+
+          # (opcional) Declarar marcadores:
+          # manageBookmarks = true;
+          # bookmarksForce  = false;  # true para imponer la lista
+          # bookmarkItems = [
+          #   { name = "YouTube"; url = "https://youtube.com"; }
+          #   { name = "Arch Wiki"; url = "https://wiki.archlinux.org/"; }
+          # ];
+    };
 
   #####################################
   ## Fonts (user-scoped)

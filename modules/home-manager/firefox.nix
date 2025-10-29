@@ -1,27 +1,11 @@
 { config, lib, pkgs, ... }:
 
-# Firefox (Home Manager) — WillWitcherOS style (2025-10)
-#
-# Cambios clave:
-# - Home & New Tab: página en blanco (about:blank).
-# - Pestañas verticales nativas activadas (Firefox >= 136).
-# - DRM (Widevine) ON.
-# - ETP por defecto en "standard" (opción para cambiar a strict).
-# - Global Privacy Control (GPC) ON.
-# - Telemetría/pings del New Tab OFF.
-# - uBlock Origin instalado con 'force = true' para que HM controle extensiones.
-#
 let
-  inherit (lib) mkEnableOption mkOption mkIf types optionals;
+  inherit (lib) mkEnableOption mkOption mkIf mkMerge types mapAttrs';
 
   cfg = config.willwitcher.firefox;
 
-  # Intentamos resolver uBlock Origin desde pkgs.firefox-addons; si no existe, la lista queda vacía.
-  uboPkg =
-    if (pkgs ? firefox-addons && pkgs.firefox-addons ? ublock-origin)
-    then pkgs.firefox-addons.ublock-origin
-    else null;
-
+  # Prefs base (user.js) — todas las que acordamos
   basePrefs = {
     # --- Telemetry / reporting OFF ---
     "app.normandy.api_url" = "";
@@ -47,12 +31,11 @@ let
     "browser.shell.checkDefaultBrowser" = false;
 
     # --- Página de inicio y nueva pestaña: en blanco ---
-    # 0 = blank, 1 = home, 3 = restore session
-    "browser.startup.page" = 0;
+    "browser.startup.page" = 0;                      # 0 = blank
     "browser.startup.homepage" = "about:blank";
     "browser.newtabpage.enabled" = false;
 
-    # Activity Stream (New Tab) sugerencias/ads OFF + telemetría OFF
+    # Activity Stream (New Tab) sugerencias/ads/telemetría OFF
     "browser.newtabpage.activity-stream.feeds.topsites" = false;
     "browser.newtabpage.activity-stream.feeds.section.topstories" = false;
     "browser.newtabpage.activity-stream.showSponsored" = false;
@@ -76,7 +59,6 @@ let
 
     # --- HTTPS-Only & ETP ---
     "dom.security.https_only_mode" = cfg.httpsOnly;
-    # "standard" | "strict" | "custom"
     "browser.contentblocking.category" = (if cfg.strictETP then "strict" else "standard");
 
     # --- Fingerprinting resistance (opcional) ---
@@ -84,11 +66,11 @@ let
 
     # --- Pocket / Firefox Accounts ---
     "extensions.pocket.enabled" = (!cfg.disablePocket);
-    "identity.fxaccounts.enabled" = (!cfg.disableFirefoxAccounts);
     "extensions.recommendations.enabled" = false;
     "extensions.getAddons.showPane" = false;
+    "identity.fxaccounts.enabled" = (!cfg.disableFirefoxAccounts);
 
-    # --- Crash reporter / Normandy OFF ---
+    # --- Crash reporter OFF ---
     "breakpad.reportURL" = "";
     "browser.tabs.crashReporting.sendReport" = false;
 
@@ -104,14 +86,32 @@ let
     "sidebar.revamp" = true;
     "sidebar.verticalTabs" = true;
 
-    # --- No deshabilitar extensiones instaladas por HM ---
+    # --- Mantener habilitadas extensiones instaladas externamente ---
     "extensions.autoDisableScopes" = 0;
 
-    # --- (opcional, útil si usas userChrome/userContent) ---
+    # (opcional para userChrome / userContent)
     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
   };
+
+  # Construye ExtensionSettings (policies) a partir de la lista declarativa
+  mkPolicyExt = ext:
+    let
+      # valores por defecto para cada entrada
+      default = {
+        installation_mode = "force_installed";
+        private_browsing = true;
+        default_area = "menupanel";
+      };
+      merged = default // (removeAttrs ext [ "id" "slug" ]);
+      url = "https://addons.mozilla.org/firefox/downloads/latest/${ext.slug}/latest.xpi";
+    in
+    merged // { install_url = url; };
+
+  extSettingsAttrset =
+    lib.listToAttrs (map (ext: { name = ext.id; value = mkPolicyExt ext; }) cfg.policyExtensions);
 in
 {
+  #### OPTIONS #################################################################
   options.willwitcher.firefox = {
     enable = mkEnableOption "Enable Firefox (themed by Stylix, managed by Home Manager).";
 
@@ -135,40 +135,33 @@ in
 
     # Stylix toggles
     enableFirefoxColor = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Also enable Stylix's Firefox Color toolbar theming.";
+      type = types.bool; default = true;
+      description = "Enable Stylix's Firefox Color toolbar theming.";
     };
     enableFirefoxGnomeTheme = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Also enable Stylix's Firefox GNOME theme (GTK-like look).";
+      type = types.bool; default = true;
+      description = "Enable Stylix's Firefox GNOME theme (GTK-like look).";
     };
 
     # Privacy toggles
     strictETP = mkOption {
-      type = types.bool;
-      default = false;  # Standard por defecto (puedes poner true para Strict)
+      type = types.bool; default = false; # Standard por defecto
       description = "Enhanced Tracking Protection: strict if true.";
     };
     httpsOnly = mkOption {
-      type = types.bool;
-      default = true;
+      type = types.bool; default = true;
       description = "Force HTTPS-Only mode.";
     };
     resistFingerprinting = mkOption {
-      type = types.bool;
-      default = false;
+      type = types.bool; default = false;
       description = "Enable RFP (may break layouts/features).";
     };
     disablePocket = mkOption {
-      type = types.bool;
-      default = true;
+      type = types.bool; default = true;
       description = "Disable Pocket integration.";
     };
     disableFirefoxAccounts = mkOption {
-      type = types.bool;
-      default = false;
+      type = types.bool; default = false;
       description = "Disable Firefox Account / Sync UI.";
     };
 
@@ -179,12 +172,65 @@ in
     };
 
     variableFontSize = mkOption {
-      type = types.int;
-      default = 20;
+      type = types.int; default = 20;
       description = "Default variable font size for western scripts (page content).";
+    };
+
+    # === Extensiones por políticas (AMO) ===
+    # Lista de extensiones con su ID y slug de AMO.
+    policyExtensions = mkOption {
+      type = types.listOf (types.attrsOf types.anything);
+      default = [
+        { id = "uBlock0@raymondhill.net"; slug = "ublock-origin"; }
+      ];
+      example = lib.literalExpression ''
+        [
+          { id = "some-ext@id"; slug = "amo-slug-here"; }
+          { id = "another@id";  slug = "another-slug"; private_browsing = false; }
+        ]
+      '';
+      description = ''
+        Declarative list of extensions installed via Firefox policies (ExtensionSettings).
+        Each item must include:
+          - id   : the extension ID (from about:support or extensions.json)
+          - slug : the AMO slug to build the latest.xpi URL
+        Optional keys (override defaults): installation_mode, private_browsing, default_area, install_url.
+      '';
+    };
+
+    # === Bookmarks ===
+    # Por defecto NO se gestionan (se conservan en el perfil).
+    manageBookmarks = mkOption {
+      type = types.bool; default = false;
+      description = "If true, manage bookmarks declaratively.";
+    };
+
+    bookmarksForce = mkOption {
+      type = types.bool; default = false;
+      description = "If true, HM replaces existing bookmarks each rebuild.";
+    };
+
+    # Simplificado: lista de marcadores planos (name/url). Para estructura avanzada usa bookmarksRaw.
+    bookmarkItems = mkOption {
+      type = types.listOf (types.submodule {
+        options = {
+          name = mkOption { type = types.str; description = "Bookmark title"; };
+          url  = mkOption { type = types.str; description = "Bookmark URL"; };
+        };
+      });
+      default = [ ];
+      description = "Simple flat bookmarks (toolbar by default).";
+    };
+
+    # Avanzado: pasa el submódulo de HM tal cual. Si no es null, tiene prioridad sobre bookmarkItems.
+    bookmarksRaw = mkOption {
+      type = types.nullOr types.attrs;
+      default = null;
+      description = "Raw HM bookmarks submodule (advanced: directories, separators, etc.).";
     };
   };
 
+  #### CONFIG ##################################################################
   config = mkIf cfg.enable {
     programs.firefox = {
       enable = true;
@@ -198,20 +244,32 @@ in
             isDefault = true;
           })
           // {
-            # Preferencias → user.js
+            # user.js
             settings = basePrefs;
 
-            # Extensiones declarativas (HM controla la lista)
-            extensions = {
-              force = true;                          # <- sobrescribe las extensiones existentes
-              packages = optionals (uboPkg != null) [ uboPkg ];  # uBlock Origin si está disponible
-              # settings = { "uBlock0@raymondhill.net" = { installation_mode = "allowed"; }; }; # opcional
-            };
+            # Bookmarks (opcional)
+            bookmarks = mkIf cfg.manageBookmarks (
+              if cfg.bookmarksRaw != null then cfg.bookmarksRaw else {
+                force = cfg.bookmarksForce;
+                bookmarks = map (b: { name = b.name; url = b.url; }) cfg.bookmarkItems;
+              }
+            );
           };
+      };
+
+      # Enterprise policies (policies.json)
+      policies = {
+        # Extensiones desde AMO (force_installed + latest.xpi)
+        ExtensionSettings = extSettingsAttrset;
+
+        # New Tab / Home en blanco + DRM
+        NewTabPage = false;
+        Homepage = { StartPage = "homepage"; URL = "about:blank"; };
+        EncryptedMediaExtensions = { Enabled = true; };
       };
     };
 
-    # Stylix: tematizar por nombre de perfil exacto
+    # Stylix tematiza este perfil
     stylix.targets.firefox = {
       enable = true;
       profileNames = [ cfg.profileName ];
@@ -219,7 +277,7 @@ in
       firefoxGnomeTheme.enable = cfg.enableFirefoxGnomeTheme;
     };
 
-    # Default browser wiring (XDG + env var)
+    # Default browser wiring
     xdg.mimeApps.defaultApplications = mkIf cfg.makeDefault {
       "text/html" = "firefox.desktop";
       "x-scheme-handler/http" = "firefox.desktop";
@@ -227,14 +285,8 @@ in
       "x-scheme-handler/about" = "firefox.desktop";
       "x-scheme-handler/unknown" = "firefox.desktop";
     };
-
     home.sessionVariables = mkIf cfg.makeDefault {
       DEFAULT_BROWSER = "${pkgs.firefox}/bin/firefox";
     };
-
-    # Aviso si no se encontró uBlock Origin en el canal actual
-    warnings = lib.mkIf (uboPkg == null) [
-      "Firefox: uBlock Origin no está disponible en pkgs.firefox-addons para este canal; no se instalará ninguna extensión. (extensions.force = true seguirá aplicando el control de la lista)."
-    ];
   };
 }
