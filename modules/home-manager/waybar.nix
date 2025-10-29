@@ -15,9 +15,6 @@ in
     programs.waybar = {
       enable = true;
 
-      # Que la inicie systemd (más limpio y robusto que Hyprland exec-once)
-      systemd.enable = true;
-
       # Sin style.css para no chocar con Stylix
       # style = '''';
 
