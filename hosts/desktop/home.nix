@@ -74,6 +74,7 @@
   #####################################
   home.packages = with pkgs; [
     # GUI / desktop apps
+    vscode
     signal-desktop
     mpv
     zathura
@@ -151,7 +152,7 @@
   home.sessionVariables = {
     # Make sure this is an actual editor in PATH (e.g., "zed" or "nvim").
     # If you intended Zed, consider: EDITOR = "zed";
-    EDITOR = "zeditor";
+    EDITOR = "code";
   };
 
   #####################################
