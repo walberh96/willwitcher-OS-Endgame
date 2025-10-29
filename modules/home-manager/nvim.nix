@@ -168,13 +168,17 @@ let
       })
     ''}
 
-    -- LSP servers
+    -- LSP servers (Neovim 0.11+ native API with fallback to lspconfig)
     ${lib.optionalString cfg.plugins.lsp ''
-      local lspconfig = require("lspconfig")
+      local has011 = (vim.fn.has("nvim-0.11") == 1) and vim.lsp and vim.lsp.start and vim.lsp.config
+
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       local ok_cmp, cmp_lsp = pcall(require, "cmp_nvim_lsp")
-      if ok_cmp then capabilities = cmp_lsp.default_capabilities(capabilities) end
+      if ok_cmp then
+        capabilities = cmp_lsp.default_capabilities(capabilities)
+      end
 
+      -- Build server list from your toggles
       local servers = {}
       ${lib.optionalString cfg.lsp.enable.lua    ''table.insert(servers, "lua_ls")''}
       ${lib.optionalString cfg.lsp.enable.nix    ''table.insert(servers, "nil_ls")''}
@@ -185,30 +189,74 @@ let
       ${lib.optionalString cfg.lsp.enable.yaml   ''table.insert(servers, "yamlls")''}
       ${lib.optionalString cfg.lsp.enable.toml   ''table.insert(servers, "taplo")''}
 
-      for _, server in ipairs(servers) do
-        local opts = { capabilities = capabilities }
-        if server == "lua_ls" then
-          opts.settings = {
-            Lua = {
-              diagnostics = { globals = { "vim" } },
-              workspace = { checkThirdParty = false },
-            }
-          }
+      if has011 then
+        -- Native path (no lspconfig)
+        local function start(server, cfg)
+          cfg = cfg or {}
+          cfg.name = cfg.name or server
+          cfg.capabilities = vim.tbl_deep_extend("force", capabilities, cfg.capabilities or {})
+          vim.lsp.start(vim.lsp.config(cfg))
         end
-        lspconfig[server].setup(opts)
+
+        for _, server in ipairs(servers) do
+          if server == "lua_ls" then
+            start(server, {
+              cmd = { "lua-language-server" },
+              settings = {
+                Lua = {
+                  diagnostics = { globals = { "vim" } },
+                  workspace = { checkThirdParty = false },
+                }
+              }
+            })
+          elseif server == "nil_ls" then
+            start(server, { cmd = { "nil" } })
+          elseif server == "pyright" then
+            start(server, { cmd = { "pyright-langserver", "--stdio" } })
+          elseif server == "rust_analyzer" then
+            start(server, { cmd = { "rust-analyzer" } })
+          elseif server == "bashls" then
+            start(server, { cmd = { "bash-language-server", "start" } })
+          elseif server == "html" then
+            start(server, { cmd = { "vscode-html-language-server", "--stdio" } })
+          elseif server == "cssls" then
+            start(server, { cmd = { "vscode-css-language-server", "--stdio" } })
+          elseif server == "jsonls" then
+            start(server, { cmd = { "vscode-json-language-server", "--stdio" } })
+          elseif server == "yamlls" then
+            start(server, { cmd = { "yaml-language-server", "--stdio" } })
+          elseif server == "taplo" then
+            start(server, { cmd = { "taplo", "lsp", "stdio" } })
+          end
+        end
+      else
+        -- Fallback for older Neovim: lspconfig as before
+        local lspconfig = require("lspconfig")
+        for _, server in ipairs(servers) do
+          local opts = { capabilities = capabilities }
+          if server == "lua_ls" then
+            opts.settings = {
+              Lua = {
+                diagnostics = { globals = { "vim" } },
+                workspace = { checkThirdParty = false },
+              }
+            }
+          end
+          lspconfig[server].setup(opts)
+        end
       end
 
       -- Basic LSP keymaps
       local map = vim.keymap.set
-      local opts = { noremap = true, silent = true }
-      map("n", "gd", vim.lsp.buf.definition, opts)
-      map("n", "gr", vim.lsp.buf.references, opts)
-      map("n", "K",  vim.lsp.buf.hover,      opts)
-      map("n", "<leader>rn", vim.lsp.buf.rename, opts)
-      map("n", "<leader>ca", vim.lsp.buf.code_action, opts)
-      map("n", "<leader>e",  vim.diagnostic.open_float, opts)
-      map("n", "[d", vim.diagnostic.goto_prev, opts)
-      map("n", "]d", vim.diagnostic.goto_next, opts)
+      local o = { noremap = true, silent = true }
+      map("n", "gd", vim.lsp.buf.definition, o)
+      map("n", "gr", vim.lsp.buf.references, o)
+      map("n", "K",  vim.lsp.buf.hover,      o)
+      map("n", "<leader>rn", vim.lsp.buf.rename, o)
+      map("n", "<leader>ca", vim.lsp.buf.code_action, o)
+      map("n", "<leader>e",  vim.diagnostic.open_float, o)
+      map("n", "[d", vim.diagnostic.goto_prev, o)
+      map("n", "]d", vim.diagnostic.goto_next, o)
     ''}
   '';
 in
