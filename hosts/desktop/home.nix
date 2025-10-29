@@ -39,6 +39,7 @@
     willwitcher.starship.enable = true;
     willwitcher.btop.enable = true;
     willwitcher.zed.enable = true;
+    willwitcher.zed.themeFromStylix = true;
 
 
   #####################################
@@ -179,7 +180,7 @@
       targets = {
         # Terminals
         kitty.enable = true;              # kitty gets Stylix colors/fonts :contentReference[oaicite:4]{index=4}
-        zed.enable = true;
+
         # Compositor / wallpaper
         hyprland.enable = true;           # Hyprland colors where applicable :contentReference[oaicite:5]{index=5}
         hyprland.hyprpaper.enable = true; # sets hyprpaper to your Stylix wallpaper :contentReference[oaicite:6]{index=6}
