@@ -210,6 +210,21 @@
     stylix = {
       autoEnable = true; # mirror system intent: only theme what you choose
 
+      # Íconos: Dracula para ambos modos
+          icons = {
+            enable  = true;                # activa el target de iconos
+            package = pkgs.dracula-icon-theme;
+            dark    = "Dracula";
+            light   = "Dracula";
+          };
+
+          # Cursor: Catppuccin (Mocha + Mauve) a tamaño 28
+          cursor = {
+            package = pkgs.catppuccin-cursors;
+            name    = "catppuccin-mocha-mauve-cursors";  # ajusta el acento si quieres
+            size    = 28;
+          };
+
       targets = {
         # Terminals
         kitty.enable = true;              # kitty gets Stylix colors/fonts :contentReference[oaicite:4]{index=4}
