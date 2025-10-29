@@ -26,7 +26,6 @@
       ../../modules/home-manager/starship.nix
       ../../modules/home-manager/btop.nix
       ../../modules/home-manager/zed.nix
-      ../../modules/home-manager/librewolf.nix
     ];
 
     ############################
@@ -42,13 +41,6 @@
     willwitcher.zed.enable = true;
     willwitcher.zed.themeFromStylix = true;
 
-    # LibreWolf Options
-    willwitcher.librewolf.enable = true;
-
-    # Use your chosen profile name
-    willwitcher.librewolf.profileName = "r2a6k0gf.default";
-
-
   #####################################
   ## Fonts (user-scoped)
   ## Enable fontconfig for user and install fonts here.
@@ -62,6 +54,7 @@
   #####################################
   home.packages = with pkgs; [
     # GUI / desktop apps
+    firefox
     signal-desktop
     mpv
     zathura
@@ -187,7 +180,7 @@
         # Terminals
         kitty.enable = true;              # kitty gets Stylix colors/fonts :contentReference[oaicite:4]{index=4}
 
-        firefox.profileNames = ["r2a6k0gf.default"];
+        #firefox.profileNames = ["default"];
         # Compositor / wallpaper
         hyprland.enable = true;           # Hyprland colors where applicable :contentReference[oaicite:5]{index=5}
         hyprland.hyprpaper.enable = true; # sets hyprpaper to your Stylix wallpaper :contentReference[oaicite:6]{index=6}
