@@ -74,7 +74,7 @@
   #####################################
   home.packages = with pkgs; [
     # GUI / desktop apps
-    vscode
+    vscodium
     signal-desktop
     mpv
     zathura
