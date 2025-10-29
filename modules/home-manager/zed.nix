@@ -1,29 +1,34 @@
-{ lib, ... }:
+{ config, pkgs, lib, ... }:
 
+let
+  inherit (lib) mkEnableOption mkIf;
+in
 {
-  # Solo escribimos el settings.json. Zed lo tienes instalado vía home.packages.
-  xdg.configFile."zed/settings.json".text = lib.generators.toJSON {} {
-    # Follow system theme
-    theme = "System";
+  options.willwitcher.zed.enable =
+    mkEnableOption "Enable WillWitcher Zed editor (minimal settings; theme follows system)";
 
-    # Fonts
-    ui_font_size = 12;
-    buffer_font_size = 12;
+  config = mkIf config.willwitcher.zed.enable {
+    # Install Zed for the user
+    home.packages = [ pkgs.zed-editor ];
 
-    # Saving / formatting
-    autosave = "on_focus_change";   # antes: auto_save
-    format_on_save = "on";          # "on" | "off"
+    # ~/.config/zed/settings.json (claves no deprecadas)
+    xdg.configFile."zed/settings.json".text = lib.generators.toJSON {} {
+      theme = "System";                 # follow system theme
+      ui_font_size = 16;
+      buffer_font_size = 16;
 
-    # Wrapping / width
-    preferred_line_length = 100;
-    soft_wrap = "preferred_line_length";
+      autosave = "on_focus_change";     # (antes era auto_save)
+      format_on_save = "on";            # "on" | "off"
 
-    # Indentation
-    tab_size = 4;
-    hard_tabs = false;              # equivalente a “translate_tabs_to_spaces = true”
+      preferred_line_length = 100;
+      soft_wrap = "preferred_line_length";
 
-    # Git inline diff: se eliminó el viejo show_inline_git_diff.
-    # Si quieres indicadores en el scrollbar, Zed ya expone:
-    # "scrollbar": { "git_diff": true } por defecto.
+      tab_size = 12;
+      hard_tabs = false;                # use spaces instead of hard tabs
+    };
+
+    # Si luego quieres keymap/snippets:
+    # xdg.configFile."zed/keymap.json".text = lib.generators.toJSON {} [ ... ];
+    # xdg.configFile."zed/snippets.json".text = lib.generators.toJSON {} { ... };
   };
 }
