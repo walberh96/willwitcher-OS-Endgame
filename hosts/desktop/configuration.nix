@@ -148,15 +148,12 @@
   ## XDG Portals (Wayland/Hyprland)
   #####################################
   # Portales
-    xdg.portal = {
-      enable = true;
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-hyprland
-        xdg-desktop-portal-gtk
-      ];
-      # Fuerza el orden de backends
-      config.common.default = [ "hyprland" "gtk" ];
-    };
+  xdg.portal.extraPortals = with pkgs; [
+    xdg-desktop-portal-hyprland
+    xdg-desktop-portal-gtk
+    xdg-desktop-portal-gnome
+  ];
+  xdg.portal.config.common.default = [ "hyprland" "gnome" "gtk" ];
 
     # Secret Service para Zed (login/API keys)
     services.gnome.gnome-keyring.enable = true;
