@@ -246,7 +246,7 @@ in
           // {
             # user.js
             settings = basePrefs;
-
+            extensions.force = true;
             # Bookmarks (opcional)
             bookmarks = mkIf cfg.manageBookmarks (
               if cfg.bookmarksRaw != null then cfg.bookmarksRaw else {
