@@ -74,7 +74,7 @@
   #####################################
   home.packages = with pkgs; [
     # GUI / desktop apps
-    vscodium
+    zed-editor
     signal-desktop
     mpv
     zathura
