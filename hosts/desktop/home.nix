@@ -27,6 +27,7 @@
       ../../modules/home-manager/btop.nix
       ../../modules/home-manager/zed.nix
       ../../modules/home-manager/firefox.nix
+      ../../modules/home-manager/nvim.nix
     ];
 
     ############################
@@ -39,6 +40,25 @@
     willwitcher.kitty.enable = true;
     willwitcher.starship.enable = true;
     willwitcher.btop.enable = true;
+
+    # NVIM SECTION ###
+    ##################
+    willwitcher.nvim.enable = true;
+
+      # Optional quality-of-life:
+      willwitcher.nvim.defaultEditor = true;
+      willwitcher.nvim.viAlias = true;
+      willwitcher.nvim.vimAlias = true;
+
+      # LSPs you want (adjust to your stack):
+      willwitcher.nvim.lsp.enable.python = true;
+      willwitcher.nvim.lsp.enable.rust   = true;
+      willwitcher.nvim.lsp.enable.web    = true;
+
+      # Keep Neovim color-neutral and let Stylix/Kitty rule the palette…
+      willwitcher.nvim.plugins.themeProvider = "none";
+    #####################################################################
+    # ####################################################################
     willwitcher.zed.enable = true;
     willwitcher.zed.themeFromStylix = true;
     # Optional: make it the default browser
