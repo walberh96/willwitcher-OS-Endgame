@@ -26,6 +26,7 @@
       ../../modules/home-manager/starship.nix
       ../../modules/home-manager/btop.nix
       ../../modules/home-manager/zed.nix
+      ../../modules/home-manager/firefox.nix
     ];
 
     ############################
@@ -40,6 +41,11 @@
     willwitcher.btop.enable = true;
     willwitcher.zed.enable = true;
     willwitcher.zed.themeFromStylix = true;
+    willwitcher.firefox.enable = true;
+    # Name for the new HM-managed profile (predefined)
+    willwitcher.firefox.profileName = "willwitcher";
+    # Optional: make it the default browser
+    willwitcher.firefox.makeDefault = true;
 
   #####################################
   ## Fonts (user-scoped)
@@ -180,7 +186,7 @@
         # Terminals
         kitty.enable = true;              # kitty gets Stylix colors/fonts :contentReference[oaicite:4]{index=4}
 
-        #firefox.profileNames = ["default"];
+        firefox.profileNames = ["willwitcher"];
         # Compositor / wallpaper
         hyprland.enable = true;           # Hyprland colors where applicable :contentReference[oaicite:5]{index=5}
         hyprland.hyprpaper.enable = true; # sets hyprpaper to your Stylix wallpaper :contentReference[oaicite:6]{index=6}
