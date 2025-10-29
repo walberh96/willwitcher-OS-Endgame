@@ -74,6 +74,7 @@
   #####################################
   home.packages = with pkgs; [
     # GUI / desktop apps
+    discord
     zed-editor
     signal-desktop
     mpv
