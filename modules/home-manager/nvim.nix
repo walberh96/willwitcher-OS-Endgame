@@ -176,14 +176,14 @@ let
       if ok_cmp then capabilities = cmp_lsp.default_capabilities(capabilities) end
 
       local servers = {}
-      ${lib.optionalString cfg.lsp.enable.lua   ''table.insert(servers, "lua_ls")''}
-      ${lib.optionalString cfg.lsp.enable.nix   ''table.insert(servers, "nil_ls")''}
-      ${lib.optionalString cfg.lsp.enable.python''table.insert(servers, "pyright")''}
-      ${lib.optionalString cfg.lsp.enable.rust  ''table.insert(servers, "rust_analyzer")''}
-      ${lib.optionalString cfg.lsp.enable.bash  ''table.insert(servers, "bashls")''}
-      ${lib.optionalString cfg.lsp.enable.web   ''for _,s in ipairs({ "html", "cssls", "jsonls" }) do table.insert(servers, s) end''}
-      ${lib.optionalString cfg.lsp.enable.yaml  ''table.insert(servers, "yamlls")''}
-      ${lib.optionalString cfg.lsp.enable.toml  ''table.insert(servers, "taplo")''}
+      ${lib.optionalString cfg.lsp.enable.lua    ''table.insert(servers, "lua_ls")''}
+      ${lib.optionalString cfg.lsp.enable.nix    ''table.insert(servers, "nil_ls")''}
+      ${lib.optionalString cfg.lsp.enable.python ''table.insert(servers, "pyright")''}
+      ${lib.optionalString cfg.lsp.enable.rust   ''table.insert(servers, "rust_analyzer")''}
+      ${lib.optionalString cfg.lsp.enable.bash   ''table.insert(servers, "bashls")''}
+      ${lib.optionalString cfg.lsp.enable.web    ''for _,s in ipairs({ "html", "cssls", "jsonls" }) do table.insert(servers, s) end''}
+      ${lib.optionalString cfg.lsp.enable.yaml   ''table.insert(servers, "yamlls")''}
+      ${lib.optionalString cfg.lsp.enable.toml   ''table.insert(servers, "taplo")''}
 
       for _, server in ipairs(servers) do
         local opts = { capabilities = capabilities }
@@ -209,14 +209,6 @@ let
       map("n", "<leader>e",  vim.diagnostic.open_float, opts)
       map("n", "[d", vim.diagnostic.goto_prev, opts)
       map("n", "]d", vim.diagnostic.goto_next, opts)
-    ''}
-
-    -- Theme provider (optional). We keep Stylix as the main palette owner.
-    ${lib.optionalString (cfg.plugins.themeProvider == "catppuccin") ''
-      -- Catppuccin theme; variant auto-chooses based on a darkish setup
-      local variant = "mocha"  -- set to "latte" if you prefer a light variant
-      require("catppuccin").setup({ flavour = variant })
-      vim.cmd.colorscheme("catppuccin")
     ''}
   '';
 in
