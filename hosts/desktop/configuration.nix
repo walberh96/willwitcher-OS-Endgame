@@ -158,8 +158,9 @@
     # Secret Service para Zed (login/API keys)
     services.gnome.gnome-keyring.enable = true;
 
-    # PAM: desbloquea el keyring al iniciar sesión
-    security.pam.services.login.enableGnomeKeyring = true;
+    services.gnome.gnome-keyring.enable = true;  # instala/autostart
+    security.pam.services.login.enableGnomeKeyring = true; # TTY
+    security.pam.services.ly.enableGnomeKeyring = true;    # si usas LY
     # Si usas un DM concreto, añade su nombre:
     # security.pam.services.ly.enableGnomeKeyring = true;   # si usas LY
     # security.pam.services.sddm.enableGnomeKeyring = true; # si usas SDDM
