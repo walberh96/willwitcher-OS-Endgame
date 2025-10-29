@@ -168,7 +168,7 @@ let
       })
     ''}
 
-    -- LSP servers (Neovim 0.11+ native API, no lspconfig, no deprecations)
+    -- LSP: start per-filetype (no servers until a matching buffer is opened)
     ${lib.optionalString cfg.plugins.lsp ''
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       local ok_cmp, cmp_lsp = pcall(require, "cmp_nvim_lsp")
@@ -176,53 +176,137 @@ let
         capabilities = cmp_lsp.default_capabilities(capabilities)
       end
 
-      -- Build server list from your toggles
-      local servers = {}
-      ${lib.optionalString cfg.lsp.enable.lua    ''table.insert(servers, "lua_ls")''}
-      ${lib.optionalString cfg.lsp.enable.nix    ''table.insert(servers, "nil_ls")''}
-      ${lib.optionalString cfg.lsp.enable.python ''table.insert(servers, "pyright")''}
-      ${lib.optionalString cfg.lsp.enable.rust   ''table.insert(servers, "rust_analyzer")''}
-      ${lib.optionalString cfg.lsp.enable.bash   ''table.insert(servers, "bashls")''}
-      ${lib.optionalString cfg.lsp.enable.web    ''for _,s in ipairs({ "html", "cssls", "jsonls" }) do table.insert(servers, s) end''}
-      ${lib.optionalString cfg.lsp.enable.yaml   ''table.insert(servers, "yamlls")''}
-      ${lib.optionalString cfg.lsp.enable.toml   ''table.insert(servers, "taplo")''}
+      local function start(server, cfg, bufnr)
+        cfg = cfg or {}
+        cfg.name = cfg.name or server
+        cfg.capabilities = vim.tbl_deep_extend("force", capabilities, cfg.capabilities or {})
 
-      -- Command map (bin names come from your extraPackages)
-      local cmd_by_server = {
-        lua_ls         = { "lua-language-server" },
-        nil_ls         = { "nil" },
-        pyright        = { "pyright-langserver", "--stdio" },
-        rust_analyzer  = { "rust-analyzer" },
-        bashls         = { "bash-language-server", "start" },
-        html           = { "vscode-html-language-server",  "--stdio" },
-        cssls          = { "vscode-css-language-server",   "--stdio" },
-        jsonls         = { "vscode-json-language-server",  "--stdio" },
-        yamlls         = { "yaml-language-server",         "--stdio" },
-        taplo          = { "taplo", "lsp", "stdio" },
-      }
+        -- Derive root from buffer path (fallback: cwd)
+        local fname = vim.api.nvim_buf_get_name(bufnr)
+        local startpath = (fname ~= "" and fname) or vim.loop.cwd()
 
-      for _, server in ipairs(servers) do
-        local cfg = {
-          name = server,                        -- MUST be a plain string
-          cmd = cmd_by_server[server],
-          capabilities = capabilities,
-          -- root_dir = vim.fn.getcwd(),        -- optional: set a root rule if you want
-        }
-
-        if server == "lua_ls" then
-          cfg.settings = {
-            Lua = {
-              diagnostics = { globals = { "vim" } },
-              workspace   = { checkThirdParty = false },
-            }
-          }
+        local markers
+        if server == "rust_analyzer" then
+          markers = { "Cargo.toml", "rust-project.json", ".git" }
+        elseif server == "nil_ls" then
+          markers = { "flake.nix", "shell.nix", "default.nix", ".git" }
+        elseif server == "pyright" then
+          markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git" }
+        elseif server == "bashls" then
+          markers = { ".git" }
+        elseif server == "yamlls" then
+          markers = { ".git" }
+        elseif server == "taplo" then
+          markers = { ".git", "Cargo.toml" }
+        else
+          markers = { ".git" }
         end
 
-        -- Start client (native API; no deprecated framework)
+        local found = vim.fs.find(markers, { upward = true, path = startpath })[1]
+        local root = found and vim.fs.dirname(found) or startpath
+        cfg.root_dir = root
+
         vim.lsp.start(cfg)
       end
 
-      -- Basic LSP keymaps
+      local function ensure_started(server, cfg)
+        return function(args)
+          local bufnr = args.buf
+          if #vim.lsp.get_clients({ bufnr = bufnr, name = server }) == 0 then
+            start(server, cfg, bufnr)
+          end
+        end
+      end
+
+      -- Rust
+      ${lib.optionalString cfg.lsp.enable.rust ''
+        vim.api.nvim_create_autocmd("FileType", {
+          pattern = "rust",
+          callback = ensure_started("rust_analyzer", {
+            cmd = { "rust-analyzer" },
+            settings = {
+              ["rust-analyzer"] = {
+                cargo = { allFeatures = true },
+                check = { command = "clippy" },
+              }
+            },
+          }),
+        })
+      ''}
+
+      -- Lua
+      ${lib.optionalString cfg.lsp.enable.lua ''
+        vim.api.nvim_create_autocmd("FileType", {
+          pattern = "lua",
+          callback = ensure_started("lua_ls", {
+            cmd = { "lua-language-server" },
+            settings = {
+              Lua = {
+                diagnostics = { globals = { "vim" } },
+                workspace = { checkThirdParty = false },
+              }
+            },
+          }),
+        })
+      ''}
+
+      -- Nix
+      ${lib.optionalString cfg.lsp.enable.nix ''
+        vim.api.nvim_create_autocmd("FileType", {
+          pattern = "nix",
+          callback = ensure_started("nil_ls", { cmd = { "nil" } }),
+        })
+      ''}
+
+      -- Python
+      ${lib.optionalString cfg.lsp.enable.python ''
+        vim.api.nvim_create_autocmd("FileType", {
+          pattern = "python",
+          callback = ensure_started("pyright", { cmd = { "pyright-langserver", "--stdio" } }),
+        })
+      ''}
+
+      -- Bash
+      ${lib.optionalString cfg.lsp.enable.bash ''
+        vim.api.nvim_create_autocmd("FileType", {
+          pattern = "sh",
+          callback = ensure_started("bashls", { cmd = { "bash-language-server", "start" } }),
+        })
+      ''}
+
+      -- Web: HTML/CSS/JSON
+      ${lib.optionalString cfg.lsp.enable.web ''
+        vim.api.nvim_create_autocmd("FileType", {
+          pattern = "html",
+          callback = ensure_started("html", { cmd = { "vscode-html-language-server", "--stdio" } }),
+        })
+        vim.api.nvim_create_autocmd("FileType", {
+          pattern = "css",
+          callback = ensure_started("cssls", { cmd = { "vscode-css-language-server", "--stdio" } }),
+        })
+        vim.api.nvim_create_autocmd("FileType", {
+          pattern = "json",
+          callback = ensure_started("jsonls", { cmd = { "vscode-json-language-server", "--stdio" } }),
+        })
+      ''}
+
+      -- YAML
+      ${lib.optionalString cfg.lsp.enable.yaml ''
+        vim.api.nvim_create_autocmd("FileType", {
+          pattern = "yaml",
+          callback = ensure_started("yamlls", { cmd = { "yaml-language-server", "--stdio" } }),
+        })
+      ''}
+
+      -- TOML
+      ${lib.optionalString cfg.lsp.enable.toml ''
+        vim.api.nvim_create_autocmd("FileType", {
+          pattern = "toml",
+          callback = ensure_started("taplo", { cmd = { "taplo", "lsp", "stdio" } }),
+        })
+      ''}
+
+      -- Basic LSP keymaps (once)
       local map = vim.keymap.set
       local o = { noremap = true, silent = true }
       map("n", "gd", vim.lsp.buf.definition, o)
@@ -234,7 +318,6 @@ let
       map("n", "[d", vim.diagnostic.goto_prev, o)
       map("n", "]d", vim.diagnostic.goto_next, o)
     ''}
-
   '';
 in
 {
