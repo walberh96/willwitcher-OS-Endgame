@@ -147,30 +147,32 @@
   #####################################
   ## XDG Portals (Wayland/Hyprland)
   #####################################
-  xdg.portal = {
+  # Portales
+    xdg.portal = {
       enable = true;
       extraPortals = with pkgs; [
         xdg-desktop-portal-hyprland
         xdg-desktop-portal-gtk
       ];
-      # Fuerza orden (Hyprland para ventanas/screencast, GTK para FileChooser/OpenURI)
+      # Fuerza el orden de backends
       config.common.default = [ "hyprland" "gtk" ];
     };
 
-    # Clave para Zed: Secret Service
+    # Secret Service para Zed (login/API keys)
     services.gnome.gnome-keyring.enable = true;
 
-    # Si usas LY como display manager (parece que sí en tu stack):
-    security.pam.services = {
-      login.enableGnomeKeyring = true;  # login por TTY
-      ly.enableGnomeKeyring = true;     # desbloqueo al entrar por LY
-      # Si usas otro DM, cambia 'ly' por 'sddm' / 'gdm' / etc.
-    };
+    # PAM: desbloquea el keyring al iniciar sesión
+    security.pam.services.login.enableGnomeKeyring = true;
+    # Si usas un DM concreto, añade su nombre:
+    # security.pam.services.ly.enableGnomeKeyring = true;   # si usas LY
+    # security.pam.services.sddm.enableGnomeKeyring = true; # si usas SDDM
+    # security.pam.services.gdm.enableGnomeKeyring = true;  # si usas GDM
 
-    # RealtimeKit (quita esos warnings y mejora PipeWire)
-    services.rtkit.enable = true;
+    # RealtimeKit (el warning que ves)
+    security.rtkit.enable = true;
 
-  environment.sessionVariables = {
+    # Entorno Wayland/Hyprland
+    environment.sessionVariables = {
       XDG_CURRENT_DESKTOP = "Hyprland";
       XDG_SESSION_TYPE = "wayland";
       NIXOS_OZONE_WL = "1";
