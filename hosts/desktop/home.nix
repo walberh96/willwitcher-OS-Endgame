@@ -26,7 +26,7 @@
       ../../modules/home-manager/starship.nix
       ../../modules/home-manager/btop.nix
       ../../modules/home-manager/zed.nix
-      ../../modules/home-manager/firefox.nix
+      ../../modules/home-manager/librewolf.nix
     ];
 
     ############################
