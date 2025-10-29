@@ -42,11 +42,11 @@
     willwitcher.zed.enable = true;
     willwitcher.zed.themeFromStylix = true;
 
-    # Firefox Options
-    willwitcher.firefox.enable = true;
+    # LibreWolf Options
+    willwitcher.librewolf.enable = true;
 
     # Use your chosen profile name
-    willwitcher.firefox.profileName = "default";
+    willwitcher.librewolf.profileName = "default";
 
 
   #####################################
@@ -62,7 +62,6 @@
   #####################################
   home.packages = with pkgs; [
     # GUI / desktop apps
-    firefox
     signal-desktop
     mpv
     zathura
