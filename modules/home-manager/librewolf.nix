@@ -1,49 +1,47 @@
 { config, lib, pkgs, ... }:
 
-# LibreWolf (via HM's Firefox module) — WillWitcherOS style
+# LibreWolf (managed via Home Manager's Firefox module) — WillWitcherOS style
 #
 # What this module does:
-#  - Installs and manages LibreWolf declaratively using `programs.firefox` (package swapped to LibreWolf).
-#  - Declares a managed profile (name configurable).
-#  - Applies privacy-focused defaults (telemetry off, HTTPS-only, strict ETP, etc.).
-#  - Optionally installs add-ons (uBlock Origin, AdGuard AdBlocker).
-#  - Optionally sets LibreWolf as the default browser (XDG + env var).
-#  - Lets Stylix theme LibreWolf by targeting the exact profile name(s).
+# - Installs and manages LibreWolf declaratively (programs.firefox with package = pkgs.librewolf).
+# - Declares one managed profile (name is configurable).
+# - Applies privacy-focused defaults (all telemetry off, HTTPS-Only, strict ETP, etc.).
+# - Lets Stylix theme LibreWolf by targeting the exact profile name(s).
+# - Can set LibreWolf as system default browser (XDG + DEFAULT_BROWSER env).
 #
-# How to enable in your home.nix:
+# How to enable (home.nix):
 #   imports = [ (inputs.self + /modules/home-manager/librewolf.nix) ];
 #   willwitcher.librewolf.enable = true;
-#   willwitcher.librewolf.profileName = "default";  # <-- your chosen profile name
+#   willwitcher.librewolf.profileName = "default";
 #
-# Optional toggles (read docstrings below and turn them on/off as needed):
-#   willwitcher.librewolf.makeDefault = true;        # set as system default (XDG)
-#   willwitcher.librewolf.installAddons = true;      # install add-ons listed in `addons`
-#   willwitcher.librewolf.addons = with pkgs.firefox-addons; [ ublock-origin adguard-adblocker ];
-#   willwitcher.librewolf.strictETP = true;          # Enhanced Tracking Protection = strict
-#   willwitcher.librewolf.httpsOnly = true;          # HTTPS-Only mode
-#   willwitcher.librewolf.resistFingerprinting = false;  # can break sites; off by default
-#   willwitcher.librewolf.enableLetterboxing = true;     # letterboxing (best with RFP on)
-#   willwitcher.librewolf.disableWebGL = true;       # safer; turn off if you need WebGL
-#   willwitcher.librewolf.disablePocket = true;      # disable Pocket UI (LibreWolf ya lo desactiva en general)
-#   willwitcher.librewolf.disableFirefoxAccounts = true; # LibreWolf suele no usar FxA; deja en true si no usas Sync
-#   willwitcher.librewolf.bookmarksToolbar = "always";   # show bookmarks toolbar (always/never/newtab)
-#   willwitcher.librewolf.variableFontSize = 20;     # UI/content default variable font size
-#   willwitcher.librewolf.reuseExistingProfilePath = null; # string path if you want to reuse an existing profile
+# Optional toggles (see options below):
+#   willwitcher.librewolf.makeDefault = true;
+#   willwitcher.librewolf.strictETP = true;
+#   willwitcher.librewolf.httpsOnly = true;
+#   willwitcher.librewolf.resistFingerprinting = false;   # may break sites/features
+#   willwitcher.librewolf.enableLetterboxing = true;      # best with RFP on
+#   willwitcher.librewolf.disableWebGL = true;            # set false if you need WebGL
+#   willwitcher.librewolf.disablePocket = true;           # LibreWolf usually ships without Pocket
+#   willwitcher.librewolf.disableFirefoxAccounts = true;  # disable Sync/Account UI
+#   willwitcher.librewolf.bookmarksToolbar = "always";    # "always" | "never" | "newtab"
+#   willwitcher.librewolf.variableFontSize = 20;          # content default variable font size
+#   willwitcher.librewolf.reuseExistingProfilePath = null # set to existing profile path to reuse data
 #
-# Notes:
-#  - Stylix cannot auto-discover profiles: you MUST list profileNames it should theme. This module does it for you.
-#  - If you reuse an existing profile via `reuseExistingProfilePath`, we will point the HM profile to that path.
-#  - Running two ad blockers works but duplicates filtering; keep only one if you prefer.
+# NOTE on add-ons:
+# - Removed here on purpose (you hit a 'firefox-addons' attribute error).
+# - Later, you can add extensions via either:
+#   (A) NUR (rycee) add-ons:  programs.firefox.profiles."<name>".extensions = with pkgs.nur.repos.rycee; [ firefox-addons.ublock-origin ];
+#   (B) nixpkgs' firefox-addons set (if available in your pin): with pkgs.firefox-addons; [ ublock-origin ];
+#   (C) Raw XPI URLs with fetchurl + buildFirefoxXpiAddon (more advanced).
 #
 let
   inherit (lib) mkEnableOption mkOption mkIf types;
 
   cfg = config.willwitcher.librewolf;
 
-  # helper to build Firefox (LibreWolf) prefs map
-  # booleans and strings go straight into `profiles.${name}.settings`
+  # Base privacy & UX prefs (written to user.js for the managed profile)
   basePrefs = {
-    # --- Telemetry / data reporting OFF (LibreWolf already ships hardened; we enforce here too) ---
+    # --- Telemetry / reporting: OFF ---
     "app.shield.optoutstudies.enabled" = false;
     "browser.ping-centre.telemetry" = false;
     "datareporting.healthreport.uploadEnabled" = false;
@@ -62,46 +60,45 @@ let
     "extensions.recommendations.enabled" = false;
     "extensions.getAddons.showPane" = false;
 
-    # --- Safe defaults / UX tweaks ---
+    # --- UX sanity ---
     "browser.shell.checkDefaultBrowser" = false;
     "browser.aboutConfig.showWarning" = false;
 
-    # Show bookmarks toolbar: "always" | "never" | "newtab"
+    # Bookmarks toolbar: "always" | "never" | "newtab"
     "browser.toolbars.bookmarks.visibility" = cfg.bookmarksToolbar;
 
-    # Variable font size (content)
+    # Default content font size
     "font.size.variable.x-western" = cfg.variableFontSize;
 
-    # --- Prefetch & predictor OFF (privacy) ---
+    # --- Prefetch / predictor: OFF ---
     "network.dns.disablePrefetch" = true;
     "network.predictor.enabled" = false;
     "network.prefetch-next" = false;
 
-    # --- HTTPS-Only & ETP (some sites may break on strict/https-only) ---
+    # --- HTTPS-Only & ETP ---
     "dom.security.https_only_mode" = cfg.httpsOnly;
-    # browser.contentblocking.category: "standard"|"strict"|"custom"
-    "browser.contentblocking.category" = (if cfg.strictETP then "strict" else "standard");
+    # "standard" | "strict" | "custom"
+    "browser.contentblocking.category" =
+      (if cfg.strictETP then "strict" else "standard");
 
-    # --- Fingerprinting resistance ---
+    # --- Fingerprinting resistance & letterboxing ---
     "privacy.resistFingerprinting" = cfg.resistFingerprinting;
-    # Letterboxing works best if RFP is on, but you can still enable it
     "privacy.resistFingerprinting.letterboxing" = cfg.enableLetterboxing;
 
-    # --- Pocket / FxAccounts (LibreWolf typically disables these; we enforce here) ---
-    "extensions.pocket.enabled" = cfg.disablePocket;
-    "identity.fxaccounts.enabled" = (!cfg.disableFirefoxAccounts);
+    # --- Pocket / Firefox Accounts ---
+    "extensions.pocket.enabled" = !cfg.disablePocket;              # disable → set false
+    "identity.fxaccounts.enabled" = (!cfg.disableFirefoxAccounts); # disable → set false
 
-    # --- Crash reporter / Normandy OFF ---
+    # --- Crash reporter / Normandy: OFF ---
     "breakpad.reportURL" = "";
     "browser.tabs.crashReporting.sendReport" = false;
     "app.normandy.enabled" = false;
     "app.normandy.api_url" = "";
 
-    # --- WebGL: disable if you prefer safety/stability ---
+    # --- WebGL ---
     "webgl.disabled" = cfg.disableWebGL;
 
-    # --- Clear-on-shutdown (history/downloads/cookies) ---
-    # Enable if you want a very ephemeral setup (may be overkill for daily browsing)
+    # --- Optional clear-on-shutdown (commented; enable if you want ephemeral browsing) ---
     # "privacy.clearOnShutdown.history" = true;
     # "privacy.clearOnShutdown.downloads" = true;
     # "privacy.clearOnShutdown.cookies" = true;
@@ -109,136 +106,104 @@ let
 in
 {
   options.willwitcher.librewolf = {
-    enable = mkEnableOption "Enable LibreWolf browser (themed by Stylix, managed by Home Manager).";
+    enable = mkEnableOption "Enable LibreWolf (themed by Stylix, managed by Home Manager).";
 
-    # Declarative profile name managed by HM & themed by Stylix
     profileName = mkOption {
       type = types.str;
       default = "default";
-      description = "LibreWolf profile name managed by Home Manager.";
+      description = "LibreWolf profile name managed by Home Manager (also used by Stylix).";
     };
 
-    # If you want to reuse an existing profile path, set it here (full absolute path).
     reuseExistingProfilePath = mkOption {
       type = types.nullOr types.path;
       default = null;
-      description = "Absolute path to an existing profile directory to reuse instead of creating a new one.";
+      description = "Absolute path to an existing profile to reuse (check about:profiles).";
     };
 
-    # Make LibreWolf the default browser (XDG + env var)
     makeDefault = mkOption {
       type = types.bool;
       default = true;
-      description = "Set LibreWolf as the default browser for http/https/text/html and DEFAULT_BROWSER env var.";
-    };
-
-    # Add-ons management
-    installAddons = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Install add-ons listed in `addons` to the managed profile.";
-    };
-    addons = mkOption {
-      type = types.listOf types.package;
-      default = with pkgs.firefox-addons; [ ublock-origin adguard-adblocker ];
-      description = "Firefox add-ons packages to install into the profile.";
+      description = "Make LibreWolf the default browser via XDG and DEFAULT_BROWSER env var.";
     };
 
     # Privacy / hardening toggles
     strictETP = mkOption {
-      type = types.bool;
-      default = true;
+      type = types.bool; default = true;
       description = "Enhanced Tracking Protection: 'strict' if true, else 'standard'.";
     };
     httpsOnly = mkOption {
-      type = types.bool;
-      default = true;
+      type = types.bool; default = true;
       description = "Force HTTPS-Only mode.";
     };
     resistFingerprinting = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Enable privacy.resistFingerprinting (may break some sites/features).";
+      type = types.bool; default = false;
+      description = "Enable privacy.resistFingerprinting (can break sites/features).";
     };
     enableLetterboxing = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Enable letterboxing (best paired with resistFingerprinting).";
+      type = types.bool; default = true;
+      description = "Enable letterboxing (works best with RFP on).";
     };
     disableWebGL = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Disable WebGL for stability/privacy (set to false if you need WebGL).";
+      type = types.bool; default = true;
+      description = "Disable WebGL (set to false if you need WebGL apps).";
     };
     disablePocket = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Disable Pocket integration.";
+      type = types.bool; default = true;
+      description = "Disable Pocket integration UI/features.";
     };
     disableFirefoxAccounts = mkOption {
-      type = types.bool;
-      default = true;
+      type = types.bool; default = true;
       description = "Disable Firefox Account / Sync UI.";
     };
 
     bookmarksToolbar = mkOption {
       type = types.enum [ "always" "never" "newtab" ];
       default = "always";
-      description = "Bookmarks toolbar visibility: always | never | newtab.";
+      description = "Bookmarks toolbar visibility.";
     };
 
     variableFontSize = mkOption {
-      type = types.int;
-      default = 20;
-      description = "Default variable font size for western scripts (content).";
+      type = types.int; default = 20;
+      description = "Default variable font size for western scripts (page content).";
     };
   };
 
   config = mkIf cfg.enable {
-    # Use HM's Firefox module but with LibreWolf as the package
+    # Install and manage LibreWolf via HM's Firefox module
     programs.firefox = {
       enable = true;
       package = pkgs.librewolf;
 
-      # Managed profile
       profiles = {
         "${cfg.profileName}" =
           (if cfg.reuseExistingProfilePath != null then {
-            # Reuse an existing profile directory (keep your old data)
-            path = cfg.reuseExistingProfilePath;
+            path = cfg.reuseExistingProfilePath;  # reuse old profile data
             isDefault = true;
           } else {
-            # Let HM create/manage a fresh profile
-            isDefault = true;
+            isDefault = true;                     # let HM create/manage one
           }) // {
-            # Add-ons (if enabled)
-            extensions = lib.mkIf cfg.installAddons cfg.addons;
-
-            # Preferences (user.js) — merged from toggles above
+            # Preferences go to user.js
             settings = basePrefs;
           };
       };
     };
 
-    # Stylix target for LibreWolf: theme the specified profile(s)
+    # Stylix: theme LibreWolf profiles by name (required so Stylix knows where to apply)
     stylix.targets.librewolf = {
       enable = true;
       profileNames = [ cfg.profileName ];
-      # Note: We keep it minimal (enable + profileNames).
-      # If Stylix later exposes colorTheme/GNOME knobs for librewolf,
-      # you can add them here similarly to the Firefox target.
     };
 
-    # Set LibreWolf as default browser (XDG + env var), if requested
-    xdg.mimeApps.defaultApplications = lib.mkIf cfg.makeDefault {
-      "text/html"               = "librewolf.desktop";
-      "x-scheme-handler/http"   = "librewolf.desktop";
-      "x-scheme-handler/https"  = "librewolf.desktop";
-      "x-scheme-handler/about"  = "librewolf.desktop";
-      "x-scheme-handler/unknown"= "librewolf.desktop";
+    # Make LibreWolf the default browser (XDG + env var)
+    xdg.mimeApps.defaultApplications = mkIf cfg.makeDefault {
+      "text/html"                = "librewolf.desktop";
+      "x-scheme-handler/http"    = "librewolf.desktop";
+      "x-scheme-handler/https"   = "librewolf.desktop";
+      "x-scheme-handler/about"   = "librewolf.desktop";
+      "x-scheme-handler/unknown" = "librewolf.desktop";
     };
 
-    home.sessionVariables = lib.mkIf cfg.makeDefault {
+    home.sessionVariables = mkIf cfg.makeDefault {
       DEFAULT_BROWSER = "${pkgs.librewolf}/bin/librewolf";
     };
   };
