@@ -123,12 +123,12 @@ in
     # Optional extra theming knobs from Stylix:
     enableFirefoxColor = mkOption {
       type = types.bool;
-      default = false;
+      default = true;
       description = "Also enable Stylix's Firefox Color toolbar theming.";
     };
     enableFirefoxGnomeTheme = mkOption {
       type = types.bool;
-      default = false;
+      default = true;
       description = "Also enable Stylix's Firefox GNOME theme (GTK-like look).";
     };
 
