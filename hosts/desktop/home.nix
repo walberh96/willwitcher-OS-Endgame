@@ -29,6 +29,7 @@
       ../../modules/home-manager/firefox.nix
       ../../modules/home-manager/nvim.nix
       ../../modules/home-manager/zathura.nix
+      ../../modules/home-manager/fzf.nix
     ];
 
     ############################
@@ -41,7 +42,7 @@
     willwitcher.kitty.enable = true;
     willwitcher.starship.enable = true;
     willwitcher.btop.enable = true;
-
+    willwitcher.fzf.enable = true;
     # ZATHURA ###
     willwitcher.zathura.enable = true;
 
