@@ -60,8 +60,8 @@
     stylix = {
       enable = true;                        # turn Stylix on system-wide
       autoEnable = true;                   # we will opt-in per target in HM (your preference)
-      #image = ./wallpapers/kenpachi.png;      # wallpaper path (change to your actual file)
-      image = ./wallpapers/cat-1.png;
+      image = ./wallpapers/kenpachi.png;      # wallpaper path (change to your actual file)
+      #image = ./wallpapers/cat-1.png;
       # Color scheme: use a Base16 file (e.g., Catppuccin Mocha)
       # You can swap to any ${pkgs.base16-schemes}/share/themes/*.yaml
       base16Scheme = ../../themes/catppuccin-mocha.yaml;
