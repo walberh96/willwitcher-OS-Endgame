@@ -114,20 +114,16 @@
   #####################################
   ## Display manager + Hyprland compositor
   #####################################
+  environment.etc."sddm/wallpapers/login.jpg".source = ./wallpapers/cat-1.png;
   services.displayManager = {
       defaultSession = "hyprland";
       sddm = {
         enable = true;
         wayland.enable = true;
 
-        extraPackages = [ pkgs.catppuccin-sddm-corners ];
-        # Revisa el nombre de carpeta instalado. Suele ser algo como:
-        # "catppuccin-mocha" o "catppuccin-latte"
-        theme = "catppuccin-mocha";
-
         settings = {
           Theme = {
-            Background = "/etc/sddm/wallpapers/cat-1.png";
+            Background = "/etc/sddm/wallpapers/login.jpg";
             # Algunas variantes permiten más claves; con Background suele bastar.
           };
           Wayland = { EnableHiDPI = true; };
@@ -135,8 +131,6 @@
         };
       };
     };
-
-    environment.etc."sddm/wallpapers/login.jpg".source = ./wallpapers/cat-1.png;
 
   programs.hyprland = {
     enable = true;
