@@ -120,7 +120,7 @@
         enable = true;
         wayland.enable = true;
 
-        extraPackages = [ pkgs.catppuccin-sddm ];
+        extraPackages = [ pkgs.catppuccin-sddm-corners ];
         # Revisa el nombre de carpeta instalado. Suele ser algo como:
         # "catppuccin-mocha" o "catppuccin-latte"
         theme = "catppuccin-mocha";
