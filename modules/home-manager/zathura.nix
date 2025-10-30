@@ -1,13 +1,13 @@
 { config, lib, pkgs, ... }:
 
-# Zathura (Home Manager) — WillWitcherOS style
+# Zathura (Home Manager) — WillWitcherOS style (bundled plugins)
 #
 # What this module does:
-# - Enables Zathura declaratively via Home Manager.
-# - Keeps colors unopinionated so Stylix/GTK own the palette.
-# - Provides clean defaults (clipboard integration, persistence).
-# - Lets you set Zathura as default PDF viewer (XDG).
-# - Optional backend toggles (mupdf / poppler) and extra formats (djvu, ps).
+# - Installs and manages Zathura via Home Manager.
+# - Assumes your nixpkgs `zathura` package already bundles PDF/DjVu/PS backends.
+# - Does NOT hardcode colors; GTK/ Stylix control the palette.
+# - Lets you set Zathura as the default PDF handler.
+# - Lets you pass extra Zathura options and raw config/mappings.
 #
 # How to enable in your home.nix:
 #   imports = [ (inputs.self + /modules/home-manager/zathura.nix) ];
@@ -15,33 +15,18 @@
 #
 # Optional knobs:
 #   willwitcher.zathura.makeDefault = true;       # make Zathura default for PDFs
-#   willwitcher.zathura.backend     = "mupdf";    # or "poppler"
-#   willwitcher.zathura.enableDjvu  = true;       # zathura-djvu
-#   willwitcher.zathura.enablePs    = true;       # zathura-ps
-#   willwitcher.zathura.extraOptions = { ... };   # inline zathurarc options
-#   willwitcher.zathura.extraConfig  = '' ... ''; # raw zathurarc text
+#   willwitcher.zathura.extraOptions = { ... };   # key/value options into zathurarc
+#   willwitcher.zathura.extraConfig  = '' ... ''; # raw zathurarc lines (mappings, etc.)
 #
 # Notes:
-# - We intentionally do NOT set color keys like default-bg/fg, statusbar colors, etc.
-#   GTK theming (Stylix) will take care of the visuals.
-# - If your nixpkgs doesn’t provide separate plugin packages, just leave the
-#   backend toggles as-is; Zathura will still run. If you need specific formats,
-#   enable the toggles below (and adjust if your channel uses different names).
+# - We intentionally do NOT set color keys (default-fg/bg, statusbar, …).
+#   GTK theming via Stylix will handle look & feel.
+# - If algún día cambias de canal a uno que NO traiga plugins integrados,
+#   podemos reintroducir toggles para `zathuraPlugins.*`.
 
 let
-  inherit (lib) mkEnableOption mkIf mkOption types optionals;
-
+  inherit (lib) mkEnableOption mkIf mkOption types;
   cfg = config.willwitcher.zathura;
-
-  # Backend / format packages (toggleable). These names are common in recent nixpkgs.
-  # If your channel differs, you can comment some out or rename accordingly.
-  backendPkgs =
-    (if cfg.backend == "mupdf" then [ pkgs.zathura-pdf-mupdf ] else [ pkgs.zathura-pdf-poppler ]);
-
-  formatPkgs =
-    (optionals cfg.enableDjvu [ pkgs.zathura-djvu ])
-    ++ (optionals cfg.enablePs [ pkgs.zathura-ps ]);
-
 in
 {
   options.willwitcher.zathura = {
@@ -53,47 +38,29 @@ in
       description = "Set Zathura as the default handler for application/pdf via XDG.";
     };
 
-    backend = mkOption {
-      type = types.enum [ "mupdf" "poppler" ];
-      default = "mupdf";
-      description = "PDF backend plugin to use (mupdf is fast; poppler can be more compatible).";
-    };
-
-    enableDjvu = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Install the DjVu plugin (zathura-djvu).";
-    };
-
-    enablePs = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Install the PostScript plugin (zathura-ps).";
-    };
-
     extraOptions = mkOption {
       type = types.attrsOf (types.oneOf [ types.bool types.int types.str ]);
       default = {
         # Clipboard integration: copy selections to the Wayland/X11 clipboard
         "selection-clipboard" = "clipboard";
 
-        # Persist bookmarks and history (sqlite is the default DB; enabled by default)
+        # Persist bookmarks and history (sqlite is the default DB)
         "database" = "sqlite";
 
-        # Smooth(ish) navigation defaults (tweak to taste)
-        "scroll-step" = 70;         # pixels per scroll step
-        "zoom-step"   = 10;         # percent per zoom step
+        # Smooth-ish navigation defaults (tweak to taste)
+        "scroll-step" = 70;     # pixels per scroll step
+        "zoom-step"   = 10;     # percent per zoom step
 
-        # UX: show file name in title bar only (cleaner)
+        # Title: show only file name (cleaner)
         "window-title-basename" = true;
 
-        # Recolor is OFF by default because Stylix/GTK already handles palette
+        # Recolor OFF by default — Stylix/GTK already drive the palette
         "recolor" = false;
       };
       description = ''
         Map of Zathura options written to zathurarc.
         Keep colors unset so Stylix/GTK own the palette. You can still add
-        any key you’d use in zathurarc here (e.g. "adjust-open" = "width").
+        any key you'd normally put in zathurarc here (e.g. "adjust-open" = "width").
       '';
     };
 
@@ -110,28 +77,22 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Install Zathura + desired backends/formats
-    home.packages = [ pkgs.zathura ] ++ backendPkgs ++ formatPkgs;
+    # Just install zathura; your nixpkgs bundles the plugins already.
+    home.packages = [ pkgs.zathura ];
 
     programs.zathura = {
       enable = true;
-
-      # Do NOT hardcode colors; let Stylix/GTK theme the app.
-      options = cfg.extraOptions;
-
-      # For non-key/value settings or custom mappings
-      extraConfig = cfg.extraConfig;
+      options = cfg.extraOptions;   # key/value options
+      extraConfig = cfg.extraConfig;# raw lines (mappings)
     };
 
-    # Make Zathura the default PDF viewer (unless you opt out)
+    # Make Zathura the default PDF viewer if requested
     xdg.mimeApps.defaultApplications = mkIf cfg.makeDefault {
       "application/pdf" = "org.pwmt.zathura.desktop";
     };
 
-    # If you ever want explicit Stylix integration for Zathura and your Stylix version
-    # exposes a dedicated target, you could enable it here. We keep this commented to
-    # avoid eval errors across channels. GTK theming should be enough.
-    #
-    # stylix.targets.zathura.enable = true;
+    # If tu Stylix expone un target específico para Zathura en tu canal,
+    # podríamos habilitarlo aquí. En la mayoría de canales basta con GTK.
+    # stylix.targets.zathura.enable = true;  # ← déjalo comentado salvo que exista ese target.
   };
 }
