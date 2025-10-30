@@ -30,6 +30,7 @@
       ../../modules/home-manager/nvim.nix
       ../../modules/home-manager/zathura.nix
       ../../modules/home-manager/fzf.nix
+      ../../modules/home-manager/discord.nix
     ];
 
     ############################
@@ -49,6 +50,8 @@
     # Optional: make Zathura the default viewer for PDFs
     willwitcher.zathura.makeDefault = true;
 
+# DISCORD
+ willwitcher.discord.enable = true;
 
     # NVIM SECTION ###
     ##################
@@ -103,7 +106,6 @@
   #####################################
   home.packages = with pkgs; [
     # GUI / desktop apps
-    discord
     zed-editor
     signal-desktop
     mpv
