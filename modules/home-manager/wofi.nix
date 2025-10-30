@@ -39,7 +39,7 @@ in
         window {
           margin: 0px;
           padding: 10px;
-          border: 0.16em solid ${c.base08};   /* acento (rojo/alerta) */
+          border: 0.16em solid ${c.base0D};   /* acento (rojo/alerta) */
           border-radius: 10px;
           background-color: ${c.base00};      /* fondo */
           animation: slideIn 0.25s ease-out both;

@@ -66,6 +66,7 @@
       # You can swap to any ${pkgs.base16-schemes}/share/themes/*.yaml
       base16Scheme = ../../themes/catppuccin-mocha.yaml;
       #base16Scheme = ../../themes/catppuccin-latte.yaml;
+      #base16Scheme = ../../themes/dracula.yaml;
       # Fonts used across apps; Stylix ensures availability + fontconfig
       fonts = {
         serif = {
