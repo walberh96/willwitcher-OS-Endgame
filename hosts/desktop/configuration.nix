@@ -127,7 +127,7 @@
 
         settings = {
           Theme = {
-            Background = "/etc/sddm/wallpapers/cat-1.jpg";
+            Background = "/etc/sddm/wallpapers/cat-1.png";
             # Algunas variantes permiten más claves; con Background suele bastar.
           };
           Wayland = { EnableHiDPI = true; };
@@ -136,7 +136,7 @@
       };
     };
 
-    environment.etc."sddm/wallpapers/login.jpg".source = ./wallpapers/cat-1.jpg;
+    environment.etc."sddm/wallpapers/login.jpg".source = ./wallpapers/cat-1.png;
 
   programs.hyprland = {
     enable = true;
