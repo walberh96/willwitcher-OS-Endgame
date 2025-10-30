@@ -28,6 +28,7 @@
       ../../modules/home-manager/zed.nix
       ../../modules/home-manager/firefox.nix
       ../../modules/home-manager/nvim.nix
+      ../../modules/home-manager/zathura.nix
     ];
 
     ############################
@@ -40,6 +41,13 @@
     willwitcher.kitty.enable = true;
     willwitcher.starship.enable = true;
     willwitcher.btop.enable = true;
+
+    # ZATHURA ###
+    willwitcher.zathura.enable = true;
+
+    # Optional: make Zathura the default viewer for PDFs
+    willwitcher.zathura.makeDefault = true;
+
 
     # NVIM SECTION ###
     ##################
