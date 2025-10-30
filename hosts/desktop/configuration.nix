@@ -167,8 +167,9 @@
     xdg-desktop-portal-hyprland
     xdg-desktop-portal-gtk
     xdg-desktop-portal-gnome
+    xdg-desktop-portal-kde
   ];
-  xdg.portal.config.common.default = [ "hyprland" "gnome" "gtk" ];
+  xdg.portal.config.common.default = [ "hyprland" "kde" "gnome" "gtk" ];
 
     # Entorno Wayland/Hyprland
     environment.sessionVariables = {
