@@ -114,9 +114,29 @@
   #####################################
   ## Display manager + Hyprland compositor
   #####################################
-  services.displayManager.sddm.enable = true;
-  services.displayManager.sddm.wayland.enable = true; # SDDM sobre Wayland
-  services.displayManager.defaultSession = "hyprland"; # mantenemos Hyprland
+  services.displayManager = {
+      defaultSession = "hyprland";
+      sddm = {
+        enable = true;
+        wayland.enable = true;
+
+        extraPackages = [ pkgs.catppuccin-sddm ];
+        # Revisa el nombre de carpeta instalado. Suele ser algo como:
+        # "catppuccin-mocha" o "catppuccin-latte"
+        theme = "catppuccin-mocha";
+
+        settings = {
+          Theme = {
+            Background = "/etc/sddm/wallpapers/cat-1.jpg";
+            # Algunas variantes permiten más claves; con Background suele bastar.
+          };
+          Wayland = { EnableHiDPI = true; };
+          General = { Numlock = "on"; };
+        };
+      };
+    };
+
+    environment.etc."sddm/wallpapers/login.jpg".source = ./wallpapers/cat-1.jpg;
 
   programs.hyprland = {
     enable = true;
