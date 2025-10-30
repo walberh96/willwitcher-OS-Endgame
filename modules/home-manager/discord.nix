@@ -1,213 +1,149 @@
 { config, lib, pkgs, ... }:
 
-# Discord / Vesktop (Home Manager) — WillWitcherOS style
+# Discord (Home Manager) — WillWitcherOS style
 #
 # What this module does:
-# - Instala Discord (o Vesktop) vía Home Manager.
-# - Opción para usar Wayland (Electron Ozone) sin pelear con tu tema.
-# - (Opcional) Crea un launcher propio “Discord (WillWitcherOS)” con wrapper.
-# - (Opcional) Registra el handler x-scheme-handler/discord.
-# - (Opcional) Autostart con systemd --user.
+# - Instala Discord (o alternativa: Vesktop/WebCord/Discordo).
+# - Crea un wrapper con flags para Wayland/Electron por defecto.
+# - Opción para autostart y para registrar el scheme "discord://".
+# - No toca colores/temas; eso lo maneja tu stack (Stylix/terminal).
 #
 # How to enable in your home.nix:
 #   imports = [ (inputs.self + /modules/home-manager/discord.nix) ];
 #   willwitcher.discord.enable = true;
 #
 # Optional knobs:
-#   willwitcher.discord.flavor = "discord" | "ptb" | "canary" | "vesktop";
-#   willwitcher.discord.package = pkgs.vesktop;  # override manual del paquete
-#   willwitcher.discord.wayland = true;          # NIXOS_OZONE_WL + Electron hint
-#   willwitcher.discord.setDefaultURLHandler = true;  # x-scheme-handler/discord
-#   willwitcher.discord.autostart = false;       # systemd --user
-#   willwitcher.discord.createLauncher = true;   # launcher propio con wrapper
-#   willwitcher.discord.launcherName = "Discord (WillWitcherOS)";
-#   willwitcher.discord.flags = [ "--enable-features=UseOzonePlatform,WaylandWindowDecorations" ];
-#   willwitcher.discord.extraEnv = { ELECTRON_TRASH = "gio"; };
-#   willwitcher.discord.binName = "discord";     # override si tu flavor usa otro bin
-#
-# Notas:
-# - Con wayland=true se exportan NIXOS_OZONE_WL=1 y ELECTRON_OZONE_PLATFORM_HINT=auto.
-# - Para screenshare/audio confía en tus xdg-desktop-portal + PipeWire del sistema.
-# - “vesktop” es una alternativa con Vencord integrado; si no existe en tu canal,
-#   el módulo cae al paquete “discord” y te deja override vía `package`.
+#   willwitcher.discord.client = "discord";    # "discord" | "vesktop" | "webcord" | "discordo"
+#   willwitcher.discord.preferWayland = true;  # añade flags Electron Wayland
+#   willwitcher.discord.extraFlags = [ "--disable-gpu-sandbox" ];
+#   willwitcher.discord.autoStart = false;     # autostart al iniciar sesión
+#   willwitcher.discord.setSchemeHandler = true; # maneja x-scheme-handler/discord
+#   willwitcher.discord.desktopName = "Discord (WillWitcherOS)"; # nombre visible
 
 let
-  inherit (lib) mkEnableOption mkIf mkOption types optionalString;
+  inherit (lib) mkEnableOption mkIf mkOption types;
 
   cfg = config.willwitcher.discord;
 
-  # Map flavor -> paquete (con fallback suave si no existe en el canal)
-  pkgByFlavor = {
-    discord = pkgs.discord or null;
-    ptb     = (pkgs."discord-ptb" or null);
-    canary  = (pkgs."discord-canary" or null);
-    vesktop = (pkgs.vesktop or null);
-  };
+  pkg =
+    let c = cfg.client;
+    in if c == "vesktop" then pkgs.vesktop
+       else if c == "webcord" then pkgs.webcord
+       else if c == "discordo" then pkgs.discordo
+       else pkgs.discord;
 
-  chosenPkg =
-    if cfg.package != null then cfg.package
-    else (pkgByFlavor.${cfg.flavor} or (pkgs.discord or null));
+  wrapperName = "willwitcher-discord";
 
-  # Map flavor -> bin && desktop id (ajustable vía opciones)
-  binByFlavor = {
-    discord = "discord";
-    ptb     = "discord-ptb";
-    canary  = "discord-canary";
-    vesktop = "vesktop";
-  };
+  waylandFlags = [
+    "--enable-features=UseOzonePlatform,WaylandWindowDecorations"
+    "--ozone-platform=wayland"
+  ];
 
-  desktopByFlavor = {
-    discord = "discord.desktop";
-    ptb     = "discord-ptb.desktop";
-    canary  = "discord-canary.desktop";
-    vesktop = "vesktop.desktop";
-  };
-
-  binNameDefault     = binByFlavor.${cfg.flavor};
-  upstreamDesktopId  = desktopByFlavor.${cfg.flavor};
-
-  # Entorno final (Wayland hints + extras)
-  waylandEnv =
-    if cfg.wayland then {
-      NIXOS_OZONE_WL = "1";
-      ELECTRON_OZONE_PLATFORM_HINT = "auto";
-      GTK_USE_PORTAL = "1";
-    } else { };
-
-  mergedEnv = waylandEnv // cfg.extraEnv;
-
-  # Wrapper para lanzar con env/flags controlados
-  runName   = "ww-discord";
-  runner    = pkgs.writeShellScriptBin runName ''
-    set -euo pipefail
-    ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "export ${k}=${lib.escapeShellArg v}") mergedEnv)}
-    exec -a ${runName} ${chosenPkg}/bin/${cfg.binName} ${lib.concatStringsSep " " cfg.flags} "$@"
+  waylandEnv = ''
+    export ELECTRON_OZONE_PLATFORM_HINT=auto
+    export NIXOS_OZONE_WL=1
+    export GTK_USE_PORTAL=1
   '';
 
-  # ID del desktop que registraremos por defecto
-  launcherKey = "discord-willwitcher";
-  launcherDesktopId = "${launcherKey}.desktop";
-  defaultDesktopId = if cfg.createLauncher then launcherDesktopId else upstreamDesktopId;
+  wrapper = pkgs.writeShellApplication {
+    name = wrapperName;
+    text = ''
+      set -e
+      ${lib.optionalString cfg.preferWayland waylandEnv}
+      exec ${lib.getExe pkg} ${lib.escapeShellArgs (lib.optionals cfg.preferWayland waylandFlags ++ cfg.extraFlags)} "$@"
+    '';
+  };
 
+  desktopId = "willwitcher-discord";
+
+  wmClass =
+    if cfg.client == "vesktop" then "Vesktop"
+    else if cfg.client == "webcord" then "WebCord"
+    else if cfg.client == "discord" then "discord"
+    else null; # discordo (TUI) no necesita WMClass
+
+  iconName =
+    if cfg.client == "vesktop" then "vesktop"
+    else if cfg.client == "webcord" then "webcord"
+    else "discord";
 in
 {
   options.willwitcher.discord = {
-    enable = mkEnableOption "Enable Discord/Vesktop (managed by Home Manager).";
+    enable = mkEnableOption "Enable Discord (managed by Home Manager).";
 
-    flavor = mkOption {
-      type = types.enum [ "discord" "ptb" "canary" "vesktop" ];
+    client = mkOption {
+      type = types.enum [ "discord" "vesktop" "webcord" "discordo" ];
       default = "discord";
-      description = "Select upstream flavor/package to install.";
+      description = "Discord client to install: official Discord, Vesktop (Vencord), WebCord, or Discordo (TUI).";
     };
 
-    package = mkOption {
-      type = types.nullOr types.package;
-      default = null;
-      description = "Override the Discord/Vesktop package (takes precedence over `flavor`).";
-    };
-
-    binName = mkOption {
-      type = types.str;
-      default = binNameDefault;
-      description = "Binary name to execute (override if your package uses a different executable name).";
-    };
-
-    wayland = mkOption {
+    preferWayland = mkOption {
       type = types.bool;
       default = true;
-      description = "Enable Wayland/Electron Ozone hints via env vars.";
+      description = "Start with Electron Wayland flags (ozone + decorations). Recommended on Hyprland/Wayland.";
     };
 
-    setDefaultURLHandler = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Register default handler for x-scheme-handler/discord.";
+    extraFlags = mkOption {
+      type = types.listOf types.str;
+      default = [ "--ignore-gpu-blocklist" ];
+      description = "Additional CLI flags passed to the client (Electron).";
     };
 
-    autostart = mkOption {
+    autoStart = mkOption {
       type = types.bool;
       default = false;
-      description = "Autostart Discord on login via systemd --user.";
+      description = "Autostart Discord on login (creates an autostart .desktop).";
     };
 
-    createLauncher = mkOption {
+    setSchemeHandler = mkOption {
       type = types.bool;
       default = true;
-      description = "Create a custom launcher 'Discord (WillWitcherOS)' that uses the wrapper with your env/flags.";
+      description = "Register handler for x-scheme-handler/discord to this desktop entry.";
     };
 
-    launcherName = mkOption {
+    desktopName = mkOption {
       type = types.str;
       default = "Discord (WillWitcherOS)";
-      description = "Visible name for the custom desktop launcher.";
-    };
-
-    flags = mkOption {
-      type = types.listOf types.str;
-      default = [ ];
-      description = "Extra command-line flags for the Electron app.";
-    };
-
-    extraEnv = mkOption {
-      type = types.attrsOf types.str;
-      default = { };
-      description = "Additional environment variables to export when starting Discord.";
+      description = "Name shown in launchers for the custom desktop entry.";
     };
   };
 
-  config = mkIf cfg.enable (mkIf (chosenPkg != null) {
-    assertions = [
-      {
-        assertion = chosenPkg != null;
-        message = "willwitcher.discord: the selected flavor/package is not available in your nixpkgs.";
-      }
-    ];
+  config = mkIf cfg.enable {
+    home.packages = [ pkg wrapper ];
 
-    # Instala el paquete elegido y el wrapper si corresponde
-    home.packages =
-      [ chosenPkg ] ++ lib.optionals cfg.createLauncher [ runner ];
+    xdg.desktopEntries.${desktopId} = {
+      name = cfg.desktopName;
+      genericName = "Chat and Communities";
+      exec = "${lib.getExe wrapper} %U";
+      terminal = (cfg.client == "discordo");
+      categories = [ "Network" "InstantMessaging" "Chat" ];
+      icon = iconName;
+      type = "Application";
 
-    # Exporta variables de entorno (global a la sesión)
-    home.sessionVariables = mergedEnv;
-
-    # Desktop launcher propio (no oculta el upstream; puedes filtrar en Wofi si deseas)
-    xdg.desktopEntries = lib.mkIf cfg.createLauncher {
-      ${launcherKey} = {
-        type = "Application";
-        name = cfg.launcherName;
-        genericName = "Chat & Voice";
-        exec = "${runner}/bin/${runName} %U";
-        terminal = false;
-        categories = [ "Network" "InstantMessaging" "Chat" ];
-        mimeType = [ "x-scheme-handler/discord" ];
-        # Icon y WMClass aproximados por flavor
-        icon = if cfg.flavor == "vesktop" then "vesktop" else "discord";
-        startupWMClass = if cfg.flavor == "vesktop" then "Vesktop" else "discord";
+      # Claves extra del .desktop (correcto en HM: usar `settings`)
+      settings = lib.optionalAttrs (wmClass != null) {
+        StartupWMClass = wmClass;
       };
     };
 
-    # Registrar handler de esquema
-    xdg.mimeApps.defaultApplications = mkIf cfg.setDefaultURLHandler {
-      "x-scheme-handler/discord" = defaultDesktopId;
+    # Autostart opcional
+    home.file.".config/autostart/${desktopId}.desktop" = mkIf cfg.autoStart {
+      text = ''
+        [Desktop Entry]
+        Type=Application
+        Name=${cfg.desktopName}
+        Exec=${lib.getExe wrapper} --start-minimized
+        X-GNOME-Autostart-enabled=true
+        X-KDE-autostart-after=panel
+        Icon=${iconName}
+        Categories=Network;InstantMessaging;Chat;
+        ${lib.optionalString (wmClass != null) "StartupWMClass=${wmClass}"}
+      '';
     };
 
-    # Autostart via systemd --user (respetando el mismo wrapper/env)
-    systemd.user.services.willwitcher-discord = mkIf cfg.autostart {
-      Unit = {
-        Description = "Discord (WillWitcherOS) autostart";
-        After = [ "graphical-session.target" ];
-        PartOf = [ "graphical-session.target" ];
-      };
-      Service = {
-        ExecStart = "${runner}/bin/${runName}";
-        Restart = "on-failure";
-        RestartSec = 2;
-        # Exporta el mismo entorno también en el servicio
-        Environment = lib.mapAttrsToList (k: v: "${k}=${v}") mergedEnv;
-      };
-      Install = {
-        WantedBy = [ "default.target" ];
-      };
+    # Registrar scheme handler (para discord://)
+    xdg.mimeApps.defaultApplications = mkIf cfg.setSchemeHandler {
+      "x-scheme-handler/discord" = "${desktopId}.desktop";
     };
-  });
+  };
 }
