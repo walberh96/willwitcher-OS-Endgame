@@ -10,17 +10,14 @@ in
     mkEnableOption "Enable WillWitcher Wofi config (Stylix owns palette)";
 
   config = mkIf config.willwitcher.wofi.enable {
-    # Stylix sí, pero sin su CSS para no chocar con el nuestro
-    stylix.targets.wofi = {
-      enable = true;
-      addCss = false;
-    };
+    # Activa el target de Wofi en Stylix (sin addCss)
+    stylix.targets.wofi.enable = true;
 
     programs.wofi = {
       enable = true;
       package = pkgs.wofi;
 
-      # Config "ini" sin colores
+      # Config básica sin colores
       settings = {
         insensitive   = true;
         width         = 500;
@@ -33,12 +30,12 @@ in
         no_actions    = true;
       };
 
-      # Nuestro CSS, usando la paleta de Stylix (sin hex hardcoded)
+      # Tu CSS, usando la paleta Stylix (sin hex fijos)
       style = mkForce ''
-        /* Dejamos la fuente a cargo de Stylix; aquí sólo tamaño si quieres */
+        /* Deja que Stylix ponga font-family; aquí sólo tamaño si quieres */
         * { font-size: 14px; }
 
-        /* Ventana principal */
+        /* Ventana */
         window {
           margin: 0px;
           padding: 10px;
@@ -48,33 +45,30 @@ in
           animation: slideIn 0.25s ease-out both;
         }
 
-        /* Animación de entrada */
+        /* Slide In */
         @keyframes slideIn {
           from { opacity: 0; transform: translateY(-4px); }
           to   { opacity: 1; transform: translateY(0); }
         }
 
         /* Contenedores */
-        #outer-box,
-        #inner-box,
-        #scroll,
-        #entry {
-          background-color: ${c.base00};
+        #outer-box, #inner-box, #scroll, #entry {
+          margin: 5px;
+          padding: 10px;
           border: none;
+          background-color: ${c.base00};
         }
 
-        #inner-box,
-        #text {
+        /* Fade In */
+        #inner-box, #text {
           animation: fadeIn 0.2s ease-out both;
         }
-
-        /* Fade suave */
         @keyframes fadeIn {
           from { opacity: 0; }
           to   { opacity: 1; }
         }
 
-        /* Input de búsqueda */
+        /* Input */
         #input {
           margin: 5px 20px;
           padding: 10px;
@@ -84,30 +78,28 @@ in
           background-color: ${c.base00};
           outline: 2px solid ${c.base0E};     /* acento (magenta/morado) */
         }
-
         #input image {
           border: none;
           color: ${c.base08};                 /* icono del input */
         }
 
-        /* Texto de entradas */
+        /* Texto */
         #text {
           margin: 5px;
           border: none;
           color: ${c.base05};
         }
 
-        /* Flechita desplegable (si la quieres ocultar del todo) */
+        /* Flechita desplegable (ocúltala por completo) */
         #entry arrow {
-          opacity: 0; min-width: 0; margin: 0; /* quita la flecha */
+          opacity: 0; min-width: 0; margin: 0;
         }
 
-        /* Estado seleccionado */
+        /* Entrada seleccionada */
         #entry:selected {
           border: 0.11em solid ${c.base0D};   /* acento (azul) */
-          background: ${c.base01};            /* leve contraste */
+          background: ${c.base01};            /* contraste leve */
         }
-
         #entry:selected #text {
           color: ${c.base0E};                 /* texto acentuado */
         }
