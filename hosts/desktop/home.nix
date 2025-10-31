@@ -76,7 +76,7 @@
     p7zip unar xz zstd bzip3 gzip gnutar libarchive
     zoxide ripgrep-all fd fzf jq lsd bat gh nb pass gnupg
     fastfetch btop git libnotify gpu-screen-recorder-gtk lutris
-    nerd-fonts.hack noto-fonts noto-fonts-emoji font-awesome vesktop
+    nerd-fonts.hack noto-fonts noto-fonts-emoji font-awesome
   ];
 
   home.file = { };
