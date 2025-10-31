@@ -57,7 +57,7 @@
 
     # Si usas esquemas base16 propios, deja la ruta que ya tenías:
     base16Scheme = ../../themes/catppuccin-mocha.yaml;
-
+    targets.regreet.useWallpaper = false;
     # Fuentes globales
     fonts = {
       serif = {
