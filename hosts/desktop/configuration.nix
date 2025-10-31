@@ -132,10 +132,11 @@
   };
 
   programs.regreet.enable = true;
-
+  # Haz que ReGreet use TU archivo TOML del repo (resuelve el conflicto)
+  programs.regreet.settings = lib.mkForce (
+    inputs.self + /nixos/configs/loginManager/regreet.toml
+  );
   # Toma tu config del repo (carpeta "config/") y publícala en /etc
-  environment.etc."greetd/regreet.toml".source =
-    inputs.self + /nixos/configs/loginManager/regreet.toml;
 
   environment.etc."greetd/wallpapers/login.jpg".source =
     inputs.self + /nixos/configs/loginManager/login.jpg;
