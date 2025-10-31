@@ -1,14 +1,8 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, inputs, lib, ... }:
 
 {
   ################################################################################
   # NixOS (system scope)
-  # - Login shell, users, kernel, networking, time/locale
-  # - System services (PipeWire, polkit, portals)
-  # - Display manager + Hyprland
-  # - System integrations (Thunar + GVFS/Tumbler/XFConf)
-  # - Steam/gamemode, nix-ld
-  # - Home Manager wiring (but NOT user config)
   ################################################################################
 
   imports = [
@@ -36,58 +30,61 @@
   #####################################
   i18n.defaultLocale = "en_US.UTF-8";
   i18n.extraLocaleSettings = {
-    LC_ADDRESS       = "en_US.UTF-8";
-    LC_IDENTIFICATION= "en_US.UTF-8";
-    LC_MEASUREMENT   = "en_US.UTF-8";
-    LC_MONETARY      = "en_US.UTF-8";
-    LC_NAME          = "en_US.UTF-8";
-    LC_NUMERIC       = "en_US.UTF-8";
-    LC_PAPER         = "en_US.UTF-8";
-    LC_TELEPHONE     = "en_US.UTF-8";
-    LC_TIME          = "en_US.UTF-8";
+    LC_ADDRESS        = "en_US.UTF-8";
+    LC_IDENTIFICATION = "en_US.UTF-8";
+    LC_MEASUREMENT    = "en_US.UTF-8";
+    LC_MONETARY       = "en_US.UTF-8";
+    LC_NAME           = "en_US.UTF-8";
+    LC_NUMERIC        = "en_US.UTF-8";
+    LC_PAPER          = "en_US.UTF-8";
+    LC_TELEPHONE      = "en_US.UTF-8";
+    LC_TIME           = "en_US.UTF-8";
   };
 
-  # XKB layout for Xwayland/X11 clients (Wayland compositor still sets its own).
+  # XKB layout for Xwayland/X11 clients
   services.xserver.xkb = {
     layout = "us";
     variant = "";
   };
 
   #####################################
-  ## Stylix
+  ## Stylix (sistema)
   #####################################
-  # --- Stylix: define the global theme once at the system level
-    stylix = {
-      enable = true;                        # turn Stylix on system-wide
-      autoEnable = true;                   # we will opt-in per target in HM (your preference)
-      image = ./wallpapers/kenpachi.png;      # wallpaper path (change to your actual file)
-      #image = ./wallpapers/cat-1.png;
-      # Color scheme: use a Base16 file (e.g., Catppuccin Mocha)
-      # You can swap to any ${pkgs.base16-schemes}/share/themes/*.yaml
-      base16Scheme = ../../themes/catppuccin-mocha.yaml;
-      #base16Scheme = ../../themes/catppuccin-latte.yaml;
-      #base16Scheme = ../../themes/dracula.yaml;
-      # Fonts used across apps; Stylix ensures availability + fontconfig
-      fonts = {
-        serif = {
-          package = pkgs.nerd-fonts.hack;
-          name    = "Hack Nerd Font";
-        };
-        sansSerif = {
-          package = pkgs.nerd-fonts.hack;
-          name    = "Hack Nerd Font";
-        };
-        monospace = {
-          package = pkgs.nerd-fonts.hack;
-          name    = "Hack Nerd Font Mono";
-        };
-        emoji = {
-          package = pkgs.noto-fonts-emoji;
-          name    = "Noto Color Emoji";
-        };
+  stylix = {
+    enable = true;
+    autoEnable = true;
+    image = ./wallpapers/kenpachi.png;
+
+    # Si usas esquemas base16 propios, deja la ruta que ya tenías:
+    base16Scheme = ../../themes/catppuccin-mocha.yaml;
+
+    # Fuentes globales
+    fonts = {
+      serif = {
+        package = pkgs.nerd-fonts.hack;
+        name    = "Hack Nerd Font";
+      };
+      sansSerif = {
+        package = pkgs.nerd-fonts.hack;
+        name    = "Hack Nerd Font";
+      };
+      monospace = {
+        package = pkgs.nerd-fonts.hack;
+        name    = "Hack Nerd Font Mono";
+      };
+      emoji = {
+        package = pkgs.noto-fonts-emoji;
+        name    = "Noto Color Emoji";
       };
     };
 
+    # 👇 Cursor a nivel sistema (para que también aplique en la pantalla de login)
+    cursor = {
+      package = pkgs.bibata-cursors;
+      name    = "Bibata-Modern-Ice";
+      size    = 24;
+    };
+  };
 
   #####################################
   ## Users
@@ -96,41 +93,52 @@
     isNormalUser = true;
     description  = "willwitcher";
     extraGroups  = [ "networkmanager" "wheel" ];
-    # Login shell MUST be declared in NixOS (edits /etc/passwd).
     shell        = pkgs.zsh;
-    # packages = [ ];  # Leave empty; user apps come from Home Manager.
   };
-
-  # Required so zsh is recognized as a valid login shell.
   environment.shells = [ pkgs.zsh ];
-
-  # REQUIRED by NixOS when setting a user's login shell to zsh.
-  # Provides a minimal /etc/zshrc with a correct PATH for login shells.
   programs.zsh.enable = true;
 
-  # Allow unfree packages system-wide (Steam, etc.)
   nixpkgs.config.allowUnfree = true;
 
   #####################################
   ## Display manager + Hyprland compositor
   #####################################
-  environment.etc."sddm/wallpapers/login.jpg".source = ./wallpapers/cat-1.png;
-  services.displayManager = {
-      defaultSession = "hyprland";
-      sddm = {
-        enable = true;
-        wayland.enable = true;
+  # ReGreet (Wayland) lanzado en cage, heredando dark/light y cursor desde Stylix
+  services.greetd.enable = true;
 
-        settings = {
-          Theme = {
-            Background = "/etc/sddm/wallpapers/login.jpg";
-            # Algunas variantes permiten más claves; con Background suele bastar.
-          };
-          Wayland = { EnableHiDPI = true; };
-          General = { Numlock = "on"; };
-        };
-      };
+  # Helpers para leer de Stylix (con fallback)
+  # preferDark: "dark"|"light"; cursorName/Size desde config.stylix.cursor
+  # NOTA: si cambias estos valores en Stylix, el login reflejará el cambio en el próximo rebuild.
+  services.greetd.settings = let
+    preferDark =
+      if lib.hasAttrByPath [ "stylix" "polarity" ] config
+      then config.stylix.polarity else "dark";
+    cursorName =
+      if lib.hasAttrByPath [ "stylix" "cursor" "name" ] config
+      then config.stylix.cursor.name else "default";
+    cursorSize =
+      if lib.hasAttrByPath [ "stylix" "cursor" "size" ] config
+      then toString config.stylix.cursor.size else "24";
+  in {
+    default_session = {
+      user = "greeter";
+      command = ''
+        XCURSOR_THEME='${cursorName}' \
+        XCURSOR_SIZE='${cursorSize}' \
+        GTK_APPLICATION_PREFER_DARK_THEME='${if preferDark == "dark" then "1" else "0"}' \
+        ${pkgs.cage}/bin/cage -s -mlast -- ${pkgs.regreet}/bin/regreet
+      '';
     };
+  };
+
+  programs.regreet.enable = true;
+
+  # Toma tu config del repo (carpeta "config/") y publícala en /etc
+  environment.etc."greetd/regreet.toml".source =
+    inputs.self + /nixos/configs/loginManager/regreet.toml;
+
+  environment.etc."greetd/wallpapers/login.jpg".source =
+    inputs.self + /nixos/configs/loginManager/login.jpg;
 
   programs.hyprland = {
     enable = true;
@@ -142,10 +150,10 @@
   #####################################
   services.pulseaudio.enable = false;
   services.pipewire = {
-    enable          = true;
-    alsa.enable     = true;
+    enable = true;
+    alsa.enable = true;
     alsa.support32Bit = true;
-    pulse.enable    = true;
+    pulse.enable = true;
     wireplumber.enable = true;
   };
 
@@ -162,54 +170,47 @@
   #####################################
   ## XDG Portals (Wayland/Hyprland)
   #####################################
-  # Portales
   xdg.portal.extraPortals = with pkgs; [
     xdg-desktop-portal-hyprland
     xdg-desktop-portal-gtk
     xdg-desktop-portal-gnome
-    xdg-desktop-portal-kde
   ];
-  xdg.portal.config.common.default = [ "hyprland" "kde" "gnome" "gtk" ];
+  xdg.portal.config.common.default = [ "hyprland" "gnome" "gtk" ];
 
-    # Entorno Wayland/Hyprland
-    environment.sessionVariables = {
-      XDG_CURRENT_DESKTOP = "Hyprland";
-      XDG_SESSION_TYPE = "wayland";
-      NIXOS_OZONE_WL = "1";
-    };
+  environment.sessionVariables = {
+    XDG_CURRENT_DESKTOP = "Hyprland";
+    XDG_SESSION_TYPE = "wayland";
+    NIXOS_OZONE_WL = "1";
+  };
+
   #####################################
-  ## File manager integrations (system services)
-  ## These are system-scoped so Thunar previews/mounts work everywhere.
+  ## Thunar + previews
   #####################################
   programs.xfconf.enable = true;
   services.gvfs.enable   = true;
   services.tumbler.enable = true;
-
   programs.thunar.enable = true;
-  programs.thunar.plugins = with pkgs.xfce; [
-    thunar-archive-plugin
-  ];
+  programs.thunar.plugins = with pkgs.xfce; [ thunar-archive-plugin ];
 
   #####################################
-  ## Gaming (needs system toggles)
+  ## Gaming
   #####################################
   hardware.steam-hardware.enable = true;
   programs.steam.enable = true;
   programs.gamemode.enable = true;
 
   #####################################
-  ## nix-ld (for non-Nix binaries missing libs)
+  ## nix-ld
   #####################################
   programs.nix-ld.enable = true;
-  programs.nix-ld.libraries = with pkgs; [
-    icu # e.g., required by some VS Code/Dotnet scenarios
-  ];
+  programs.nix-ld.libraries = with pkgs; [ icu ];
 
   #####################################
   ## System packages
-  ## Keep minimal; prefer Home Manager for user apps.
   #####################################
-  environment.systemPackages = with pkgs; [ ];
+  environment.systemPackages = with pkgs; [
+    # opcional: cage ya se invoca por ruta absoluta, así que no es imprescindible
+  ];
 
   #####################################
   ## Nix settings
@@ -217,8 +218,7 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   #####################################
-  ## Home Manager (wire-up only)
-  ## The actual user config is in ./home.nix
+  ## Home Manager wiring
   #####################################
   home-manager = {
     useGlobalPkgs   = true;
@@ -227,8 +227,5 @@
     users.willwitcher = import ./home.nix;
   };
 
-  #####################################
-  ## Version pins (do not bump lightly)
-  #####################################
   system.stateVersion = "25.05";
 }
