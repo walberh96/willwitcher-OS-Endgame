@@ -22,7 +22,6 @@
     ../../modules/home-manager/nvim.nix
     ../../modules/home-manager/zathura.nix
     ../../modules/home-manager/fzf.nix
-    ../../modules/home-manager/discord.nix
   ];
 
   willwitcher.hyprland.enable = true;
@@ -37,10 +36,6 @@
   # Zathura
   willwitcher.zathura.enable       = true;
   willwitcher.zathura.makeDefault  = true;
-
-  # Discord
-  willwitcher.discord.enable = true;
-
   # Neovim
   willwitcher.nvim.enable           = true;
   willwitcher.nvim.defaultEditor    = true;
@@ -81,7 +76,7 @@
     p7zip unar xz zstd bzip3 gzip gnutar libarchive
     zoxide ripgrep-all fd fzf jq lsd bat gh nb pass gnupg
     fastfetch btop git libnotify gpu-screen-recorder-gtk lutris
-    nerd-fonts.hack noto-fonts noto-fonts-emoji font-awesome
+    nerd-fonts.hack noto-fonts noto-fonts-emoji font-awesome vesktop
   ];
 
   home.file = { };
