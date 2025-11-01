@@ -136,7 +136,7 @@
       kitty.enable = true;
       firefox.profileNames = [ "willwitcher" ];
       hyprland.enable = true;
-      #hyprland.hyprpaper.enable = true;
+      hyprland.hyprpaper.enable = true;
       waybar.enable = true;
       wofi.enable = true;
       neovim.enable = true;
