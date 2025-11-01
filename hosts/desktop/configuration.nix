@@ -40,7 +40,7 @@
   stylix = {
     enable = true;
     autoEnable = true;
-    image = ./wallpapers/kenpachi.png;
+    image = ./wallpapers/cat.png;
     base16Scheme = ../../themes/catppuccin-mocha.yaml;
 
     fonts = {
