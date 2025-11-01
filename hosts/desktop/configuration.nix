@@ -42,6 +42,7 @@
     autoEnable = true;
     image = ./wallpapers/cat.png;
     base16Scheme = ../../themes/catppuccin-mocha.yaml;
+    polarity = "dark";
 
     fonts = {
       serif = {
