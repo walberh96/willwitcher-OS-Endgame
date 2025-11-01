@@ -16,7 +16,7 @@ in
 
     # Let Stylix theme Hyprland, but do NOT enable hyprpaper (you use mpvpaper)
     stylix.targets.hyprland.enable = true;
-    stylix.targets.hyprland.hyprpaper.enable = mkForce true;
+    stylix.targets.hyprland.hyprpaper.enable = mkForce false;
 
     wayland.windowManager.hyprland = {
       enable = true;
