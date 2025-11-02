@@ -40,8 +40,8 @@
   stylix = {
     enable = true;
     autoEnable = true;
-    image = ./wallpapers/cat.png;
-    base16Scheme = ../../themes/catppuccin-mocha.yaml;
+    image = ./wallpapers/test1.png;
+    #base16Scheme = ../../themes/catppuccin-mocha.yaml;
     polarity = "dark";
 
     fonts = {
