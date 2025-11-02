@@ -112,7 +112,38 @@
   programs.zsh = {
     enable = true;
     enableCompletion = true;
+
+    # Mantienes syntax highlighting de HM
     syntaxHighlighting.enable = true;
+
+    # 1) compinit + nix-zsh-completions al fpath (ANTES de fzf-tab)
+    completionInit = ''
+      fpath=(${pkgs.nix-zsh-completions}/share/zsh/site-functions $fpath)
+      autoload -U compinit
+      compinit
+    '';
+
+    # 2) Cargar plugins DESPUÉS de compinit, usando rutas alternativas
+    initContent = ''
+      # --- zsh-autosuggestions ---
+      if [[ -f ${pkgs.zsh-autosuggestions}/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+        source ${pkgs.zsh-autosuggestions}/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+      elif [[ -f ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+        source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+      fi
+
+      # --- zsh-fzf-tab (requiere compinit cargado) ---
+      if [[ -f ${pkgs.zsh-fzf-tab}/share/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh ]]; then
+        source ${pkgs.zsh-fzf-tab}/share/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh
+      elif [[ -f ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh ]]; then
+        source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
+      elif [[ -f ${pkgs.zsh-fzf-tab}/share/zsh-fzf-tab/fzf-tab.plugin.zsh ]]; then
+        source ${pkgs.zsh-fzf-tab}/share/zsh-fzf-tab/fzf-tab.plugin.zsh
+      fi
+
+      # Opcional: un estilo útil para fzf-tab
+      zstyle ':fzf-tab:*' switch-group ',' '.'
+    '';
   };
 
   programs.starship.enable = true;
