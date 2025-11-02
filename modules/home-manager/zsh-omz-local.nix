@@ -12,42 +12,36 @@ with lib; {
       description = "Enable WillWitcher Zsh with Oh My Zsh and local plugins.";
     };
 
-    # Carpeta en tu flake donde viven tus plugins (cada plugin en una subcarpeta).
     pluginsRoot = mkOption {
       type = types.path;
       default = inputs.self + /configs/zsh/plugins;
       description = "Root path (in the flake repo) for local Zsh plugins.";
     };
 
-    # Lista de nombres de carpeta (orden = orden de carga).
     pluginNames = mkOption {
       type = with types; listOf str;
       default = [];
       description = "Local plugin folder names under pluginsRoot (load order = list order).";
     };
 
-    # Plugins nativos de OMZ que quieras además de los locales.
     extraOmzPlugins = mkOption {
       type = with types; listOf str;
       default = [ "git" "sudo" "z" "colored-man-pages" ];
       description = "Built-in Oh My Zsh plugins.";
     };
 
-    # OMZ theme: lo dejamos vacío para no usar tema (prompt lo maneja Starship).
     theme = mkOption {
       type = types.str;
-      default = "";
+      default = ""; # sin tema OMZ; prompt lo lleva Starship
       description = "If empty, OMZ won't load a theme; Starship handles the prompt.";
     };
 
-    # Usa Starship por defecto (prompt).
     useStarship = mkOption {
       type = types.bool;
       default = true;
       description = "Enable Starship prompt with Zsh integration.";
     };
 
-    # Hooks opcionales.
     extraInitBeforeCompInit = mkOption {
       type = types.lines;
       default = "";
@@ -71,9 +65,7 @@ with lib; {
     programs.zsh = {
       enable = true;
       enableCompletion = true;
-
-      # Usamos tu plugin local de highlighting, así que no el de HM.
-      syntaxHighlighting.enable = false;
+      syntaxHighlighting.enable = false; # usamos tu copia local
 
       oh-my-zsh = {
         enable  = true;
@@ -87,7 +79,7 @@ with lib; {
         '';
       };
 
-      # Antes de compinit, añade rutas de completions detectadas por plugin.
+      # Antes de compinit: añade rutas de completions por plugin si existen
       initExtraBeforeCompInit = ''
         _ww_custom="${omzCustom}/plugins"
         for p in ${lib.concatStringsSep " " cfg.pluginNames}; do
@@ -100,20 +92,16 @@ with lib; {
         ${cfg.extraInitBeforeCompInit}
       '';
 
-      # Hook extra del usuario (después de OMZ).
       initExtra = cfg.extraInit;
     };
 
-    # Starship (prompt); Stylix puede dar los colores.
+    # Starship (prompt)
     programs.starship = mkIf cfg.useStarship {
       enable = true;
       enableZshIntegration = true;
     };
 
-    # 1) Symlink de cada plugin local a $ZSH_CUSTOM/plugins/<name>
-    # 2) Wrapper genérico __ww-autoload.plugin.zsh por plugin:
-    #    - Si el plugin ya trae *.plugin.zsh (además del nuestro), no hace nada.
-    #    - Si no, hace source de todos los *.zsh (excepto *.plugin.zsh).
+    # Symlinks + wrapper genérico por plugin
     home.file =
       let
         links = lib.listToAttrs (map (p: {
@@ -121,7 +109,7 @@ with lib; {
           value = {
             source = cfg.pluginsRoot + "/${p}";
             recursive = true;
-            optional = true;  # permite que no exista aún sin romper la build
+            optional = true;  # si aún no existe la carpeta, no rompe
           };
         }) cfg.pluginNames);
 
@@ -132,8 +120,8 @@ with lib; {
               # Autoload seguro: si hay otro *.plugin.zsh (además de este), no hagas nada.
               local _dir="${omzCustom}/plugins/${p}"
               local -a _others
-              _others=("${_dir}"/*.plugin.zsh(N))
-              if (( ${#_others} > 1 )); then
+              _others=("$_dir"/*.plugin.zsh(N))
+              if (( ''${#_others} > 1 )); then
                 return
               fi
 
