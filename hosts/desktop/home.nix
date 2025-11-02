@@ -22,6 +22,7 @@
     ../../modules/home-manager/nvim.nix
     ../../modules/home-manager/zathura.nix
     ../../modules/home-manager/fzf.nix
+    ../../modules/home-manager/zsh-omz-local.nix
   ];
 
   willwitcher.hyprland.enable = true;
@@ -109,11 +110,20 @@
   #####################################
   ## Zsh
   #####################################
-  programs.zsh = {
-    enable = true;
-    enableCompletion = true;
-    syntaxHighlighting.enable = true;
-  };
+  willwitcher.zsh = {
+      enable = true;
+      pluginsRoot = ../../configs/zsh/plugins;
+
+      pluginNames = [
+        "zsh-autosuggestions"
+        "zsh-completions"
+        "zsh-syntax-highlighting"  # déjalo al final
+      ];
+
+      extraOmzPlugins = [ "git" "sudo" "z" "colored-man-pages" ];
+      theme = "";          # sin tema OMZ
+      useStarship = true;  # prompt via Starship
+    };
 
   programs.starship.enable = true;
   programs.home-manager.enable = true;
