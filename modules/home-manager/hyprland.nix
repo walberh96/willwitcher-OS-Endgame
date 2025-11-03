@@ -43,6 +43,11 @@ in
           #''mpvpaper -o "no-audio --loop" DP-3 ~/Wallpapers/ww-os-green.mp4''
           "waybar" "nm-applet" "blueman-applet" "udiskie" "signal-desktop"
           "steam -silent"
+          #HYPRPAPER QUICK FIX UNTIL CUSTOM THEME BACKEND IS DONE
+          "hyprpaper & disown"
+          "until hyprctl hyprpaper listactive >/dev/null 2>&1; do sleep 0.1; done"
+          "hyprpaper"
+          ### END OF CUSTOM HYPRPAPER FIX
         ];
 
         ################################
