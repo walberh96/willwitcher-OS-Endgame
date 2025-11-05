@@ -1,4 +1,4 @@
-{ config, pkgs,inputs, ... }:
+{ config, pkgs,inputs,lib, ... }:
 
 {
   ################################################################################
@@ -53,7 +53,7 @@
         discordBranch = "stable";
       };
   };
-
+programs.kitty.font.size = lib.mkForce 16;
   #NVF
   programs.nvf = {
     enable = true;
