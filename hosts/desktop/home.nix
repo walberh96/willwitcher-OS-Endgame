@@ -19,7 +19,6 @@
     ../../modules/home-manager/btop.nix
     ../../modules/home-manager/zed.nix
     ../../modules/home-manager/firefox.nix
-    ../../modules/home-manager/nvim.nix
     ../../modules/home-manager/zathura.nix
     ../../modules/home-manager/fzf.nix
     ../../modules/home-manager/vesktop.nix
@@ -37,15 +36,6 @@
   # Zathura
   willwitcher.zathura.enable       = true;
   willwitcher.zathura.makeDefault  = true;
-  # Neovim
-  willwitcher.nvim.enable           = true;
-  willwitcher.nvim.defaultEditor    = true;
-  willwitcher.nvim.viAlias          = true;
-  willwitcher.nvim.vimAlias         = true;
-  willwitcher.nvim.lsp.enable.python = true;
-  willwitcher.nvim.lsp.enable.rust   = true;
-  willwitcher.nvim.lsp.enable.web    = true;
-  willwitcher.nvim.plugins.themeProvider = "none";
 
   # Zed
   willwitcher.zed.enable        = true;
@@ -62,6 +52,44 @@
         discordBranch = "stable";
       };
   };
+
+  #NVF
+  programs.nvf = {
+    enable = true;
+    defaultEditor = true;      # exporta EDITOR=“nvim”
+    enableManpages = true;     # podrás usar: man 5 nvf
+    settings = {
+      vim = {
+        viAlias = true;
+        vimAlias = true;
+
+        # File tree — nvim-tree
+        filetree.nvimTreeLua.enable = true;
+
+        # Git — Neogit (módulo NVF)
+        # Si tu build dice que la opción no existe, usa el fallback de la sección 6.
+        git.neogit.enable = true;
+
+        # Markdown — LSP/format + render-markdown
+        languages.markdown = {
+          enable = true;        # treesitter, etc.
+          lsp.enable = true;    # marksman
+          format.enable = true; # (puedes ajustar el tipo después)
+          extensions.render-markdown-nvim.enable = true;
+        };
+
+        # Rust — todo lo necesario
+        languages.rust = {
+          enable = true;
+          lsp.enable = true;        # rust-analyzer via rustaceanvim
+          format.enable = true;     # rustfmt
+          debugger.enable = true;   # DAP (CodeLLDB)
+        };
+      };
+    };
+  };
+
+
 
   # Firefox (declarativo)
   willwitcher.firefox = {
@@ -90,6 +118,13 @@
     zoxide ripgrep-all fd fzf jq lsd bat gh nb pass gnupg
     fastfetch btop git libnotify gpu-screen-recorder-gtk lutris
     nerd-fonts.hack noto-fonts noto-fonts-emoji font-awesome
+    # Rust
+      rustc cargo rustfmt clippy rust-analyzer lldb
+
+      # Markdown
+      marksman
+      deno        # (si luego eliges "deno_fmt" como formateador)
+      # o en su lugar: nodePackages.prettier  # si prefieres prettier
   ];
 
   home.file = { };
@@ -183,10 +218,10 @@
       hyprland.hyprpaper.enable = true;
       waybar.enable = true;
       wofi.enable = true;
-      neovim.enable = true;
       zathura.enable = true;
       gtk.enable = true;
       vesktop.enable = true;
+      nvf.enable = true;
     };
   };
 }
