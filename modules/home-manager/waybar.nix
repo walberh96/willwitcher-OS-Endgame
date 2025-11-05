@@ -125,7 +125,7 @@ let
         [[ -n "''${file}" ]] && tip="''${tip}\n''${file}"
         printf '{"text":"REC %d:%02d","alt":"rec","class":"recording","tooltip":"%s"}\n' "''${mm}" "''${ss}" "''${tip}"
       else
-        printf '{"text":"Idle","alt":"idle","class":"idle","tooltip":"Click: monitor enfocado · Medio: región · Derecho: carpeta"}\n'
+        printf '{"text":"Idle","alt":"idle","class":"idle","tooltip":"Click: Monitor · Middle: Region · Derecho: Open Folder"}\n'
       fi
     }
 
