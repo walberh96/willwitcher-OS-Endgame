@@ -136,6 +136,7 @@ programs.kitty.font.size = lib.mkForce 16;
     zoxide ripgrep-all fd fzf jq lsd bat gh nb pass gnupg
     fastfetch btop git libnotify gpu-screen-recorder-gtk lutris
     nerd-fonts.hack noto-fonts noto-fonts-emoji font-awesome
+    slurp
     # Rust
       rustc cargo rustfmt clippy rust-analyzer lldb
         
@@ -152,8 +153,18 @@ programs.kitty.font.size = lib.mkForce 16;
       tmux
   ];
 
-  home.file = { };
-
+ home.file = {
+  "Wallpapers/live" = {
+    source = ../../wallpapers/live;
+    recursive = true;                          # es un directorio
+    force = true;                              # pisa si ya existe algo ahí
+  };
+  "Wallpapers/images" = {
+    source = ../../wallpapers/images;
+    recursive = true;
+    force = true;
+  };
+}; 
   #####################################
   ## Environment variables (user session)
   #####################################
