@@ -138,6 +138,12 @@ programs.kitty.font.size = lib.mkForce 16;
     nerd-fonts.hack noto-fonts noto-fonts-emoji font-awesome
     # Rust
       rustc cargo rustfmt clippy rust-analyzer lldb
+        
+    # AI TERMINAL
+    gemini-cli
+
+    # SCREENREC
+    wl-screenrec
 
       # Markdown
       marksman
