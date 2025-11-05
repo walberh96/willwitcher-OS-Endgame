@@ -10,7 +10,7 @@
   home.stateVersion  = "25.05";
 
   imports = [
-        inputs.nvf.homeManagerModules.default
+    inputs.nvf.homeManagerModules.default
     ../../modules/home-manager/hyprland.nix
     ../../modules/home-manager/waybar.nix
     ../../modules/home-manager/wofi.nix
@@ -82,9 +82,9 @@
         # Rust — todo lo necesario
         languages.rust = {
           enable = true;
-          lsp.enable = true;        # rust-analyzer via rustaceanvim
-          format.enable = true;     # rustfmt
-          debugger.enable = true;   # DAP (CodeLLDB)
+            lsp.enable = true;
+            format.enable = true;
+            dap.enable = true;
         };
       };
     };
