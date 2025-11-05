@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs,inputs, ... }:
 
 {
   ################################################################################
@@ -10,6 +10,7 @@
   home.stateVersion  = "25.05";
 
   imports = [
+        inputs.nvf.homeManagerModules.default
     ../../modules/home-manager/hyprland.nix
     ../../modules/home-manager/waybar.nix
     ../../modules/home-manager/wofi.nix

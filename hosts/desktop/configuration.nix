@@ -5,7 +5,6 @@
     ./hardware-configuration.nix
     inputs.home-manager.nixosModules.default
     inputs.stylix.nixosModules.stylix
-    inputs.nvf.homeManagerModules.default
   ];
 
   boot.loader.systemd-boot.enable = true;
