@@ -18,7 +18,7 @@
     ../../modules/home-manager/kitty.nix
     ../../modules/home-manager/starship.nix
     ../../modules/home-manager/btop.nix
-    ../../modules/home-manager/zed.nix
+#    ../../modules/home-manager/zed.nix
     ../../modules/home-manager/firefox.nix
     ../../modules/home-manager/zathura.nix
     ../../modules/home-manager/fzf.nix
@@ -39,7 +39,7 @@
   willwitcher.zathura.makeDefault  = true;
 
   # Zed
-  willwitcher.zed.enable        = false;
+  #willwitcher.zed.enable        = false;
   #willwitcher.zed.themeFromStylix = true;
 
   # VESKTOP
