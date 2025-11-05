@@ -11,7 +11,6 @@
 
   imports = [
         inputs.nvf.homeManagerModules.default
-        inputs.nvf.homeManagerModules.default
     ../../modules/home-manager/hyprland.nix
     ../../modules/home-manager/waybar.nix
     ../../modules/home-manager/wofi.nix
