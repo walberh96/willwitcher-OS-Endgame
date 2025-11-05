@@ -39,8 +39,8 @@
   willwitcher.zathura.makeDefault  = true;
 
   # Zed
-  willwitcher.zed.enable        = true;
-  willwitcher.zed.themeFromStylix = true;
+  willwitcher.zed.enable        = false;
+  #willwitcher.zed.themeFromStylix = true;
 
   # VESKTOP
   programs.vesktop = {
