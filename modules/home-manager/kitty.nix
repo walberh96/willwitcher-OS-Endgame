@@ -14,6 +14,7 @@ in
     programs.kitty = {
       enable = true;
       package = pkgs.kitty;
+      font.size = 16;
 
       # Shell integration improves things like Ctrl+click on paths, etc.
       shellIntegration.enableZshIntegration = true;

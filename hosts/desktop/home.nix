@@ -63,22 +63,51 @@
       vim = {
         viAlias = true;
         vimAlias = true;
+        git = {
+          # por si no estaba ya
+          gitsigns.enable = true;
+        };
 
+        luaConfigRC.gitsigns = ''
+          require('gitsigns').setup({
+            current_line_blame = true,
+            current_line_blame_opts = { delay = 400 },
+            current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>',
+          })
+        '';
         # File tree — nvim-tree
-        filetree.nvimTree.enable = true;
+        filetree.nvimTree = {
+          enable = true;
+          # fuerza el panel a la izquierda
+          setupOpts.view.side = "left";
+        };
+        # Lua para auto-abrir y toggle key
+        luaConfigRC.nvimtree = ''
+          -- Abrir el file explorer al iniciar Neovim
+          vim.api.nvim_create_autocmd('VimEnter', {
+            callback = function()
+              require('nvim-tree.api').tree.open()
+            end
+          })
+
+          -- Toggle del file explorer: Ctrl + n
+          vim.keymap.set('n', '<C-n>', '<cmd>NvimTreeToggle<CR>', { desc = 'Toggle file explorer' })
+        '';
 
         # Git — Neogit (módulo NVF)
         # Si tu build dice que la opción no existe, usa el fallback de la sección 6.
         git.neogit.enable = true;
 
-        # Markdown — LSP/format + render-markdown
         languages.markdown = {
-          enable = true;        # treesitter, etc.
-          lsp.enable = true;    # marksman
-          format.enable = true; # (puedes ajustar el tipo después)
-          extensions.render-markdown-nvim.enable = true;
+          enable = true;          # Treesitter para Markdown
+          lsp.enable = false;     # <- apagamos LSP (adiós warning de lspconfig)
+          format.enable = true;   # sigue habiendo formateo (deno/prettier, etc.)
+          extensions.render-markdown-nvim.enable = true;  # <- el plugin que quieres
         };
 
+        languages.nix = {
+          enable = true;
+        };
         # Rust — todo lo necesario
         languages.rust = {
           enable = true;
