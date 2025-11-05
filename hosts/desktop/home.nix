@@ -32,7 +32,8 @@
   willwitcher.starship.enable = true;
   willwitcher.btop.enable     = true;
   willwitcher.fzf.enable      = true;
-  willwitcher.nvf-willwitcher.enable = true;
+  willwitcher.nvim.enable = true;
+
   # Zathura
   willwitcher.zathura.enable       = true;
   willwitcher.zathura.makeDefault  = true;
