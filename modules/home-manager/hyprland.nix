@@ -40,7 +40,7 @@ in
         ## Autostart (exec-once)
         ################################
         exec-once = [
-          "mpvpaper -o \"no-audio --loop\" ALL ~/Wallpapers/live/kaiju.mp4"
+          "mpvpaper -o \"no-audio --loop\" ALL ~/Wallpapers/live/itachi-purple.mp4"
           "waybar" "nm-applet" "blueman-applet" "udiskie" "vesktop"
           "steam -silent"
         ];
