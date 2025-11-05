@@ -61,7 +61,7 @@
         hardwareAcceleration = true;
         discordBranch = "stable";
       };
-
+  };
 
   # Firefox (declarativo)
   willwitcher.firefox = {
