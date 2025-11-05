@@ -1,35 +1,39 @@
 # modules/home-manager/vesktop.nix
-{ lib, pkgs, config, ... }:
+{ lib, pkgs, config, options, ... }:
 
 let
   cfg = config.willwitcher.vesktop;
-in
-{
-  options.willwitcher.vesktop = with lib; {
-    enable = mkEnableOption "Vesktop + Vencord configurados declarativamente";
 
-    # Si usas Stylix, esto enciende su target para Vesktop.
+  # ¿Home Manager trae el módulo programs.vesktop?
+  hasHMVesktop =
+    lib.hasAttrByPath [ "programs" "vesktop" "enable" ] options;
+
+  # ¿Stylix está importado y declara el target vesktop?
+  hasStylixTarget =
+    lib.hasAttrByPath [ "stylix" "targets" "vesktop" "enable" ] options;
+
+in {
+  options.willwitcher.vesktop = with lib; {
+    enable = mkEnableOption "Vesktop + Vencord declarativos";
+
     stylixTarget = mkOption {
       type = types.bool;
       default = true;
       description = "Habilita stylix.targets.vesktop si Stylix está presente.";
     };
 
-    # Usa el Vencord del sistema (recomendado).
     useSystemVencord = mkOption {
       type = types.bool;
       default = true;
-      description = "Usar Vencord empaquetado por nix en lugar del autoupdater.";
+      description = "Usar Vencord del sistema (desactiva el autoupdater interno).";
     };
 
-    # Paquete (por si quieres sobreescribirlo).
     package = mkOption {
       type = types.package;
       default = pkgs.vesktop;
       description = "Paquete de Vesktop a instalar.";
     };
 
-    # Ajustes típicos de Vesktop (puedes extenderlos).
     settings = mkOption {
       type = types.attrs;
       default = {
@@ -42,19 +46,26 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable (
-    {
+  # Implementación, sin tocar `config` para checks de existencia
+  config = lib.mkIf cfg.enable (lib.mkMerge [
+    # Ruta A: si existe el módulo de HM para Vesktop, úsalo
+    (lib.mkIf hasHMVesktop {
       programs.vesktop = {
         enable = true;
         package = cfg.package;
         settings = cfg.settings;
         vencord.useSystem = cfg.useSystemVencord;
       };
-    }
-    # Solo intentamos tocar Stylix si realmente está importado en tu sistema,
-    # así evitamos errores de “opción no definida”.
-    // lib.optionalAttrs (lib.hasAttrByPath [ "stylix" ] config) {
-      stylix.targets.vesktop.enable = cfg.stylixTarget;
-    }
-  );
+    })
+
+    # Ruta B (fallback): si NO existe el módulo, al menos instala el paquete
+    (lib.mkIf (!hasHMVesktop) {
+      home.packages = [ cfg.package ];
+    })
+
+    # Stylix target, solo si Stylix declara esa opción y el toggle está en true
+    (lib.mkIf (cfg.stylixTarget && hasStylixTarget) {
+      stylix.targets.vesktop.enable = true;
+    })
+  ]);
 }
