@@ -10,7 +10,6 @@
   home.stateVersion  = "25.05";
 
   imports = [
-    inputs.nvf.homeManagerModules.default
     ../../modules/home-manager/hyprland.nix
     ../../modules/home-manager/waybar.nix
     ../../modules/home-manager/wofi.nix
@@ -22,6 +21,7 @@
     ../../modules/home-manager/zathura.nix
     ../../modules/home-manager/fzf.nix
     ../../modules/home-manager/vesktop.nix
+    ../../modules/home-manager/nvf-willwitcher.nix
   ];
 
   willwitcher.hyprland.enable = true;
@@ -32,7 +32,7 @@
   willwitcher.starship.enable = true;
   willwitcher.btop.enable     = true;
   willwitcher.fzf.enable      = true;
-
+  willwitcher.nvf-willwitcher.enable = true;
   # Zathura
   willwitcher.zathura.enable       = true;
   willwitcher.zathura.makeDefault  = true;
@@ -49,64 +49,6 @@
       };
   };
 programs.kitty.font.size = lib.mkForce 16;
-  #NVF
-  programs.nvf = {
-    enable = true;
-    defaultEditor = true;      # exporta EDITOR=“nvim”
-    enableManpages = true;     # podrás usar: man 5 nvf
-    settings = {
-      vim = {
-        viAlias = true;
-        vimAlias = true;
-        git = {
-          # por si no estaba ya
-          gitsigns.enable = true;
-        };
-
-        # File tree — nvim-tree
-        filetree.nvimTree = {
-          enable = true;
-          # fuerza el panel a la izquierda
-          setupOpts.view.side = "left";
-        };
-        # Lua para auto-abrir y toggle key
-        luaConfigRC.nvimtree = ''
-          -- Abrir el file explorer al iniciar Neovim
-          vim.api.nvim_create_autocmd('VimEnter', {
-            callback = function()
-              require('nvim-tree.api').tree.open()
-            end
-          })
-
-          -- Toggle del file explorer: Ctrl + n
-          vim.keymap.set('n', '<C-n>', '<cmd>NvimTreeToggle<CR>', { desc = 'Toggle file explorer' })
-        '';
-
-        # Git — Neogit (módulo NVF)
-        # Si tu build dice que la opción no existe, usa el fallback de la sección 6.
-        git.neogit.enable = true;
-
-        languages.markdown = {
-          enable = true;          # Treesitter para Markdown
-          lsp.enable = false;     # <- apagamos LSP (adiós warning de lspconfig)
-          format.enable = true;   # sigue habiendo formateo (deno/prettier, etc.)
-          extensions.render-markdown-nvim.enable = true;  # <- el plugin que quieres
-        };
-
-        languages.nix = {
-          enable = true;
-        };
-        # Rust — todo lo necesario
-        languages.rust = {
-          enable = true;
-            lsp.enable = true;
-            format.enable = true;
-            dap.enable = true;
-        };
-      };
-    };
-  };
-
 
 
   # Firefox (declarativo)
