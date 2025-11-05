@@ -127,13 +127,21 @@ in
           '';
 
           # ccc (color picker) + entrada sugerida en which-key
-          ccc = ''
-            pcall(function()
-              require('ccc').setup({})
-              -- Ejemplo: <leader>cp para abrir el picker
-              vim.keymap.set('n', '<leader>cp', '<cmd>CccPick<CR>', { desc = 'Color Picker (ccc)' })
-            end)
-          '';
+         ccc = ''
+  pcall(function()
+    -- Config base de ccc
+    require('ccc').setup({})
+
+    -- Auto-enable del highlighter (preview de colores en el buffer)
+    vim.cmd('CccHighlighterEnable')
+
+    -- Keybindings:
+    -- Picker rápido
+    vim.keymap.set('n', '<leader>cp', '<cmd>CccPick<CR>', { desc = 'Color Picker (ccc)' })
+    -- Toggle del preview inline
+    vim.keymap.set('n', '<leader>ch', '<cmd>CccHighlighterToggle<CR>', { desc = 'Toggle color preview (ccc)' })
+  end)
+''; 
 
           # Telescope + bindings
           telescope = ''
