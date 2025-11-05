@@ -18,7 +18,6 @@
     ../../modules/home-manager/kitty.nix
     ../../modules/home-manager/starship.nix
     ../../modules/home-manager/btop.nix
-#    ../../modules/home-manager/zed.nix
     ../../modules/home-manager/firefox.nix
     ../../modules/home-manager/zathura.nix
     ../../modules/home-manager/fzf.nix
@@ -37,10 +36,6 @@
   # Zathura
   willwitcher.zathura.enable       = true;
   willwitcher.zathura.makeDefault  = true;
-
-  # Zed
-  #willwitcher.zed.enable        = false;
-  #willwitcher.zed.themeFromStylix = true;
 
   # VESKTOP
   programs.vesktop = {
@@ -68,13 +63,6 @@ programs.kitty.font.size = lib.mkForce 16;
           gitsigns.enable = true;
         };
 
-        luaConfigRC.gitsigns = ''
-          require('gitsigns').setup({
-            current_line_blame = true,
-            current_line_blame_opts = { delay = 400 },
-            current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>',
-          })
-        '';
         # File tree — nvim-tree
         filetree.nvimTree = {
           enable = true;
