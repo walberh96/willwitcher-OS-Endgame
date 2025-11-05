@@ -140,7 +140,7 @@ programs.kitty.font.size = lib.mkForce 16;
   ## User packages
   #####################################
   home.packages = with pkgs; [
-    zed-editor signal-desktop mpv zathura qimgv libreoffice
+    signal-desktop mpv zathura qimgv libreoffice
     wofi hyprpaper hyprlock hyprpicker hyprshot wl-clipboard
     ntfs3g udiskie swaynotificationcenter waybar blueman
     mpvpaper xarchiver
