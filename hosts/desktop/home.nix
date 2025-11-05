@@ -155,6 +155,7 @@ programs.kitty.font.size = lib.mkForce 16;
       marksman
       deno        # (si luego eliges "deno_fmt" como formateador)
       # o en su lugar: nodePackages.prettier  # si prefieres prettier
+      tmux
   ];
 
   home.file = { };
