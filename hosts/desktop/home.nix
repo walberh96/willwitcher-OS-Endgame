@@ -11,6 +11,7 @@
 
   imports = [
         inputs.nvf.homeManagerModules.default
+        inputs.nvf.homeManagerModules.default
     ../../modules/home-manager/hyprland.nix
     ../../modules/home-manager/waybar.nix
     ../../modules/home-manager/wofi.nix
@@ -65,7 +66,7 @@
         vimAlias = true;
 
         # File tree — nvim-tree
-        filetree.nvimTreeLua.enable = true;
+        filetree.nvimTree.enable = true;
 
         # Git — Neogit (módulo NVF)
         # Si tu build dice que la opción no existe, usa el fallback de la sección 6.
