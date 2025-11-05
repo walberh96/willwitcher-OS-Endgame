@@ -22,6 +22,7 @@
     ../../modules/home-manager/nvim.nix
     ../../modules/home-manager/zathura.nix
     ../../modules/home-manager/fzf.nix
+    ../../modules/home-manager/vesktop.nix
   ];
 
   willwitcher.hyprland.enable = true;
@@ -49,6 +50,18 @@
   # Zed
   willwitcher.zed.enable        = true;
   willwitcher.zed.themeFromStylix = true;
+
+  # VESKTOP
+  programs.vesktop = {
+      enable = true;
+      # Opcional: algunos ajustes útiles
+      settings = {
+        tray = true;
+        minimizeToTray = true;
+        hardwareAcceleration = true;
+        discordBranch = "stable";
+      };
+
 
   # Firefox (declarativo)
   willwitcher.firefox = {
@@ -173,6 +186,7 @@
       neovim.enable = true;
       zathura.enable = true;
       gtk.enable = true;
+      vesktop.enable = true;
     };
   };
 }
