@@ -22,6 +22,7 @@
     ../../modules/home-manager/fzf.nix
     ../../modules/home-manager/vesktop.nix
     ../../modules/home-manager/nvf-willwitcher.nix
+     ../../modules/home-manager/tmux.nix
   ];
 
   willwitcher.hyprland.enable = true;
@@ -33,6 +34,7 @@
   willwitcher.btop.enable     = true;
   willwitcher.fzf.enable      = true;
   willwitcher.nvim.enable = true;
+  willwitcher.tmux.enable = true;
 
   # Zathura
   willwitcher.zathura.enable       = true;
@@ -93,7 +95,6 @@ programs.kitty.font.size = lib.mkForce 16;
       marksman
       deno        # (si luego eliges "deno_fmt" como formateador)
       # o en su lugar: nodePackages.prettier  # si prefieres prettier
-      tmux
   ];
 
  home.file = {
