@@ -35,6 +35,7 @@
   willwitcher.fzf.enable      = true;
   willwitcher.nvim.enable = true;
   willwitcher.tmux.enable = true;
+  willwitcher.tmux.whichKey.enable = true;
 
   # Zathura
   willwitcher.zathura.enable       = true;
