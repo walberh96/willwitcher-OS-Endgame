@@ -59,7 +59,7 @@
       hardwareAcceleration = true;
       discordBranch        = "stable";
     };
-  };
+ 
 
   # Force Kitty font size (kept as-is)
   programs.kitty.font.size = lib.mkForce 16;
@@ -100,7 +100,7 @@
     # Wayland helpers
     slurp
     # Rust toolchain
-    rustc cargo rustfmt clippy rust-analyzer lldb
+    rustc cargo rustfmt clippy rust-analyzer lldb gcc binutils pkg-config
     # Audio control
     pwvucontrol
     # AI (terminal client)
