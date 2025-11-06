@@ -61,6 +61,82 @@
 
 ---
 
+## Installing from GitHub
+
+There are multiple ways to apply this flake directly from GitHub. Replace `<user>/<repo>` with your GitHub path.
+
+### 1) On an existing NixOS install
+
+With flakes already enabled:
+```bash
+sudo nixos-rebuild switch --flake github:<user>/<repo>#ww-desktop
+```
+
+If you haven’t enabled flakes yet, you can do a one‑shot build with a temporary env var:
+```bash
+sudo NIX_CONFIG="experimental-features = nix-command flakes"   nixos-rebuild switch --flake github:<user>/<repo>#ww-desktop
+```
+
+### 2) Fresh install from the ISO
+
+#### Quick path (same hardware as the repo’s `hardware-configuration.nix`)
+```bash
+# If needed:
+nix-shell -p git
+
+# Install straight from GitHub
+sudo nixos-install --flake github:<user>/<repo>#ww-desktop
+```
+
+#### Proper path (different/new hardware)
+Generate a local hardware config for the machine you’re installing:
+```bash
+# 1) Partition/mount target at /mnt (standard NixOS steps)
+
+# 2) Generate hardware config for THIS machine
+nixos-generate-config --root /mnt
+
+# 3) Clone your repo and swap in the generated hardware file
+nix-shell -p git
+git clone https://github.com/<user>/<repo>.git
+cp /mnt/etc/nixos/hardware-configuration.nix    <repo>/hosts/desktop/hardware-configuration.nix
+
+# 4) Install using the local repo path (so it uses your swapped file)
+sudo nixos-install --flake <repo>#ww-desktop
+```
+
+### 3) Pin a branch or a specific commit
+
+Specific branch:
+```bash
+sudo nixos-rebuild switch --flake 'github:<user>/<repo>?ref=my-branch#ww-desktop'
+```
+
+Specific commit:
+```bash
+sudo nixos-rebuild switch --flake 'github:<user>/<repo>?rev=<commit>#ww-desktop'
+```
+
+### 4) Private repository
+
+Clone via SSH and build locally:
+```bash
+git clone git@github.com:<user>/<private-repo>.git
+sudo nixos-rebuild switch --flake .#ww-desktop
+```
+
+If you must fetch via the `github:` URI directly, configure a token in Nix:
+```
+# ~/.config/nix/nix.conf
+access-tokens = github.com=<TOKEN>
+```
+
+**Notes for this repo**
+- The flake exposes `nixosConfigurations.ww-desktop`, so the target after `#` is **`ww-desktop`**.
+- System permanently enables `nix-command` and `flakes`; once switched, no need for the temporary env var.
+
+---
+
 ## System Configuration (host: `ww-desktop`)
 
 Defined in **`hosts/desktop/configuration.nix`**.
@@ -238,23 +314,3 @@ stylix = {
 - **Hyprland-first Wayland**: XDG portals prioritize Hyprland for better screencast/portal behavior.
 
 ---
-
-## Contributing / Adapting
-
-- Fork and adapt to your host(s). Add a new host under `hosts/<name>/` and reference it via `--flake .#<name>`.
-- Prefer adding new apps as modular HM files under `modules/home-manager/` with a small `willwitcher.<app>.enable` toggle.
-- Keep colors with Stylix; avoid hardcoding palette values in modules.
-
----
-
-## License
-
-TBD (personal configuration; choose a license if you intend to share/redistribute as a project template).
-
----
-
-## Credits
-
-- **NixOS**, **Home Manager**, **Stylix**
-- **Hyprland**, **Waybar**, **Wofi**, **Zathura**, **Vesktop**, **Tmux**, **Starship**
-- Everyone maintaining the packages and targets used here ❤️
