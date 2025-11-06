@@ -92,12 +92,6 @@
   # Instala ReGreet y deja un regreet.toml por defecto en /etc/greetd/
   programs.regreet.enable = true;
 
-  # Lanza ReGreet dentro de un compositor Wayland mínimo (cage)
-  services.greetd.settings.default_session = {
-    user = "greeter";
-    command = "${pkgs.cage}/bin/cage -s -mlast -- ${pkgs.regreet}/bin/regreet";
-  }; 
-
   ########################
   # Hyprland
   ########################
