@@ -85,7 +85,8 @@ programs.kitty.font.size = lib.mkForce 16;
     slurp
     # Rust
       rustc cargo rustfmt clippy rust-analyzer lldb
-        
+      pwvucontrol
+      wlogout
     # AI TERMINAL
     gemini-cli
 
