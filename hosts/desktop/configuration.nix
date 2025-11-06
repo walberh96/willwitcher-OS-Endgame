@@ -87,12 +87,8 @@
   ########################
   # Display Manager
   ########################
-# LightDM (usa el greeter GTK por defecto)
-  services.xserver.enable = true;
-  services.xserver.displayManager.lightdm.enable = true;
-  services.xserver.displayManager.lightdm.greeters.gtk.enable = true;
-  services.displayManager.defaultSession = "hyprland";
-  services.displayManager.sessionPackages = [ pkgs.hyprland ];
+services.greetd.enable = true;
+programs.regreet.enable = true;
 
 ########################
   # Hyprland
