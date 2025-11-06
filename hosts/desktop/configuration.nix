@@ -52,7 +52,7 @@
     enable = true;
     autoEnable = true;
     image = ../../wallpapers/images/cat.png;
-    base16Scheme = ../../themes/catppuccin-mocha.yaml;
+    base16Scheme = ../../themes/tokyo-night-dark.yaml;
     polarity = "dark";
 
     fonts = {
