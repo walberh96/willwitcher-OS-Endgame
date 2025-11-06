@@ -91,7 +91,7 @@ services.greetd.enable = true;
 
   services.greetd.settings.default_session = {
     user = "greeter";
-    command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd Hyprland";
+    command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd Hyprland";
   };
 
   # Asegura que haya un .desktop de Hyprland visible para el greeter
