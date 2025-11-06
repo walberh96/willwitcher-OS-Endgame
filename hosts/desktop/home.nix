@@ -1,4 +1,4 @@
-{ config, pkgs,inputs,lib, ... }:
+{ config, pkgs, inputs, lib, ... }:
 
 {
   ################################################################################
@@ -9,6 +9,9 @@
   home.homeDirectory = "/home/willwitcher";
   home.stateVersion  = "25.05";
 
+  ################################################################################
+  # Module imports (Home Manager modules from the repo)
+  ################################################################################
   imports = [
     ../../modules/home-manager/hyprland.nix
     ../../modules/home-manager/waybar.nix
@@ -22,9 +25,12 @@
     ../../modules/home-manager/fzf.nix
     ../../modules/home-manager/vesktop.nix
     ../../modules/home-manager/nvf-willwitcher.nix
-     ../../modules/home-manager/tmux.nix
+    ../../modules/home-manager/tmux.nix
   ];
 
+  ################################################################################
+  # Feature toggles (custom modules)
+  ################################################################################
   willwitcher.hyprland.enable = true;
   willwitcher.waybar.enable   = true;
   willwitcher.wofi.enable     = true;
@@ -33,29 +39,34 @@
   willwitcher.starship.enable = true;
   willwitcher.btop.enable     = true;
   willwitcher.fzf.enable      = true;
-  willwitcher.nvim.enable = true;
-  willwitcher.tmux.enable = true;
+  willwitcher.nvim.enable     = true;
+  willwitcher.tmux.enable     = true;
   willwitcher.tmux.whichKey.enable = true;
 
-  # Zathura
-  willwitcher.zathura.enable       = true;
-  willwitcher.zathura.makeDefault  = true;
+  # Zathura (PDF viewer)
+  willwitcher.zathura.enable      = true;
+  willwitcher.zathura.makeDefault = true;
 
-  # VESKTOP
+  ################################################################################
+  # Vesktop (Discord client fork)
+  ################################################################################
   programs.vesktop = {
-      enable = true;
-      # Opcional: algunos ajustes útiles
-      settings = {
-        tray = true;
-        minimizeToTray = true;
-        hardwareAcceleration = true;
-        discordBranch = "stable";
-      };
+    enable = true;
+    # Optional quality-of-life settings
+    settings = {
+      tray                 = true;
+      minimizeToTray       = true;
+      hardwareAcceleration = true;
+      discordBranch        = "stable";
+    };
   };
-programs.kitty.font.size = lib.mkForce 16;
 
+  # Force Kitty font size (kept as-is)
+  programs.kitty.font.size = lib.mkForce 16;
 
-  # Firefox (declarativo)
+  ################################################################################
+  # Firefox (declarative profile through custom module)
+  ################################################################################
   willwitcher.firefox = {
     enable       = true;
     profileName  = "willwitcher";
@@ -65,63 +76,73 @@ programs.kitty.font.size = lib.mkForce 16;
     ];
   };
 
-  #####################################
-  ## Fonts (user-scoped)
-  #####################################
+  ################################################################################
+  # Fonts (user-scoped)
+  ################################################################################
   fonts.fontconfig.enable = true;
 
-  #####################################
-  ## User packages
-  #####################################
+  ################################################################################
+  # User packages
+  ################################################################################
   home.packages = with pkgs; [
+    # Apps
     signal-desktop mpv zathura qimgv libreoffice
     wofi hyprpaper hyprlock hyprpicker hyprshot wl-clipboard
     ntfs3g udiskie swaynotificationcenter waybar blueman
     mpvpaper xarchiver
+    # Archivers / compression tools
     p7zip unar xz zstd bzip3 gzip gnutar libarchive
+    # CLI utilities
     zoxide ripgrep-all fd fzf jq lsd bat gh nb pass gnupg
     fastfetch btop git libnotify gpu-screen-recorder-gtk lutris
+    # Fonts (user scope)
     nerd-fonts.hack noto-fonts noto-fonts-emoji font-awesome
+    # Wayland helpers
     slurp
-    # Rust
-      rustc cargo rustfmt clippy rust-analyzer lldb
-      pwvucontrol
-    # AI TERMINAL
+    # Rust toolchain
+    rustc cargo rustfmt clippy rust-analyzer lldb
+    # Audio control
+    pwvucontrol
+    # AI (terminal client)
     gemini-cli
-
-    # SCREENREC
+    # Screen recording
     wl-screenrec
-
-      # Markdown
-      marksman
-      deno        # (si luego eliges "deno_fmt" como formateador)
-      # o en su lugar: nodePackages.prettier  # si prefieres prettier
+    # Markdown tooling
+    marksman
+    deno
+    # or: nodePackages.prettier  # if you prefer Prettier instead of Deno fmt
   ];
 
- home.file = {
-  "Wallpapers/live" = {
-    source = ../../wallpapers/live;
-    recursive = true;                          # es un directorio
-    force = true;                              # pisa si ya existe algo ahí
+  ################################################################################
+  # Dotfiles / assets (copy from repo to $HOME)
+  ################################################################################
+  home.file = {
+    "Wallpapers/live" = {
+      source    = ../../wallpapers/live;
+      recursive = true;   # directory
+      force     = true;   # overwrite if exists
+    };
+    "Wallpapers/images" = {
+      source    = ../../wallpapers/images;
+      recursive = true;
+      force     = true;
+    };
   };
-  "Wallpapers/images" = {
-    source = ../../wallpapers/images;
-    recursive = true;
-    force = true;
-  };
-}; 
-  #####################################
-  ## Environment variables (user session)
-  #####################################
+
+  ################################################################################
+  # Environment variables (session)
+  ################################################################################
   home.sessionVariables = {
     EDITOR = "nvim";
   };
 
-  #####################################
-  ## Git
-  #####################################
+  ################################################################################
+  # Git & GitHub CLI
+  ################################################################################
   programs.git = {
     enable = true;
+
+    # Keep original structure intact (settings.* + settings = { ... }):
     settings.user.name  = "Willwitcher";
     settings.user.email = "willgamedevelopment@gmail.com";
     settings = {
@@ -135,24 +156,24 @@ programs.kitty.font.size = lib.mkForce 16;
     settings.git_protocol = "https";
   };
 
-  #####################################
-  ## Zsh
-  #####################################
+  ################################################################################
+  # Zsh (plugins and initialization)
+  ################################################################################
   programs.zsh = {
     enable = true;
     enableCompletion = true;
 
-    # Mantienes syntax highlighting de HM
+    # Built-in syntax highlighting from HM
     syntaxHighlighting.enable = true;
 
-    # 1) compinit + nix-zsh-completions al fpath (ANTES de fzf-tab)
+    # 1) Initialize completion and add nix-zsh-completions to $fpath
     completionInit = ''
       fpath=(${pkgs.nix-zsh-completions}/share/zsh/site-functions $fpath)
       autoload -U compinit
       compinit
     '';
 
-    # 2) Cargar plugins DESPUÉS de compinit, usando rutas alternativas
+    # 2) Load plugins AFTER compinit, using known paths
     initContent = ''
       # --- zsh-autosuggestions ---
       if [[ -f ${pkgs.zsh-autosuggestions}/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
@@ -161,7 +182,7 @@ programs.kitty.font.size = lib.mkForce 16;
         source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
       fi
 
-      # --- zsh-fzf-tab (requiere compinit cargado) ---
+      # --- zsh-fzf-tab (requires compinit) ---
       if [[ -f ${pkgs.zsh-fzf-tab}/share/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh ]]; then
         source ${pkgs.zsh-fzf-tab}/share/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh
       elif [[ -f ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh ]]; then
@@ -170,7 +191,7 @@ programs.kitty.font.size = lib.mkForce 16;
         source ${pkgs.zsh-fzf-tab}/share/zsh-fzf-tab/fzf-tab.plugin.zsh
       fi
 
-      # Opcional: un estilo útil para fzf-tab
+      # Helpful style for fzf-tab: switch match groups with ',' and '.'
       zstyle ':fzf-tab:*' switch-group ',' '.'
     '';
   };
@@ -178,13 +199,18 @@ programs.kitty.font.size = lib.mkForce 16;
   programs.starship.enable = true;
   programs.home-manager.enable = true;
 
+  ################################################################################
+  # Services
+  ################################################################################
   services.gnome-keyring.enable = true;
 
-  # --- Stylix (usuario): SIN cursor aquí; el cursor lo maneja el sistema.
+  ################################################################################
+  # Stylix (user scope) — cursor is handled at the system level
+  ################################################################################
   stylix = {
     autoEnable = true;
 
-    # Iconos (si quieres mantenerlos en HM)
+    # Icons (kept under Home Manager if you prefer user-scoped icon theme)
     icons = {
       enable  = true;
       package = pkgs.dracula-icon-theme;
@@ -193,16 +219,17 @@ programs.kitty.font.size = lib.mkForce 16;
     };
 
     targets = {
-      kitty.enable = true;
-      firefox.profileNames = [ "willwitcher" ];
-      hyprland.enable = true;
-      hyprland.hyprpaper.enable = true;
-      waybar.enable = true;
-      wofi.enable = true;
-      zathura.enable = true;
-      gtk.enable = true;
-      vesktop.enable = true;
-      nvf.enable = true;
+      kitty.enable                = true;
+      firefox.profileNames        = [ "willwitcher" ];
+      hyprland.enable             = true;
+      hyprland.hyprpaper.enable   = true;
+      waybar.enable               = true;
+      wofi.enable                 = true;
+      zathura.enable              = true;
+      gtk.enable                  = true;
+      vesktop.enable              = true;
+      nvf.enable                  = true;
     };
   };
 }
+

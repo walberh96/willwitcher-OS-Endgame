@@ -5,9 +5,9 @@ let
 
   cfg = config.willwitcher.firefox;
 
-  # Prefs base (user.js) — todas las que acordamos
+  # Base user.js preferences (driven by options in `cfg` where applicable)
   basePrefs = {
-    # --- Telemetry / reporting OFF ---
+    # --- Telemetry & reporting: OFF ---
     "app.normandy.api_url" = "";
     "app.normandy.enabled" = false;
     "app.shield.optoutstudies.enabled" = false;
@@ -26,16 +26,16 @@ let
     "toolkit.telemetry.unified" = false;
     "toolkit.telemetry.updatePing.enabled" = false;
 
-    # --- UI / avisos ---
+    # --- UI / warnings ---
     "browser.aboutConfig.showWarning" = false;
     "browser.shell.checkDefaultBrowser" = false;
 
-    # --- Página de inicio y nueva pestaña: en blanco ---
-    "browser.startup.page" = 0;                      # 0 = blank
+    # --- Startup & New Tab: blank ---
+    "browser.startup.page" = 0; # 0 = blank
     "browser.startup.homepage" = "about:blank";
     "browser.newtabpage.enabled" = false;
 
-    # Activity Stream (New Tab) sugerencias/ads/telemetría OFF
+    # --- Activity Stream (New Tab): suggestions/ads/telemetry OFF ---
     "browser.newtabpage.activity-stream.feeds.topsites" = false;
     "browser.newtabpage.activity-stream.feeds.section.topstories" = false;
     "browser.newtabpage.activity-stream.showSponsored" = false;
@@ -43,38 +43,39 @@ let
     "browser.newtabpage.activity-stream.telemetry" = false;
     "browser.newtabpage.activity-stream.feeds.telemetry" = false;
 
-    # --- URLbar quicksuggest OFF ---
+    # --- URL bar quicksuggest: OFF ---
     "browser.urlbar.quicksuggest.enabled" = false;
     "browser.urlbar.suggest.quicksuggest.sponsored" = false;
     "browser.urlbar.suggest.quicksuggest.nonsponsored" = false;
 
-    # --- Barra de marcadores + fuente base ---
+    # --- Bookmarks toolbar visibility & base font size (option-driven) ---
     "browser.toolbars.bookmarks.visibility" = cfg.bookmarksToolbar;
     "font.size.variable.x-western" = cfg.variableFontSize;
 
-    # --- Prefetch / predictor OFF ---
+    # --- Prefetch / predictor: OFF ---
     "network.dns.disablePrefetch" = true;
     "network.predictor.enabled" = false;
     "network.prefetch-next" = false;
 
-    # --- HTTPS-Only & ETP ---
+    # --- HTTPS-Only & Enhanced Tracking Protection (ETP) ---
     "dom.security.https_only_mode" = cfg.httpsOnly;
-    "browser.contentblocking.category" = (if cfg.strictETP then "strict" else "standard");
+    "browser.contentblocking.category" =
+      (if cfg.strictETP then "strict" else "standard");
 
-    # --- Fingerprinting resistance (opcional) ---
+    # --- Fingerprinting resistance (optional) ---
     "privacy.resistFingerprinting" = cfg.resistFingerprinting;
 
-    # --- Pocket / Firefox Accounts ---
+    # --- Pocket / Firefox Accounts (option-driven) ---
     "extensions.pocket.enabled" = (!cfg.disablePocket);
     "extensions.recommendations.enabled" = false;
     "extensions.getAddons.showPane" = false;
     "identity.fxaccounts.enabled" = (!cfg.disableFirefoxAccounts);
 
-    # --- Crash reporter OFF ---
+    # --- Crash reporter: OFF ---
     "breakpad.reportURL" = "";
     "browser.tabs.crashReporting.sendReport" = false;
 
-    # --- DRM (Widevine) ON ---
+    # --- DRM (Widevine): ON ---
     "media.eme.enabled" = true;
     "media.gmp-widevinecdm.enabled" = true;
 
@@ -82,36 +83,40 @@ let
     "privacy.globalprivacycontrol.enabled" = true;
     "privacy.globalprivacycontrol.functionality.enabled" = true;
 
-    # --- Pestañas verticales nativas (FF >= 136) ---
+    # --- Native vertical tabs (FF >= 136) ---
     "sidebar.revamp" = true;
     "sidebar.verticalTabs" = true;
 
-    # --- Mantener habilitadas extensiones instaladas externamente ---
+    # --- Keep externally installed extensions enabled ---
     "extensions.autoDisableScopes" = 0;
 
-    # (opcional para userChrome / userContent)
+    # --- Allow userChrome.css / userContent.css (optional) ---
     "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
   };
 
-  # Construye ExtensionSettings (policies) a partir de la lista declarativa
+  # Build a single ExtensionSettings policy entry for one extension
   mkPolicyExt = ext:
     let
-      # valores por defecto para cada entrada
+      # Defaults per extension entry
       default = {
         installation_mode = "force_installed";
-        private_browsing = true;
-        default_area = "menupanel";
+        private_browsing  = true;
+        default_area      = "menupanel";
       };
       merged = default // (removeAttrs ext [ "id" "slug" ]);
-      url = "https://addons.mozilla.org/firefox/downloads/latest/${ext.slug}/latest.xpi";
+      url    = "https://addons.mozilla.org/firefox/downloads/latest/${ext.slug}/latest.xpi";
     in
     merged // { install_url = url; };
 
+  # Convert the declarative list to the attrset that policies.json expects
   extSettingsAttrset =
     lib.listToAttrs (map (ext: { name = ext.id; value = mkPolicyExt ext; }) cfg.policyExtensions);
+
 in
 {
-  #### OPTIONS #################################################################
+  ##############################################################################
+  # OPTIONS
+  ##############################################################################
   options.willwitcher.firefox = {
     enable = mkEnableOption "Enable Firefox (themed by Stylix, managed by Home Manager).";
 
@@ -130,39 +135,51 @@ in
     makeDefault = mkOption {
       type = types.bool;
       default = true;
-      description = "Set Firefox as the default browser using XDG and env var.";
+      description = "Set Firefox as the default browser using XDG and a session env var.";
     };
 
     # Stylix toggles
     enableFirefoxColor = mkOption {
-      type = types.bool; default = true;
+      type = types.bool;
+      default = true;
       description = "Enable Stylix's Firefox Color toolbar theming.";
     };
+
     enableFirefoxGnomeTheme = mkOption {
-      type = types.bool; default = true;
+      type = types.bool;
+      default = true;
       description = "Enable Stylix's Firefox GNOME theme (GTK-like look).";
     };
 
     # Privacy toggles
     strictETP = mkOption {
-      type = types.bool; default = false; # Standard por defecto
+      type = types.bool;
+      default = false; # Standard by default
       description = "Enhanced Tracking Protection: strict if true.";
     };
+
     httpsOnly = mkOption {
-      type = types.bool; default = true;
+      type = types.bool;
+      default = true;
       description = "Force HTTPS-Only mode.";
     };
+
     resistFingerprinting = mkOption {
-      type = types.bool; default = false;
-      description = "Enable RFP (may break layouts/features).";
+      type = types.bool;
+      default = false;
+      description = "Enable RFP (may break some layouts/features).";
     };
+
     disablePocket = mkOption {
-      type = types.bool; default = true;
+      type = types.bool;
+      default = true;
       description = "Disable Pocket integration.";
     };
+
     disableFirefoxAccounts = mkOption {
-      type = types.bool; default = false;
-      description = "Disable Firefox Account / Sync UI.";
+      type = types.bool;
+      default = false;
+      description = "Disable Firefox Accounts / Sync UI.";
     };
 
     bookmarksToolbar = mkOption {
@@ -172,12 +189,12 @@ in
     };
 
     variableFontSize = mkOption {
-      type = types.int; default = 20;
+      type = types.int;
+      default = 20;
       description = "Default variable font size for western scripts (page content).";
     };
 
-    # === Extensiones por políticas (AMO) ===
-    # Lista de extensiones con su ID y slug de AMO.
+    # --- Extensions via policies (AMO) ----------------------------------------
     policyExtensions = mkOption {
       type = types.listOf (types.attrsOf types.anything);
       default = [
@@ -198,31 +215,32 @@ in
       '';
     };
 
-    # === Bookmarks ===
-    # Por defecto NO se gestionan (se conservan en el perfil).
+    # --- Bookmarks management --------------------------------------------------
     manageBookmarks = mkOption {
-      type = types.bool; default = false;
+      type = types.bool;
+      default = false;
       description = "If true, manage bookmarks declaratively.";
     };
 
     bookmarksForce = mkOption {
-      type = types.bool; default = false;
-      description = "If true, HM replaces existing bookmarks each rebuild.";
+      type = types.bool;
+      default = false;
+      description = "If true, Home Manager replaces existing bookmarks each rebuild.";
     };
 
-    # Simplificado: lista de marcadores planos (name/url). Para estructura avanzada usa bookmarksRaw.
+    # Simple flat bookmarks (name/url). For complex structures, use `bookmarksRaw`.
     bookmarkItems = mkOption {
       type = types.listOf (types.submodule {
         options = {
-          name = mkOption { type = types.str; description = "Bookmark title"; };
-          url  = mkOption { type = types.str; description = "Bookmark URL"; };
+          name = mkOption { type = types.str; description = "Bookmark title."; };
+          url  = mkOption { type = types.str; description = "Bookmark URL.";   };
         };
       });
       default = [ ];
       description = "Simple flat bookmarks (toolbar by default).";
     };
 
-    # Avanzado: pasa el submódulo de HM tal cual. Si no es null, tiene prioridad sobre bookmarkItems.
+    # Advanced: pass the HM bookmarks submodule as-is. If set, takes precedence.
     bookmarksRaw = mkOption {
       type = types.nullOr types.attrs;
       default = null;
@@ -230,7 +248,9 @@ in
     };
   };
 
-  #### CONFIG ##################################################################
+  ##############################################################################
+  # CONFIG
+  ##############################################################################
   config = mkIf cfg.enable {
     programs.firefox = {
       enable = true;
@@ -244,32 +264,38 @@ in
             isDefault = true;
           })
           // {
-            # user.js
+            # user.js preferences
             settings = basePrefs;
+
+            # Keep externally installed extensions enabled
             extensions.force = true;
-            # Bookmarks (opcional)
+
+            # Declarative bookmarks (optional)
             bookmarks = mkIf cfg.manageBookmarks (
-              if cfg.bookmarksRaw != null then cfg.bookmarksRaw else {
-                force = cfg.bookmarksForce;
-                bookmarks = map (b: { name = b.name; url = b.url; }) cfg.bookmarkItems;
-              }
+              if cfg.bookmarksRaw != null then
+                cfg.bookmarksRaw
+              else
+                {
+                  force = cfg.bookmarksForce;
+                  bookmarks = map (b: { name = b.name; url = b.url; }) cfg.bookmarkItems;
+                }
             );
           };
       };
 
       # Enterprise policies (policies.json)
       policies = {
-        # Extensiones desde AMO (force_installed + latest.xpi)
+        # Extensions from AMO (force_installed + latest.xpi)
         ExtensionSettings = extSettingsAttrset;
 
-        # New Tab / Home en blanco + DRM
+        # New Tab / Home: blank, plus DRM enabled
         NewTabPage = false;
         Homepage = { StartPage = "homepage"; URL = "about:blank"; };
         EncryptedMediaExtensions = { Enabled = true; };
       };
     };
 
-    # Stylix tematiza este perfil
+    # Stylix theming for this Firefox profile
     stylix.targets.firefox = {
       enable = true;
       profileNames = [ cfg.profileName ];
@@ -277,16 +303,18 @@ in
       firefoxGnomeTheme.enable = cfg.enableFirefoxGnomeTheme;
     };
 
-    # Default browser wiring
+    # Default browser integration (XDG + env var)
     xdg.mimeApps.defaultApplications = mkIf cfg.makeDefault {
-      "text/html" = "firefox.desktop";
-      "x-scheme-handler/http" = "firefox.desktop";
+      "text/html"              = "firefox.desktop";
+      "x-scheme-handler/http"  = "firefox.desktop";
       "x-scheme-handler/https" = "firefox.desktop";
       "x-scheme-handler/about" = "firefox.desktop";
       "x-scheme-handler/unknown" = "firefox.desktop";
     };
+
     home.sessionVariables = mkIf cfg.makeDefault {
       DEFAULT_BROWSER = "${pkgs.firefox}/bin/firefox";
     };
   };
 }
+

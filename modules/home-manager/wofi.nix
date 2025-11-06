@@ -2,22 +2,28 @@
 
 let
   inherit (lib) mkEnableOption mkIf mkForce;
-  # Paleta Stylix con '#RRGGBB'
+  # Stylix palette with '#RRGGBB'
   c = config.lib.stylix.colors.withHashtag;
 in
 {
+  ################################################################################
+  # OPTION
+  ################################################################################
   options.willwitcher.wofi.enable =
     mkEnableOption "Enable WillWitcher Wofi config (Stylix owns palette)";
 
+  ################################################################################
+  # CONFIG
+  ################################################################################
   config = mkIf config.willwitcher.wofi.enable {
-    # Activa el target de Wofi en Stylix (sin addCss)
+    # Enable Stylix target for Wofi (no addCss toggle here; palette is owned by Stylix)
     stylix.targets.wofi.enable = true;
 
     programs.wofi = {
       enable = true;
       package = pkgs.wofi;
 
-      # Config básica sin colores
+      # Basic config without hardcoded colors
       settings = {
         insensitive   = true;
         width         = 500;
@@ -30,18 +36,18 @@ in
         no_actions    = true;
       };
 
-      # Tu CSS, usando la paleta Stylix (sin hex fijos)
+      # Your CSS using the Stylix palette (no fixed hex values)
       style = mkForce ''
-        /* Deja que Stylix ponga font-family; aquí sólo tamaño si quieres */
+        /* Let Stylix set the font-family; optionally keep size here */
         * { font-size: 14px; }
 
-        /* Ventana */
+        /* Window */
         window {
           margin: 0px;
           padding: 10px;
-          border: 0.16em solid ${c.base0D};   /* acento (rojo/alerta) */
+          border: 0.16em solid ${c.base0D};   /* accent */
           border-radius: 10px;
-          background-color: ${c.base00};      /* fondo */
+          background-color: ${c.base00};      /* background */
           animation: slideIn 0.25s ease-out both;
         }
 
@@ -51,7 +57,7 @@ in
           to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* Contenedores */
+        /* Containers */
         #outer-box, #inner-box, #scroll, #entry {
           margin: 5px;
           padding: 10px;
@@ -74,37 +80,37 @@ in
           padding: 10px;
           border: none;
           border-radius: 0.2em;
-          color: ${c.base05};                 /* texto */
+          color: ${c.base05};                 /* text */
           background-color: ${c.base00};
-          outline: 2px solid ${c.base0E};     /* acento (magenta/morado) */
+          outline: 2px solid ${c.base0E};     /* accent */
         }
         #input image {
           border: none;
-          color: ${c.base08};                 /* icono del input */
+          color: ${c.base08};                 /* input icon */
         }
 
-        /* Texto */
+        /* Text */
         #text {
           margin: 5px;
           border: none;
           color: ${c.base05};
         }
 
-        /* Flechita desplegable (ocúltala por completo) */
+        /* Drop arrow — fully hidden */
         #entry arrow {
           opacity: 0; min-width: 0; margin: 0;
         }
 
-        /* Entrada seleccionada */
+        /* Selected entry */
         #entry:selected {
-          border: 0.11em solid ${c.base0D};   /* acento (azul) */
-          background: ${c.base01};            /* contraste leve */
+          border: 0.11em solid ${c.base0D};   /* accent */
+          background: ${c.base01};            /* subtle contrast */
         }
         #entry:selected #text {
-          color: ${c.base0E};                 /* texto acentuado */
+          color: ${c.base0E};                 /* emphasized text */
         }
 
-        /* Drag & drop activo (opcional) */
+        /* Drag & drop active (optional) */
         #entry:drop(active) {
           background-color: ${c.base0D};
           color: ${c.base00};
@@ -113,3 +119,4 @@ in
     };
   };
 }
+

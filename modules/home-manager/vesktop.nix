@@ -1,18 +1,21 @@
-# modules/home-manager/vesktop.nix
 { lib, pkgs, config, options, ... }:
 
 let
   cfg = config.willwitcher.vesktop;
 
-  # ¿Home Manager trae el módulo programs.vesktop?
+  # Does Home Manager expose the `programs.vesktop` module?
   hasHMVesktop =
     lib.hasAttrByPath [ "programs" "vesktop" "enable" ] options;
 
-  # ¿Stylix está importado y declara el target vesktop?
+  # Is Stylix imported and does it declare the `stylix.targets.vesktop` option?
   hasStylixTarget =
     lib.hasAttrByPath [ "stylix" "targets" "vesktop" "enable" ] options;
 
-in {
+in
+{
+  ################################################################################
+  # OPTIONS
+  ################################################################################
   options.willwitcher.vesktop = with lib; {
     enable = mkEnableOption "Vesktop + Vencord declarativos";
 
@@ -46,9 +49,12 @@ in {
     };
   };
 
-  # Implementación, sin tocar `config` para checks de existencia
+  ################################################################################
+  # CONFIG
+  # Implementation uses mkMerge with existence checks (no side-effects on `options`)
+  ################################################################################
   config = lib.mkIf cfg.enable (lib.mkMerge [
-    # Ruta A: si existe el módulo de HM para Vesktop, úsalo
+    # Path A: If HM exposes the Vesktop module, use it.
     (lib.mkIf hasHMVesktop {
       programs.vesktop = {
         enable = true;
@@ -58,14 +64,15 @@ in {
       };
     })
 
-    # Ruta B (fallback): si NO existe el módulo, al menos instala el paquete
+    # Path B (fallback): If the module is not available, ensure the package is installed.
     (lib.mkIf (!hasHMVesktop) {
       home.packages = [ cfg.package ];
     })
 
-    # Stylix target, solo si Stylix declara esa opción y el toggle está en true
+    # Stylix target: enable only if Stylix option exists and the toggle is on.
     (lib.mkIf (cfg.stylixTarget && hasStylixTarget) {
       stylix.targets.vesktop.enable = true;
     })
   ]);
 }
+

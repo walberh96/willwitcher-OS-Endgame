@@ -2,10 +2,10 @@
 
 let
   inherit (lib) mkEnableOption mkIf mkForce;
-  # Paleta de Stylix con '#'
+  # Stylix palette with '#' prefixed colors
   c = config.lib.stylix.colors.withHashtag;
 
-  # Wrapper: ww-wlrec (toggle, start/stop, región con slurp, status JSON para Waybar)
+  # Wrapper: ww-wlrec (toggle, start/stop, region via slurp, JSON status for Waybar)
   wlrec = pkgs.writeShellScriptBin "ww-wlrec" ''
     #!/usr/bin/env bash
     set -euo pipefail
@@ -80,7 +80,7 @@ let
     sleep 0.3
   fi
 
-  # Por si no había PID o no respondió, intenta por nombre del proceso
+  # If PID is missing or process didn’t respond, try by process name
   if pgrep -u "''${UID}" -x wl-screenrec >/dev/null 2>&1; then
     pkill -INT -u "''${UID}" -x wl-screenrec
     sleep 0.3
@@ -95,10 +95,10 @@ let
 
     region() {
       if is_running; then
-        # Si ya hay grabación, detener (toggle de región)
+        # If already recording, stop (region toggle)
         stop
       else
-        # Selecciona región con slurp; cancela si no hay selección
+        # Select region with slurp; cancel if empty selection
         local geom
         geom="$("''${SLURP}" -f '%x,%y %wx%h' 2>/dev/null || true)"
         [[ -z "''${geom}" ]] && exit 0
@@ -121,11 +121,11 @@ let
         mm=$(( elapsed / 60 ))
         ss=$(( elapsed % 60 ))
         file=$(cat "''${LASTFILE}" 2>/dev/null || echo "")
-        tip="Grabando → ''${mm}:$(printf "%02d" "''${ss}")"
+        tip="Recording → ''${mm}:$(printf "%02d" "''${ss}")"
         [[ -n "''${file}" ]] && tip="''${tip}\n''${file}"
         printf '{"text":"REC %d:%02d","alt":"rec","class":"recording","tooltip":"%s"}\n' "''${mm}" "''${ss}" "''${tip}"
       else
-        printf '{"text":"Idle","alt":"idle","class":"idle","tooltip":"Click: Monitor · Middle: Region · Derecho: Open Folder"}\n'
+        printf '{"text":"Idle","alt":"idle","class":"idle","tooltip":"Click: Monitor · Middle: Region · Right: Open Folder"}\n'
       fi
     }
 
@@ -140,25 +140,31 @@ let
   '';
 in
 {
+  ##############################################################################
+  # OPTION
+  ##############################################################################
   options.willwitcher.waybar.enable =
     mkEnableOption "Enable WillWitcher Waybar config (Stylix owns palette)";
 
+  ##############################################################################
+  # CONFIG
+  ##############################################################################
   config = mkIf config.willwitcher.waybar.enable {
-
-    # Stylix: Waybar tematizado pero sin inyectar CSS propio
+    # Stylix: theme Waybar but do not inject custom CSS via Stylix
     stylix.targets.waybar = {
       enable = true;
       addCss = false;
     };
 
-    # Instala el wrapper y slurp
+    # Install the ww-wlrec wrapper and slurp (for region selection)
     home.packages = [ wlrec pkgs.slurp ];
 
     programs.waybar = {
       enable = true;
 
+      # CSS (uses Stylix palette variables)
       style = mkForce ''
-        * { font-size: 16px; } /* font-family lo pone Stylix */
+        * { font-size: 16px; } /* font-family handled by Stylix */
         window#waybar { background-color: transparent; }
 
         #workspaces {
@@ -182,11 +188,12 @@ in
         #clock { font-size: 20px; padding-top: 4px; padding-bottom: 2px; }
         #custom-power:hover { color: ${c.base08}; }
 
-        /* Estados del grabador */
+        /* Recorder states */
         #custom-wlrec.recording { color: ${c.base08}; border-color: ${c.base08}; }
         #custom-wlrec.idle      { color: ${c.base0E}; }
       '';
 
+      # Waybar JSON configuration
       settings = [
         {
           layer = "top";
@@ -229,24 +236,24 @@ in
             "on-click" = "pwvucontrol";
           };
 
-          # Módulo de grabación
+          # Recorder module backed by ww-wlrec
           "custom/wlrec" = {
             "return-type" = "json";
             "format" = " {icon} {text} ";
-            "format-icons" = { "idle" = "⏺"; "rec" = "⏹"; }; # ⏺ grabar, ⏹ detener
+            "format-icons" = { "idle" = "⏺"; "rec" = "⏹"; }; # ⏺ record, ⏹ stop
             "exec-if" = "command -v ww-wlrec";
             exec = "ww-wlrec status";
             interval = 1;
             signal = 8;
             tooltip = true;
 
-            # Clic izquierdo: alterna grabación del monitor enfocado
+            # Left click: toggle recording on focused monitor
             "on-click" = "ww-wlrec toggle; pkill -RTMIN+8 waybar";
 
-            # Clic medio: selecciona región (slurp) y alterna
+            # Middle click: select region (slurp) and start/stop
             "on-click-middle" = "ww-wlrec region; pkill -RTMIN+8 waybar";
 
-            # Clic derecho: abre carpeta de grabaciones
+            # Right click: open recordings folder
             "on-click-right" = "ww-wlrec open";
             "escape" = true;
           };

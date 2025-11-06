@@ -1,20 +1,31 @@
 { config, pkgs, inputs, lib, ... }:
 
 {
+  ############################
+  # Imports
+  ############################
   imports = [
     ./hardware-configuration.nix
-
     inputs.stylix.nixosModules.stylix
   ];
 
+  ############################
+  # Boot & Kernel
+  ############################
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
+  ############################
+  # Hostname, Network, Timezone
+  ############################
   networking.hostName = "ww-desktop";
   networking.networkmanager.enable = true;
   time.timeZone = "America/Los_Angeles";
 
+  ############################
+  # Locale
+  ############################
   i18n.defaultLocale = "en_US.UTF-8";
   i18n.extraLocaleSettings = {
     LC_ADDRESS        = "en_US.UTF-8";
@@ -28,15 +39,15 @@
     LC_TIME           = "en_US.UTF-8";
   };
 
-  # Layout de teclado para apps X11/Xwayland
+  # Keyboard layout for X11/Xwayland apps
   services.xserver.xkb = {
     layout = "us";
     variant = "";
   };
 
-  ########################
-  # Stylix (sistema)
-  ########################
+  ############################
+  # Stylix (system theming)
+  ############################
   stylix = {
     enable = true;
     autoEnable = true;
@@ -70,9 +81,9 @@
     };
   };
 
-  ########################
-  # Usuario
-  ########################
+  ############################
+  # User
+  ############################
   users.users.willwitcher = {
     isNormalUser = true;
     description  = "willwitcher";
@@ -82,25 +93,28 @@
   environment.shells = [ pkgs.zsh ];
   programs.zsh.enable = true;
 
+  ############################
+  # Licensing
+  ############################
   nixpkgs.config.allowUnfree = true;
 
-  ########################
+  ############################
   # Display Manager
-  ########################
-services.greetd.enable = true;
-programs.regreet.enable = true;
+  ############################
+  services.greetd.enable = true;
+  programs.regreet.enable = true;
 
-########################
-  # Hyprland
-  ########################
+  ############################
+  # Hyprland (Wayland compositor)
+  ############################
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
   };
 
-  ########################
+  ############################
   # Audio (PipeWire)
-  ########################
+  ############################
   services.pulseaudio.enable = false;
   services.pipewire = {
     enable = true;
@@ -110,12 +124,15 @@ programs.regreet.enable = true;
     wireplumber.enable = true;
   };
 
+  ############################
+  # Hardware & Security
+  ############################
   hardware.bluetooth.enable = true;
   security.polkit.enable = true;
 
-  ########################
-  # XDG Portals
-  ########################
+  ############################
+  # XDG Portals (screen sharing, file pickers, etc.)
+  ############################
   xdg.portal.extraPortals = with pkgs; [
     xdg-desktop-portal-hyprland
     xdg-desktop-portal-gtk
@@ -123,44 +140,62 @@ programs.regreet.enable = true;
   ];
   xdg.portal.config.common.default = [ "hyprland" "gnome" "gtk" ];
 
+  ############################
+  # Session Environment
+  ############################
   environment.sessionVariables = {
     XDG_CURRENT_DESKTOP = "Hyprland";
-    XDG_SESSION_TYPE = "wayland";
-    NIXOS_OZONE_WL = "1";
+    XDG_SESSION_TYPE    = "wayland";
+    NIXOS_OZONE_WL      = "1";
   };
 
-  ########################
+  ############################
   # Thunar + previews
-  ########################
-  programs.xfconf.enable = true;
-  services.gvfs.enable   = true;
-  services.tumbler.enable = true;
-  programs.thunar.enable = true;
-  programs.thunar.plugins = with pkgs.xfce; [ thunar-archive-plugin ];
+  ############################
+  programs.xfconf.enable     = true;
+  services.gvfs.enable       = true;
+  services.tumbler.enable    = true;
+  programs.thunar.enable     = true;
+  programs.thunar.plugins    = with pkgs.xfce; [ thunar-archive-plugin ];
 
-  ########################
+  ############################
   # Gaming
-  ########################
+  ############################
   hardware.steam-hardware.enable = true;
-  programs.steam.enable = true;
-  programs.gamemode.enable = true;
+  programs.steam.enable          = true;
+  programs.gamemode.enable       = true;
 
-  ########################
-  # nix-ld
-  ########################
+  ############################
+  # nix-ld (run non-Nix binaries with missing libs)
+  ############################
   programs.nix-ld.enable = true;
-  programs.nix-ld.libraries = with pkgs; [ icu ];
+  programs.nix-ld.libraries = with pkgs; [
+    icu
+  ];
 
+  ############################
+  # System Packages
+  ############################
   environment.systemPackages = with pkgs; [ ];
 
+  ############################
+  # Nix (features & flakes)
+  ############################
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  ############################
+  # Home Manager (user scope)
+  ############################
   home-manager = {
-    useGlobalPkgs   = true;
-    extraSpecialArgs = { inherit inputs; };
-    backupFileExtension = "hm-bak";
-    users.willwitcher = import ./home.nix;
+    useGlobalPkgs        = true;
+    extraSpecialArgs     = { inherit inputs; };
+    backupFileExtension  = "hm-bak";
+    users.willwitcher    = import ./home.nix;
   };
 
+  ############################
+  # State Version
+  ############################
   system.stateVersion = "25.05";
 }
+

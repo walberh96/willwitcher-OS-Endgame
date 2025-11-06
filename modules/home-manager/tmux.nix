@@ -2,11 +2,15 @@
 
 let
   inherit (lib) mkEnableOption mkIf mkOption types optionals optionalString;
-  cfg = config.willwitcher.tmux;
-  p = pkgs.tmuxPlugins;
-  whichKeyPkg = p.tmux-which-key or null;
+
+  cfg          = config.willwitcher.tmux;
+  p            = pkgs.tmuxPlugins;
+  whichKeyPkg  = p.tmux-which-key or null;
 in
 {
+  ################################################################################
+  # OPTIONS
+  ################################################################################
   options.willwitcher.tmux = {
     enable = mkEnableOption "Enable tmux with helpful plugins and a clean status line";
 
@@ -23,18 +27,21 @@ in
     };
   };
 
+  ################################################################################
+  # CONFIG
+  ################################################################################
   config = mkIf cfg.enable {
-    # OJO: si tu Stylix no tiene target tmux, comenta esta línea.
+    # Note: If your Stylix build does not expose a tmux target, comment this out.
     stylix.targets.tmux.enable = cfg.useStylixColors;
 
     programs.tmux = {
-      enable = true;                # <-- instala tmux
-      terminal = "tmux-256color";
-      mouse = true;
-      keyMode = "vi";
-      baseIndex = 1;
+      enable       = true;            # installs tmux
+      terminal     = "tmux-256color";
+      mouse        = true;
+      keyMode      = "vi";
+      baseIndex    = 1;
       historyLimit = 100000;
-      clock24 = true;
+      clock24      = true;
 
       plugins =
         [
@@ -55,21 +62,21 @@ in
         set -g @continuum-restore 'on'
         set -g @continuum-save-interval '15'
 
-        # Resurrect: mejor con Neovim
+        # Resurrect: better with Neovim
         set -g @resurrect-strategy-nvim 'session'
 
         ${optionalString (cfg.whichKey.enable && whichKeyPkg != null) ''
           set -g @tmux-which-key-xdg-enable 1
         ''}
 
-        # Status minimal (sin colores hardcode: deja a Stylix)
+        # Minimal status line (no hardcoded colors; leave to Stylix)
         set -g status-interval 2
         set -g status-left  " #S "
         set -g status-right " #(date '+%H:%M') "
         set -g window-status-current-format " #I:#W* "
         set -g window-status-format         " #I:#W  "
 
-        # Binds
+        # Key bindings
         bind r source-file ~/.config/tmux/tmux.conf \; display-message "tmux reloaded"
         bind | split-window -h
         bind - split-window -v
@@ -91,7 +98,7 @@ in
       '';
     };
 
-    # ✅ Condicional bien hecho: a nivel de atributos, no con cadenas sueltas
+    # Conditional file generation at the attribute level (not via string interpolation)
     xdg.configFile = mkIf (cfg.whichKey.enable && whichKeyPkg != null) {
       "tmux/plugins/tmux-which-key/config.yaml".text = ''
         menu:
