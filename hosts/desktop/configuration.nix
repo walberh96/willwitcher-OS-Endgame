@@ -87,14 +87,11 @@
   ########################
   # Display Manager
   ########################
-services.greetd.enable = true;
-
-  services.greetd.settings.default_session = {
-    user = "greeter";
-    command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd Hyprland";
-  };
-
-  # Asegura que haya un .desktop de Hyprland visible para el greeter
+# LightDM (usa el greeter GTK por defecto)
+  services.xserver.enable = true;
+  services.xserver.displayManager.lightdm.enable = true;
+  services.xserver.displayManager.lightdm.greeters.gtk.enable = true;
+  services.displayManager.defaultSession = "hyprland";
   services.displayManager.sessionPackages = [ pkgs.hyprland ];
 
 ########################
