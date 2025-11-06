@@ -60,7 +60,7 @@
       discordBranch        = "stable";
     };
  
-
+};
   # Force Kitty font size (kept as-is)
   programs.kitty.font.size = lib.mkForce 16;
 
