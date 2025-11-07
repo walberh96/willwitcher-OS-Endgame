@@ -4,37 +4,36 @@ let
   cfg = config.willwitcher.nvim;
 
   vp = pkgs.vimPlugins;
-  # Plugins que podrían no existir en tu canal: se vuelven opcionales
-  bufferline      = vp.bufferline-nvim or null;
-  whichKey        = vp.which-key-nvim or null;
-  ccc             = vp.ccc-nvim or null;
-  telescope       = vp.telescope-nvim or null;
-  telescopeFzf    = vp.telescope-fzf-native-nvim or null;
-  telescopeUiSel  = vp.telescope-ui-select-nvim or null;
-  snacks          = vp.snacks-nvim or null;
-  smearCursor     = vp.smear-cursor-nvim or null;
+  # Optional plugins (channel-dependent)
+  bufferline     = vp.bufferline-nvim or null;
+  whichKey       = vp.which-key-nvim or null;
+  ccc            = vp.ccc-nvim or null;
+  telescope      = vp.telescope-nvim or null;
+  telescopeFzf   = vp.telescope-fzf-native-nvim or null;
+  telescopeUiSel = vp.telescope-ui-select-nvim or null;
+  snacks         = vp.snacks-nvim or null;
+  smearCursor    = vp.smear-cursor-nvim or null;
 
   startOptional = ps: lib.flatten (map (p: lib.optional (p != null) p) ps);
 in
 {
   options.willwitcher.nvim.enable = lib.mkEnableOption "NVF-based Neovim setup (WillWitcher)";
 
-  # Importa el módulo de NVF aquí (no lo importes en otro sitio)
+  # Import NVF here (do not import it elsewhere)
   imports = [
     inputs.nvf.homeManagerModules.default
   ];
 
   config = lib.mkIf cfg.enable {
-    # Requiere que ya hayas importado Stylix HM en algún lugar de tu home.nix
+    # Requires Stylix HM to be imported somewhere in your home.nix
     stylix.targets.nvf.enable = true;
 
-    # Binarios que usa Telescope/DAP/etc. (se suman a los que ya tengas)
+    # CLI tools used by Telescope/DAP/etc. (add to what you already have)
     home.packages = with pkgs; [
       ripgrep fd fzf
       lldb
-      # Opcionales (los tienes en tu lista, por si quieres formatear .md con deno/prettier)
       deno
-      # nodePackages.prettier
+      # nodePackages.prettier  # Use this instead of Deno if you prefer
     ];
 
     programs.nvf = {
@@ -47,7 +46,7 @@ in
         vimAlias = true;
 
         ############################################
-        ## FILE EXPLORER: nvim-tree (izquierda, oculto)
+        ## FILE EXPLORER: nvim-tree (left side)
         ############################################
         filetree.nvimTree = {
           enable = true;
@@ -55,7 +54,7 @@ in
         };
 
         ############################################
-        ## GIT: neogit + gitsigns (blame OFF)
+        ## GIT: neogit + gitsigns (blame OFF by default)
         ############################################
         git = {
           neogit.enable = true;
@@ -63,11 +62,11 @@ in
         };
 
         ############################################
-        ## MARKDOWN: render-markdown (sin LSP)
+        ## MARKDOWN: render-markdown (no LSP)
         ############################################
         languages.markdown = {
           enable = true;
-          lsp.enable = false;          # -> sin lspconfig warning
+          lsp.enable = false;          # avoid lspconfig warning
           format.enable = true;
           extensions.render-markdown-nvim.enable = true;
         };
@@ -83,7 +82,7 @@ in
         };
 
         ############################################
-        ## PLUGINS extra (vía nixpkgs, opcionales por canal)
+        ## Extra plugins (via nixpkgs, optional by channel)
         ############################################
         startPlugins = startOptional [
           bufferline
@@ -97,51 +96,66 @@ in
         ];
 
         ############################################
-        ## Lua config (keymaps + setups ligeros)
+        ## Lua config (keymaps + light setups)
         ############################################
         luaConfigRC = {
-          # Explorer toggle (Ctrl+n) y ajustes
+          # --- LSP: define a global default_on_attach early (fixes ON_ATTACH_ERROR) ---
+          _000_lsp_pre = ''
+            -- Provide a global handler some setups expect.
+            function _G.default_on_attach(client, bufnr)
+              local function map(mode, lhs, rhs, desc)
+                vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true, noremap = true, desc = desc })
+              end
+
+              -- Basic LSP keymaps
+              map('n', 'gd', vim.lsp.buf.definition, 'Go to definition')
+              map('n', 'gD', vim.lsp.buf.declaration, 'Go to declaration')
+              map('n', 'gi', vim.lsp.buf.implementation, 'Go to implementation')
+              map('n', 'gr', vim.lsp.buf.references, 'List references')
+              map('n', 'K',  vim.lsp.buf.hover, 'Hover docs')
+              map('n', '<leader>rn', vim.lsp.buf.rename, 'Rename symbol')
+              map('n', '<leader>ca', vim.lsp.buf.code_action, 'Code action')
+              map('n', '<leader>f', function() vim.lsp.buf.format({ async = true }) end, 'Format buffer')
+            end
+          '';
+
+          # Explorer toggle (Ctrl+n)
           nvimtree = ''
             vim.keymap.set('n', '<C-n>', '<cmd>NvimTreeToggle<CR>', { desc = 'Toggle file explorer' })
           '';
 
-          # Bufferline + navegación de buffers
+          # Bufferline + buffer navigation
           bufferline = ''
             pcall(function()
               require('bufferline').setup({})
-              -- Tab / Shift-Tab para navegar buffers
+              -- Tab / Shift-Tab to cycle buffers
               vim.keymap.set('n', '<Tab>', '<cmd>BufferLineCycleNext<CR>')
               vim.keymap.set('n', '<S-Tab>', '<cmd>BufferLineCyclePrev<CR>')
-              -- <leader>1..9 para saltar a buffer N
+              -- <leader>1..9 to jump to buffer N
               for i = 1, 9 do
                 vim.keymap.set('n', '<leader>' .. i, '<cmd>BufferLineGoToBuffer ' .. i .. '<CR>')
               end
             end)
           '';
 
-          # which-key (descubrimiento de teclas)
+          # which-key
           whichkey = ''
             pcall(function()
               require('which-key').setup({})
             end)
           '';
 
-          # ccc (color picker) + entrada sugerida en which-key
-         ccc = ''
-  pcall(function()
-    -- Config base de ccc
-    require('ccc').setup({})
-
-    -- Auto-enable del highlighter (preview de colores en el buffer)
-    vim.cmd('CccHighlighterEnable')
-
-    -- Keybindings:
-    -- Picker rápido
-    vim.keymap.set('n', '<leader>cp', '<cmd>CccPick<CR>', { desc = 'Color Picker (ccc)' })
-    -- Toggle del preview inline
-    vim.keymap.set('n', '<leader>ch', '<cmd>CccHighlighterToggle<CR>', { desc = 'Toggle color preview (ccc)' })
-  end)
-''; 
+          # ccc (color picker) + inline previews
+          ccc = ''
+            pcall(function()
+              require('ccc').setup({})
+              -- Enable inline color previews
+              vim.cmd('CccHighlighterEnable')
+              -- Keybindings
+              vim.keymap.set('n', '<leader>cp', '<cmd>CccPick<CR>', { desc = 'Color Picker (ccc)' })
+              vim.keymap.set('n', '<leader>ch', '<cmd>CccHighlighterToggle<CR>', { desc = 'Toggle color preview (ccc)' })
+            end)
+          '';
 
           # Telescope + bindings
           telescope = ''
@@ -152,7 +166,6 @@ in
                 pcall(telescope.load_extension, 'fzf')
                 pcall(telescope.load_extension, 'ui-select')
               end
-              -- Keys estándar
               vim.keymap.set('n', '<leader>ff', '<cmd>Telescope find_files<CR>', { desc = 'Find files' })
               vim.keymap.set('n', '<leader>fg', '<cmd>Telescope live_grep<CR>', { desc = 'Live grep' })
               vim.keymap.set('n', '<leader>fb', '<cmd>Telescope buffers<CR>',    { desc = 'Buffers' })
@@ -160,7 +173,7 @@ in
             end)
           '';
 
-          # Gitsigns: blame en línea -> OFF por defecto (toggle manual)
+          # Gitsigns: blame OFF by default (toggle manually)
           gitsigns = ''
             pcall(function()
               require('gitsigns').setup({
@@ -171,7 +184,7 @@ in
             end)
           '';
 
-          # Neogit en floating + keybinding
+          # Neogit in floating window + keybinding
           neogit = ''
             pcall(function()
               vim.keymap.set('n', '<leader>gg', function()
@@ -180,7 +193,7 @@ in
             end)
           '';
 
-          # Snacks (modular) - solo setup por defecto; ajustamos módulos luego si quieres
+          # Snacks (default setup)
           snacks = ''
             pcall(function()
               require('snacks').setup({})
