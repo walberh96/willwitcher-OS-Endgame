@@ -32,7 +32,7 @@ in
         tab_bar_style           = "powerline";
         remember_window_size    = "yes";
         strip_trailing_spaces   = "smart";
-        background_opacity = "0.85";
+        background_opacity = lib.mkForce "0.95";
       };
 
       # Handy keybindings (do not conflict with your Hyprland binds)
