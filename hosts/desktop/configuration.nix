@@ -51,8 +51,8 @@
   stylix = {
     enable = true;
     autoEnable = true;
-    image = ../../wallpapers/images/red.png;
-    #base16Scheme = ../../themes/willwitcher-dark-red.yaml;
+    image = ../../wallpapers/images/cat.png;
+    base16Scheme = ../../themes/willwitcher-dark-red.yaml;
     polarity = "dark";
 
     fonts = {
