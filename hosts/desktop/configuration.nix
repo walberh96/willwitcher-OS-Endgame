@@ -52,7 +52,7 @@
     enable = true;
     autoEnable = true;
     image = ../../wallpapers/images/cat.png;
-    base16Scheme = ../../themes/willwitcher-catppuccin-rust.yaml;
+    base16Scheme = ../../themes/willwitcher-dark-red.yaml;
     polarity = "dark";
 
     fonts = {
