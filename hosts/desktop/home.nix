@@ -119,7 +119,7 @@
     wlogout
     yazi
     tmuxifier
-  
+ ]; 
 
   ################################################################################
   # Dotfiles / assets (copy from repo to $HOME)

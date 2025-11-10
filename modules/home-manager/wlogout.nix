@@ -1,219 +1,232 @@
 # modules/home-manager/wlogout.nix
-#
-# A small Home-Manager module that:
-# - Installs wlogout (and hyprlock, since you use it)
-# - Generates ~/.config/wlogout/style.css using Stylix Base16 colors (with sane fallbacks)
-# - Generates ~/.config/wlogout/layout to wire actions (lock via hyprlock, suspend, reboot, etc.)
-# - Exposes a few knobs (columns, lockFirstOnSuspend, extraCss, per-action commands/icons)
-#
-# Usage:
-#   1) Put this file at: modules/home-manager/wlogout.nix
-#   2) In your home.nix (or host/home.nix), add:
-#        imports = [ ../../modules/home-manager/wlogout.nix ];
-#      and configure:
-#        willwitcher.wlogout.enable = true;
-#   3) (Optional) Add the Waybar button shown at the end of this file.
-#
 { config, lib, pkgs, ... }:
 
 let
   inherit (lib)
-    mkEnableOption mkIf mkOption types optionalString attrByPath;
+    mkEnableOption mkIf mkOption types attrByPath mkMerge concatStringsSep toLower;
 
   cfg = config.willwitcher.wlogout;
 
-  # --- Palette (Stylix -> Base16). We fall back to a Catppuccin-Mocha-ish set if Stylix is missing ---
+  # --- Stylix palette (fallback if Stylix not present) ---
   defaultPalette = {
-    base00 = "1e1e2e"; # base
-    base01 = "181825"; # mantle
-    base02 = "313244"; # surface0
-    base03 = "45475a"; # surface1
-    base04 = "585b70"; # surface2
-    base05 = "cdd6f4"; # text
-    base06 = "f5e0dc"; # rosewater
-    base07 = "b4befe"; # lavender
-    base08 = "f38ba8"; # red
-    base09 = "fab387"; # peach
-    base0A = "f9e2af"; # yellow
-    base0B = "a6e3a1"; # green
-    base0C = "94e2d5"; # teal
-    base0D = "89b4fa"; # blue
-    base0E = "cba6f7"; # mauve
-    base0F = "f2cdcd"; # flamingo
+    base00 = "1e1e2e"; base01 = "181825"; base02 = "313244"; base03 = "45475a";
+    base04 = "585b70"; base05 = "cdd6f4"; base06 = "f5e0dc"; base07 = "b4befe";
+    base08 = "f38ba8"; base09 = "fab387"; base0A = "f9e2af"; base0B = "a6e3a1";
+    base0C = "94e2d5"; base0D = "89b4fa"; base0E = "cba6f7"; base0F = "f2cdcd";
   };
-
-  # Try to read Stylix colors from config.lib.stylix.colors; fall back otherwise
-  stylixColors = attrByPath [ "lib" "stylix" "colors" ] defaultPalette config;
-
-  # Try to read Stylix sans font name; fall back to Inter
+  c = attrByPath [ "lib" "stylix" "colors" ] defaultPalette config;
   sansFont = attrByPath [ "stylix" "fonts" "sansSerif" "name" ] "Inter" config;
 
-  # Handy alias
-  c = stylixColors;
-
-  # Default actions (shell commands). You can override any of these via the module options.
+  # --- Actions / Icons / Labels ---
   defaultActions = {
     lock     = "hyprlock";
-    suspend  = "hyprlock & sleep 0.4 && systemctl suspend"; # lock first, then suspend
+    suspend  = "hyprlock & sleep 0.4 && systemctl suspend";
     reboot   = "systemctl reboot";
     poweroff = "systemctl poweroff";
-    logout   = "hyprctl dispatch exit 0"; # Hyprland logout; change if you want a different compositor cmd
+    logout   = "hyprctl dispatch exit 0";
+    desktop  = "${pkgs.procps}/bin/pkill -x wlogout"; # “volver al desktop”
   };
-
-  # Default glyphs (Nerd Font / Font Awesome-like). These render as large icons on each button.
   defaultIcons = {
-    lock     = "";
+    lock     = "";  # Nerd Font
     suspend  = "";
     reboot   = "";
     poweroff = "";
     logout   = "";
+    desktop  = "";
+  };
+  defaultLabels = {
+    lock     = "Lock";
+    suspend  = "Suspend";
+    reboot   = "Reboot";
+    poweroff = "Poweroff";
+    logout   = "Logout";
+    desktop  = "Desktop";
   };
 
-  # Per-action background colors from Base16 (tweak to taste)
-  actionBg = {
-    lock     = c.base0D; # blue
-    suspend  = c.base0B; # green
-    reboot   = c.base0A; # yellow
+  # Colores por acción (se aplican al TEXTO: label + icon)
+  actionFg = {
     poweroff = c.base08; # red
+    reboot   = c.base0A; # yellow
+    suspend  = c.base0B; # green
     logout   = c.base0C; # teal
+    lock     = c.base0D; # blue
+    desktop  = c.base06; # neutral/text
   };
 
-  # Build the JSON layout from current options (no comments; wlogout expects plain JSON).
-  layoutJson = builtins.toJSON {
-    columns = cfg.columns;
-    actions = [
-      { label = cfg.icons.lock;     action = cfg.actions.lock;     id = "lock";     }
-      { label = cfg.icons.suspend;  action = cfg.actions.suspend;  id = "suspend";  }
-      { label = cfg.icons.reboot;   action = cfg.actions.reboot;   id = "reboot";   }
-      { label = cfg.icons.poweroff; action = cfg.actions.poweroff; id = "poweroff"; }
-      { label = cfg.icons.logout;   action = cfg.actions.logout;   id = "logout";   }
+  cfgHome = config.xdg.configHome;  # usually ~/.config
+
+  # Wrapper: fuerza columnas y usa *tu* layout/CSS (evita layouts del sistema)
+  menu = pkgs.writeShellScriptBin "wlogout-menu" ''
+    exec ${pkgs.wlogout}/bin/wlogout \
+      -p layer-shell \
+      -b ${toString cfg.columns} \
+      -l "${cfgHome}/wlogout/layout" \
+      -C "${cfgHome}/wlogout/style.css"
+  '';
+
+  # --- rgba() helpers to avoid GTK opacity flicker ---
+  hexMap = {
+    "0"=0;"1"=1;"2"=2;"3"=3;"4"=4;"5"=5;"6"=6;"7"=7;"8"=8;"9"=9;
+    "a"=10;"b"=11;"c"=12;"d"=13;"e"=14;"f"=15;
+  };
+  hex2 = s:
+    16 * (hexMap.${toLower (builtins.substring 0 1 s)}) +
+          hexMap.${toLower (builtins.substring 1 1 s)};
+  hexToRGB = hex: {
+    r = hex2 (builtins.substring 0 2 hex);
+    g = hex2 (builtins.substring 2 2 hex);
+    b = hex2 (builtins.substring 4 2 hex);
+  };
+  base00Rgb = hexToRGB c.base00;
+
+  # Helper: un objeto JSON por línea para layout
+  mkBtn = name: text: action: key:
+    builtins.toJSON { label = name; action = action; text = text; keybind = key; };
+
+  # TEXTO = "Label Icon" (sin saltos de línea)
+  layoutText =
+    concatStringsSep "\n" [
+      (mkBtn "lock"     (defaultLabels.lock     + " " + defaultIcons.lock)     cfg.actions.lock     "l")
+      (mkBtn "suspend"  (defaultLabels.suspend  + " " + defaultIcons.suspend)  cfg.actions.suspend  "s")
+      (mkBtn "reboot"   (defaultLabels.reboot   + " " + defaultIcons.reboot)   cfg.actions.reboot   "r")
+      (mkBtn "poweroff" (defaultLabels.poweroff + " " + defaultIcons.poweroff) cfg.actions.poweroff "p")
+      (mkBtn "logout"   (defaultLabels.logout   + " " + defaultIcons.logout)   cfg.actions.logout   "e")
+      (mkBtn "desktop"  (defaultLabels.desktop  + " " + defaultIcons.desktop)  cfg.actions.desktop  "d")
     ];
-  };
-
-  # CSS alpha for the backdrop. We use hex alpha (E6 ~ 90%). Tweak in options if you want.
-  alphaHex = cfg.cssBackdropAlphaHex;
 in
 {
   options.willwitcher.wlogout = {
-    enable = mkEnableOption "Styleable power/logout menu using wlogout + Stylix colors";
+    enable = mkEnableOption "Styled wlogout menu (Stylix colors, hyprlock lock).";
 
-    # Grid columns for the layout JSON
+    # 6 botones → 6 por fila por defecto
     columns = mkOption {
-      type = types.int;
-      default = 5;
-      description = "Number of columns in the wlogout grid layout.";
+      type = types.int; default = 6;
+      description = "Buttons per row; used by the wrapper (wlogout -b <n>).";
     };
 
-    # If true, we generate CSS from the Stylix palette. Otherwise we still generate
-    # a neutral theme using the fallback palette above.
-    useStylixColors = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Use Stylix palette (if available) for wlogout CSS.";
+    # Alpha 0..1 para rgba() (sin flicker)
+    backdropAlpha = mkOption {
+      type = types.number; default = 0.92;
+      description = "Alpha (0..1) for window background using rgba().";
     };
 
-    # When true, 'suspend' first launches hyprlock, waits a moment, then suspends.
+    # Si no quieres lock antes de suspender, desactívalo
     lockFirstOnSuspend = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Lock the session with hyprlock before suspending.";
+      type = types.bool; default = true;
+      description = "Run hyprlock, wait briefly, then suspend.";
     };
 
-    # Per-action shell commands (override any if you prefer different behavior).
+    # Permite override de acciones/íconos/labels si quisieras
     actions = mkOption {
+      default = {};
       type = types.submodule {
         options = {
-          lock     = mkOption { type = types.str; default = defaultActions.lock;     description = "Command executed for the Lock button."; };
-          suspend  = mkOption { type = types.str; default = defaultActions.suspend;  description = "Command executed for the Suspend button."; };
-          reboot   = mkOption { type = types.str; default = defaultActions.reboot;   description = "Command executed for the Reboot button."; };
-          poweroff = mkOption { type = types.str; default = defaultActions.poweroff; description = "Command executed for the Poweroff button."; };
-          logout   = mkOption { type = types.str; default = defaultActions.logout;   description = "Command executed for the Logout button."; };
+          lock     = mkOption { type = types.str; default = defaultActions.lock;     };
+          suspend  = mkOption { type = types.str; default = defaultActions.suspend;  };
+          reboot   = mkOption { type = types.str; default = defaultActions.reboot;   };
+          poweroff = mkOption { type = types.str; default = defaultActions.poweroff; };
+          logout   = mkOption { type = types.str; default = defaultActions.logout;   };
+          desktop  = mkOption { type = types.str; default = defaultActions.desktop;  };
         };
       };
       description = "Shell commands for each action.";
     };
 
-    # Per-action label glyphs (Nerd Font). Change to words if you prefer text labels.
     icons = mkOption {
+      default = {};
       type = types.submodule {
         options = {
-          lock     = mkOption { type = types.str; default = defaultIcons.lock;     description = "Label for Lock."; };
-          suspend  = mkOption { type = types.str; default = defaultIcons.suspend;  description = "Label for Suspend."; };
-          reboot   = mkOption { type = types.str; default = defaultIcons.reboot;   description = "Label for Reboot."; };
-          poweroff = mkOption { type = types.str; default = defaultIcons.poweroff; description = "Label for Poweroff."; };
-          logout   = mkOption { type = types.str; default = defaultIcons.logout;   description = "Label for Logout."; };
+          lock     = mkOption { type = types.str; default = defaultIcons.lock;     };
+          suspend  = mkOption { type = types.str; default = defaultIcons.suspend;  };
+          reboot   = mkOption { type = types.str; default = defaultIcons.reboot;   };
+          poweroff = mkOption { type = types.str; default = defaultIcons.poweroff; };
+          logout   = mkOption { type = types.str; default = defaultIcons.logout;   };
+          desktop  = mkOption { type = types.str; default = defaultIcons.desktop;  };
         };
       };
-      description = "Per-action labels (icons or text).";
+      description = "Nerd Font glyphs used inside the button text.";
     };
 
-    # Extra CSS appended to the generated style.css
-    extraCss = mkOption {
-      type = types.lines;
-      default = "";
-      description = "Additional CSS appended at the end of style.css.";
+    labels = mkOption {
+      default = {};
+      type = types.submodule {
+        options = {
+          lock     = mkOption { type = types.str; default = defaultLabels.lock;     };
+          suspend  = mkOption { type = types.str; default = defaultLabels.suspend;  };
+          reboot   = mkOption { type = types.str; default = defaultLabels.reboot;   };
+          poweroff = mkOption { type = types.str; default = defaultLabels.poweroff; };
+          logout   = mkOption { type = types.str; default = defaultLabels.logout;   };
+          desktop  = mkOption { type = types.str; default = defaultLabels.desktop;  };
+        };
+      };
+      description = "Plain text labels shown before the icon.";
     };
 
-    # Backdrop alpha as a 2-hex digit string (e.g. 'E6' ~ 90%, 'CC' ~ 80%, '99' ~ 60%).
-    cssBackdropAlphaHex = mkOption {
-      type = types.str;
-      default = "E6";
-      example = "CC";
-      description = "Two-digit hex alpha applied to the window background color.";
+    extraCss = mkOption { type = types.lines; default = ""; };
+    textFontSizePx = mkOption {
+      type = types.int; default = 28;  # tamaño combinado label+icon
+      description = "Font size (px) for the button text (label + icon).";
+    };
+    minButtonHeightPx = mkOption {
+      type = types.int; default = 120;
+      description = "Ensures the text has enough space.";
     };
   };
 
-  config = mkIf cfg.enable {
-    # Install wlogout and hyprlock (required by your Lock action).
-    home.packages = with pkgs; [ wlogout hyprlock ];
+  config = mkIf cfg.enable (mkMerge [
+    {
+      home.packages = with pkgs; [ wlogout hyprlock procps menu ];
 
-    # If the user toggles lockFirstOnSuspend=false, rewrite the suspend action automatically.
-    # (Users can still override actions.suspend manually afterwards if they want.)
-    willwitcher.wlogout.actions.suspend = lib.mkIf (!cfg.lockFirstOnSuspend) "systemctl suspend";
+      # --- Layout: 6 botones (un objeto JSON por línea) ---
+      xdg.configFile."wlogout/layout".text = layoutText;
 
-    # --- wlogout layout (JSON) ---
-    xdg.configFile."wlogout/layout".text = layoutJson;
+      # --- CSS: fondo único, texto por acción, sin rounded corners, rgba sin flicker ---
+      xdg.configFile."wlogout/style.css".text = ''
+        /* Generated by willwitcher.wlogout
+           - Palette: Stylix/fallback
+           - Single background color for all buttons (base01)
+           - Per-action colors applied to TEXT (label + icon)
+           - RGBA background for the window (no global opacity)
+        */
 
-    # --- wlogout CSS (GTK CSS-like) ---
-    # Note: CSS uses Base16 values (no '#'), we add the leading '#'.
-    xdg.configFile."wlogout/style.css".text = ''
-      /* Generated by willwitcher.wlogout module
-         - Palette source: ${if cfg.useStylixColors then "Stylix" else "fallback"}
-         - Font: ${sansFont}
-      */
+        window {
+          background-color: rgba(${toString base00Rgb.r}, ${toString base00Rgb.g}, ${toString base00Rgb.b}, ${toString cfg.backdropAlpha});
+        }
 
-      window {
-        /* Slightly transparent backdrop (base00 with alpha) */
-        background-color: #${c.base00}${alphaHex};
-      }
+        button {
+          border-radius: 0;                      /* no rounded corners */
+          border: 2px solid #${c.base03};
+          background: #${c.base01};              /* same for all buttons */
+          color: #${c.base06};                   /* default text color (overridden per action below) */
+          margin: 10px;
+          min-height: ${toString cfg.minButtonHeightPx}px;
+          padding: 24px 28px;
 
-      /* Buttons share the same base style; each action gets its own background below */
-      button {
-        border-radius: 18px;
-        border: 2px solid #${c.base03};
-        background: #${c.base01};
-        color: #${c.base06};
-        padding: 18px 22px;
-        margin: 10px;
-        font-family: "${sansFont}";
-        font-size: 18px;
-      }
+          /* Nerd Font first for icons; Inter as fallback */
+          font-family: "Symbols Nerd Font", "Symbols Nerd Font Mono", "Noto Sans Symbols 2", "${sansFont}", "DejaVu Sans";
+          font-size: ${toString cfg.textFontSizePx}px;
+        }
 
-      button:hover {
-        background: #${c.base02};
-        border-color: #${c.base0D};
-        color: #${c.base07};
-      }
+        button:hover {
+          background: #${c.base02};              /* keep text color on hover */
+          border-color: #${c.base0D};
+        }
 
-      /* Per-action colors (tweak freely) */
-      #poweroff { background: #${actionBg.poweroff}; }
-      #reboot   { background: #${actionBg.reboot};   }
-      #suspend  { background: #${actionBg.suspend};  }
-      #logout   { background: #${actionBg.logout};   }
-      #lock     { background: #${actionBg.lock};     }
+        /* Per-action TEXT colors (label + icon) */
+        #poweroff { color: #${actionFg.poweroff}; }
+        #reboot   { color: #${actionFg.reboot};   }
+        #suspend  { color: #${actionFg.suspend};  }
+        #logout   { color: #${actionFg.logout};   }
+        #lock     { color: #${actionFg.lock};     }
+        #desktop  { color: #${actionFg.desktop};  }
 
-      ${cfg.extraCss}
-    '';
-  };
+        ${cfg.extraCss}
+      '';
+    }
+
+    (mkIf (!cfg.lockFirstOnSuspend) {
+      willwitcher.wlogout.actions.suspend = "systemctl suspend";
+    })
+  ]);
 }
 
