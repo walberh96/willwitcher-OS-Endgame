@@ -26,6 +26,7 @@
     ../../modules/home-manager/vesktop.nix
     ../../modules/home-manager/nvf-willwitcher.nix
     ../../modules/home-manager/tmux.nix
+     ../../modules/home-manager/wlogout.nix
   ];
 
   ################################################################################
@@ -42,6 +43,7 @@
   willwitcher.nvim.enable     = true;
   willwitcher.tmux.enable     = true;
   willwitcher.tmux.whichKey.enable = true;
+  willwitcher.wlogout.enable = true;
 
   # Zathura (PDF viewer)
   willwitcher.zathura.enable      = true;
@@ -111,7 +113,13 @@
     marksman
     deno
     # or: nodePackages.prettier  # if you prefer Prettier instead of Deno fmt
-  ];
+    
+    #Under testing for now
+    walker
+    wlogout
+    yazi
+    tmuxifier
+  
 
   ################################################################################
   # Dotfiles / assets (copy from repo to $HOME)
