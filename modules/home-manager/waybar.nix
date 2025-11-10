@@ -204,7 +204,7 @@ in
 
           "modules-left"   = [ "hyprland/workspaces" ];
           "modules-center" = [ "clock" ];
-          "modules-right"  = [ "custom/wlrec" "custom/notification" "pulseaudio" "tray" ];
+          "modules-right"  = [ "custom/wlrec" "custom/notification" "pulseaudio" "tray" "custom/power" ];
 
           "clock" = { "format-alt" = "{:%Y-%m-%d}"; tooltip = false; };
           "tray"  = { "icon-size" = 20; spacing = 13; };
@@ -256,6 +256,12 @@ in
             # Right click: open recordings folder
             "on-click-right" = "ww-wlrec open";
             "escape" = true;
+          };
+          "custom/power" = {
+                format = " ⏻ ";
+                tooltip = "Power menu";
+                 "on-click" = "wlogout";
+                 "return-type" = "string";
           };
         }
       ];
