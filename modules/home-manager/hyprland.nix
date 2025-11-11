@@ -121,7 +121,7 @@ in
         ## Binds (inline mod/commands — no $vars)
         ################################
         bind = [
-          "SUPER, Return, exec, kitty"
+          "SUPER, Return, exec, wezterm"
           "SUPER, Q, killactive,"
           "SUPER, M, exit,"
           "SUPER, E, exec, thunar"

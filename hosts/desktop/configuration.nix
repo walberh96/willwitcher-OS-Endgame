@@ -52,7 +52,7 @@
     enable = true;
     autoEnable = true;
     image = ../../wallpapers/images/cat.png;
-    base16Scheme = ../../themes/willwitcher-dark-red.yaml;
+    base16Scheme = ../../themes/catppuccin-mocha.yaml;
     polarity = "dark";
 
     fonts = {
@@ -88,10 +88,10 @@
     isNormalUser = true;
     description  = "willwitcher";
     extraGroups  = [ "networkmanager" "wheel" ];
-    shell        = pkgs.zsh;
+    shell        = pkgs.nushell;
   };
-  environment.shells = [ pkgs.zsh ];
-  programs.zsh.enable = true;
+  environment.shells = [ pkgs.nushell ];
+  programs.nushell.enable = true;
 
   ############################
   # Licensing

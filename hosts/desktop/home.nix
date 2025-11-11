@@ -16,7 +16,6 @@
     ../../modules/home-manager/waybar.nix
     ../../modules/home-manager/wofi.nix
     ../../modules/home-manager/swaync.nix
-    ../../modules/home-manager/kitty.nix
     ../../modules/home-manager/starship.nix
     ../../modules/home-manager/btop.nix
     ../../modules/home-manager/firefox.nix
@@ -34,7 +33,6 @@
   willwitcher.waybar.enable   = true;
   willwitcher.wofi.enable     = true;
   willwitcher.swaync.enable   = true;
-  willwitcher.kitty.enable    = true;
   willwitcher.starship.enable = true;
   willwitcher.btop.enable     = true;
   willwitcher.fzf.enable      = true;
@@ -59,8 +57,6 @@
     };
  
 };
-  # Force Kitty font size (kept as-is)
-  programs.kitty.font.size = lib.mkForce 16;
 
   ################################################################################
   # Firefox (declarative profile through custom module)
@@ -131,7 +127,7 @@
       force     = true;
     };
     ".wezterm.lua" = {
-        source = ../../configs/.wezterm.lua;
+        source = ../../hosts/desktop/configs/.wezterm.lua;
         recursive = true;
         force = true;
     };
@@ -164,46 +160,6 @@
     settings.git_protocol = "https";
   };
 
-  ################################################################################
-  # Zsh (plugins and initialization)
-  ################################################################################
-  programs.zsh = {
-    enable = true;
-    enableCompletion = true;
-
-    # Built-in syntax highlighting from HM
-    syntaxHighlighting.enable = true;
-
-    # 1) Initialize completion and add nix-zsh-completions to $fpath
-    completionInit = ''
-      fpath=(${pkgs.nix-zsh-completions}/share/zsh/site-functions $fpath)
-      autoload -U compinit
-      compinit
-    '';
-
-    # 2) Load plugins AFTER compinit, using known paths
-    initContent = ''
-      # --- zsh-autosuggestions ---
-      if [[ -f ${pkgs.zsh-autosuggestions}/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
-        source ${pkgs.zsh-autosuggestions}/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-      elif [[ -f ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
-        source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-      fi
-
-      # --- zsh-fzf-tab (requires compinit) ---
-      if [[ -f ${pkgs.zsh-fzf-tab}/share/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh ]]; then
-        source ${pkgs.zsh-fzf-tab}/share/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh
-      elif [[ -f ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh ]]; then
-        source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
-      elif [[ -f ${pkgs.zsh-fzf-tab}/share/zsh-fzf-tab/fzf-tab.plugin.zsh ]]; then
-        source ${pkgs.zsh-fzf-tab}/share/zsh-fzf-tab/fzf-tab.plugin.zsh
-      fi
-
-      # Helpful style for fzf-tab: switch match groups with ',' and '.'
-      zstyle ':fzf-tab:*' switch-group ',' '.'
-    '';
-  };
-
   programs.starship.enable = true;
   programs.home-manager.enable = true;
 
@@ -227,7 +183,6 @@
     };
 
     targets = {
-      kitty.enable                = true;
       firefox.profileNames        = [ "willwitcher" ];
       hyprland.enable             = true;
       hyprland.hyprpaper.enable   = true;
