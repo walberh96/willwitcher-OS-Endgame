@@ -39,8 +39,6 @@
   willwitcher.btop.enable     = true;
   willwitcher.fzf.enable      = true;
   willwitcher.nvim.enable     = true;
-  willwitcher.tmux.enable     = true;
-  willwitcher.tmux.whichKey.enable = true;
   willwitcher.wlogout.enable = true;
 
   # Zathura (PDF viewer)
@@ -115,7 +113,8 @@
     #Under testing for now
     wlogout
     yazi
-    tmuxifier
+
+    wezterm
  ];
   ################################################################################
   # Dotfiles / assets (copy from repo to $HOME)
@@ -130,6 +129,11 @@
       source    = ../../wallpapers/images;
       recursive = true;
       force     = true;
+    };
+    ".wezterm.lua" = {
+        source = ../../configs/.wezterm.lua;
+        recursive = true;
+        force = true;
     };
   };
 
