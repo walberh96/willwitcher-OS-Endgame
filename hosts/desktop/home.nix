@@ -24,7 +24,6 @@
     ../../modules/home-manager/fzf.nix
     ../../modules/home-manager/vesktop.nix
     ../../modules/home-manager/nvf-willwitcher.nix
-    ../../modules/home-manager/tmux.nix
     ../../modules/home-manager/wlogout.nix
   ];
 
