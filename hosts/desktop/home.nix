@@ -15,8 +15,6 @@
     ../../modules/home-manager/hyprland.nix
     ../../modules/home-manager/waybar.nix
     ../../modules/home-manager/firefox.nix
-    ../../modules/home-manager/fzf.nix
-    ../../modules/home-manager/vesktop.nix
   ];
 
   ################################################################################
@@ -24,7 +22,6 @@
   ################################################################################
   willwitcher.hyprland.enable = true;
   willwitcher.waybar.enable   = true;
-  willwitcher.fzf.enable      = true;
 
   ################################################################################
   # Vesktop (Discord client fork)
