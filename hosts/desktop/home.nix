@@ -8,6 +8,8 @@
   home.homeDirectory = "/home/willwitcher";
   home.stateVersion  = "25.05";
 
+  home.sessionPath = [ "$HOME/.local/bin" ];
+
   ################################################################################
   # Module imports (Home Manager modules from the repo)
   ################################################################################
