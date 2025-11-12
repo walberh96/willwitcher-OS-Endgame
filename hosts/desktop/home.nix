@@ -180,14 +180,15 @@
   services.gnome-keyring.enable = true;
 
   # 2) Start Elephant (Walker's backend) in your user session
-    systemd.user.services.elephant = {
-      Unit = { Description = "Elephant backend (for Walker)"; };
-      Service = {
-        ExecStart = "${pkgs.elephant}/bin/elephant";
-        Restart = "on-failure";
-      };
-      Install.WantedBy = [ "default.target" ];
+  systemd.user.services.elephant = {
+    Unit = { Description = "Elephant backend for Walker"; };
+    Service = {
+      ExecStart = "${inputs.elephant.packages.${pkgs.system}.default}/bin/elephant";
+      Restart = "on-failure";
     };
+    Install.WantedBy = [ "default.target" ];
+  };
+
 
     # 3) Preload Walker as a background service (GTK app service)
     systemd.user.services.walker = {
