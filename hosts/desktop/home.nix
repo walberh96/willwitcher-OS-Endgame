@@ -138,6 +138,11 @@
         recursive = true;
         force = true;
     };
+    ".config/walker/config.toml" = {
+        source = ../../hosts/desktop/configs/walker/config.toml;
+        recursive = true;
+        force = true;
+    };
   };
 
   ################################################################################
