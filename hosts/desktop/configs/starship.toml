@@ -1,59 +1,90 @@
+# ---- Global ----
 add_newline = false
-format = "$directory$git_branch$git_status$package$nix_shell$nodejs$python$rust$dotnet$cmd_duration$line_break$character"
+format = "$directory$git_branch$git_status$nix_shell$nodejs$python$rust$cmd_duration$line_break$character"
+right_format = "$time"               # time only on the right; keeps left prompt clean
 palette = "base16"
-right_format = "$time"
-scan_timeout = 30
+scan_timeout = 10                    # was 30
+command_timeout = 500                # cap slow external calls
 
+# ---- Symbols / core ----
 [character]
-error_symbol = "❯"
 success_symbol = "❯"
-vicmd_symbol = "❮"
+error_symbol   = "❯"
+vicmd_symbol   = "❮"
 
 [cmd_duration]
-format = "[ $duration]($style) "
-min_time = 500
+format   = "[ $duration]($style) "
+min_time = 1500                      # only show if >1.5s (reduce noise & work)
 
 [directory]
 read_only = " "
-truncate_to_repo = false
+truncate_to_repo = true              # cheaper & tidier
 truncation_length = 3
 
-[dotnet]
-format = "via [$symbol$version]($style) "
-
+# ---- Git ----
 [git_branch]
-only_attached = false
 symbol = " "
 truncation_length = 20
+only_attached = false
 
 [git_status]
-ahead = " ⇡$count"
-behind = " ⇣$count"
-conflicted = " "
-deleted = " "
-diverged = " ⇕"
 format = "[$all_status$ahead_behind]($style)"
-modified = " "
-renamed = " "
-staged = " "
-stashed = " "
-untracked = " "
+conflicted = " "
+deleted    = " "
+modified   = " "
+renamed    = " "
+staged     = " "
+stashed    = " "
+untracked  = " "
+ahead      = " ⇡$count"
+behind     = " ⇣$count"
+diverged   = " ⇕"
 
-[jobs]
-disabled = false
-symbol = " "
-
+# ---- Nix ----
 [nix_shell]
-format = "via [$symbol$name]($style) "
 symbol = "❄️ "
+format = "via [$symbol$name]($style) "
 
+# ---- Languages (restricted detection for speed) ----
 [nodejs]
 format = "via [$symbol$version]($style) "
+detect_files = ["package.json","pnpm-workspace.yaml",".nvmrc",".node-version"]
+detect_folders = ["node_modules"]
+detect_extensions = ["js","mjs","cjs","ts"]
+
+[python]
+format = "via [${symbol}${pyenv_prefix}${version}]($style) "
+detect_files = ["pyproject.toml","requirements.txt","Pipfile",".python-version"]
+detect_extensions = ["py"]
+
+[rust]
+format = "via [$symbol$version]($style) "
+detect_files = ["Cargo.toml","rust-toolchain.toml","rust-toolchain"]
+detect_extensions = ["rs"]
+
+# ---- Disabled modules ----
+[dotnet]
+disabled = true
 
 [package]
-display_private = true
-symbol = "📦 "
+disabled = true
 
+[jobs]
+disabled = true
+
+[sudo]
+disabled = false
+format = "[sudo]($style) "
+
+# ---- Time (right prompt) ----
+[time]
+disabled = false
+format = "[$time]($style)"
+style = "bold"
+time_format = "%H:%M"
+use_12hr = false
+
+# ---- Palette (your base16) ----
 [palettes.base16]
 base00 = "#1e1e2e"
 base01 = "#181825"
@@ -99,20 +130,3 @@ purple = "#cba6f7"
 red = "#f38ba8"
 white = "#cdd6f4"
 yellow = "#f9e2af"
-
-[python]
-format = "via [${symbol}${pyenv_prefix}${version}]($style) "
-
-[rust]
-format = "via [$symbol$version]($style) "
-
-[sudo]
-disabled = false
-format = "[sudo]($style) "
-
-[time]
-disabled = false
-format = "[$time]($style)"
-style = "bold"
-time_format = "%H:%M"
-use_12hr = false
