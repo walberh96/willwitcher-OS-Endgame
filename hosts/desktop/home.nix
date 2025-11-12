@@ -16,7 +16,6 @@
     ../../modules/home-manager/waybar.nix
     ../../modules/home-manager/wofi.nix
     ../../modules/home-manager/swaync.nix
-    ../../modules/home-manager/starship.nix
     ../../modules/home-manager/btop.nix
     ../../modules/home-manager/firefox.nix
     ../../modules/home-manager/zathura.nix
@@ -32,7 +31,6 @@
   willwitcher.waybar.enable   = true;
   willwitcher.wofi.enable     = true;
   willwitcher.swaync.enable   = true;
-  willwitcher.starship.enable = true;
   willwitcher.btop.enable     = true;
   willwitcher.fzf.enable      = true;
   willwitcher.wlogout.enable = true;
@@ -109,6 +107,7 @@
     yazi
 
     wezterm
+    starship
     zed-editor
  ];
   ################################################################################
@@ -132,6 +131,11 @@
     };
     ".config/nushell/config.nu" = {
         source = ../../hosts/desktop/configs/nushell/config.nu;
+        recursive = true;
+        force = true;
+    };
+    ".config/starship.toml" = {
+        source = ../../hosts/desktop/configs/starship.toml;
         recursive = true;
         force = true;
     };
@@ -164,7 +168,6 @@
     settings.git_protocol = "https";
   };
 
-  programs.starship.enable = true;
   programs.home-manager.enable = true;
 
   ################################################################################
