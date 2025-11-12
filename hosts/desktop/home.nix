@@ -65,7 +65,7 @@
     # Archivers / compression tools
     p7zip unar xz zstd bzip3 gzip gnutar libarchive
     # CLI utilities
-    zoxide ripgrep-all fd fzf jq lsd bat gh nb pass gnupg
+    zoxide ripgrep-all ripgrep fd fzf jq lsd bat gh nb pass gnupg
     fastfetch btop git libnotify gpu-screen-recorder-gtk lutris
     # Fonts (user scope)
     nerd-fonts.hack noto-fonts noto-fonts-emoji font-awesome
