@@ -31,6 +31,9 @@ vim.keymap.set("n", "<leader>ff", function() require("telescope.builtin").find_f
     { desc = "Find files" })
 vim.keymap.set("n", "<leader>fg", function() require("telescope.builtin").live_grep() end, { desc = "Live grep" })
 
+vim.keymap.set("i", "<C-Space>", "<C-x><C-o>", { silent = true })
+vim.keymap.set("i", "<C-@>", "<C-x><C-o>", { silent = true })     -- some terminals send C-@
+
 -- Improve completion UX
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
 
