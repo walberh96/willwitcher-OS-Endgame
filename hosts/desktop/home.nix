@@ -93,7 +93,7 @@
     zed-editor
     walker
     neovim
-    zellij
+    swww
 
   gpu-screen-recorder   # the recorder backend (command: gpu-screen-recorder)
   jq
