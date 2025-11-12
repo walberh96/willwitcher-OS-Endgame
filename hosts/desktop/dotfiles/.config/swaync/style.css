@@ -1,3 +1,8 @@
+/* =======================
+   SwayNC — WillwitcherOS
+   (anti-overlap)
+   ======================= */
+
 * {
     font-family: "Hack Nerd Font";
     font-size: 10pt;
@@ -12,155 +17,160 @@
 @define-color base06 #f5e0dc;
 @define-color base07 #b4befe;
 
-@define-color base08 #f38ba8;
-@define-color base09 #fab387;
-@define-color base0A #f9e2af;
-@define-color base0B #a6e3a1;
-@define-color base0C #94e2d5;
-@define-color base0D #89b4fa;
-@define-color base0E #cba6f7;
+@define-color base08 #f38ba8; /* red */
+@define-color base09 #fab387; /* peach */
+@define-color base0A #f9e2af; /* yellow */
+@define-color base0B #a6e3a1; /* green */
+@define-color base0C #94e2d5; /* teal */
+@define-color base0D #89b4fa; /* blue */
+@define-color base0E #cba6f7; /* mauve */
 @define-color base0F #f2cdcd;
-progress,
-progressbar,
-trough {
-    border: 1px solid @base0D;
+
+/* =======================
+   TOASTS (flotantes)
+   ======================= */
+
+.floating-notifications {
+    padding: 10px;
 }
 
-trough {
-    background: @base01;
+.floating-notifications .notification-row {
+    margin: 6px 0;
+    outline: none;
 }
 
-.notification.low {
+.floating-notifications .notification-row .notification-background {
+    background: alpha(@base02, 0.85);
+    color: @base05;
     border: 1px solid @base03;
+    border-radius: 14px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
 }
 
-.notification.low progress {
-    background: @base03;
+.floating-notifications .notification {
+    padding: 10px 12px;
+    color: @base05;
 }
 
-.notification.normal {
-    border: 1px solid @base0D;
+.floating-notifications .notification .app-icon,
+.floating-notifications .notification .image {
+    border-radius: 10px;
 }
 
-.notification.normal progress {
-    background: @base0F;
+.floating-notifications .notification.critical {
+    border-left: 3px solid @base08;
 }
-
-.notification.critical {
-    border: 1px solid @base08;
+.floating-notifications .notification.normal {
+    border-left: 3px solid @base0D;
 }
-
-.notification.critical progress {
-    background: @base08;
+.floating-notifications .notification.low {
+    border-left: 3px solid @base03;
 }
 
 .summary {
     color: @base05;
+    font-weight: 600;
 }
-
 .body {
     color: @base06;
+    opacity: 0.95;
 }
-
 .time {
     color: @base06;
-}
-
-.notification-action {
-    color: @base05;
-    background: @base01;
-}
-
-.notification-action:hover {
-    background: @base01;
-    color: @base05;
-}
-
-.notification-action:active {
-    background: @base0F;
-    color: @base05;
 }
 
 .close-button {
     color: @base02;
     background: @base08;
+    border-radius: 10px;
+    padding: 4px;
 }
-
 .close-button:hover {
     background: lighter(@base08);
     color: lighter(@base02);
 }
-
 .close-button:active {
     background: @base08;
     color: @base00;
 }
 
-.notification-content {
-    background: @base00;
+progress,
+progressbar,
+trough {
     border: 1px solid @base0D;
+}
+trough {
+    background: @base01;
+}
+.notification.low progress {
+    background: @base03;
+}
+.notification.normal progress {
+    background: @base0F;
+}
+.notification.critical progress {
+    background: @base08;
 }
 
 .floating-notifications.background .notification-row .notification-background {
-    background: transparent;
+    background: alpha(@base02, 0.85);
     color: @base05;
 }
 
-.notification-group .notification-group-buttons,
-.notification-group .notification-group-headers {
-    color: @base05;
-}
-
-.notification-group .notification-group-headers .notification-group-icon {
-    color: @base05;
-}
-
-.notification-group .notification-group-headers .notification-group-header {
-    color: @base05;
-}
-
-.notification-group.collapsed .notification-row .notification {
-    background: @base01;
-}
-
-.notification-group.collapsed:hover
-    .notification-row:not(:only-child)
-    .notification {
-    background: @base01;
-}
+/* =======================
+CONTROL CENTER
+   ======================= */
 
 .control-center {
-    background: @base00;
+    background: alpha(@base00, 0.92);
     border: 1px solid @base0D;
     color: @base05;
+    padding: 10px;
+    border-radius: 14px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3);
+}
+
+.control-center .control-center-list {
+    padding: 6px;
+    row-gap: 8px;
 }
 
 .control-center .notification-row .notification-background {
     background: @base00;
     color: @base05;
+    border: 1px solid @base0D;
+    border-radius: 14px;
+    box-shadow: none;
 }
-
 .control-center .notification-row .notification-background:hover {
     background: @base00;
     color: @base05;
 }
-
 .control-center .notification-row .notification-background:active {
     background: @base0F;
     color: @base05;
+}
+
+.control-center .notification.critical {
+    border-left: 3px solid @base08;
+}
+.control-center .notification.normal {
+    border-left: 3px solid @base0D;
+}
+.control-center .notification.low {
+    border-left: 3px solid @base03;
 }
 
 .widget-title {
     color: @base05;
     margin: 0.5rem;
 }
-
 .widget-title > button {
     background: @base01;
     border: 1px solid @base0D;
     color: @base05;
+    border-radius: 10px;
 }
-
 .widget-title > button:hover {
     background: @base01;
 }
@@ -168,20 +178,16 @@ trough {
 .widget-dnd {
     color: @base05;
 }
-
 .widget-dnd > switch {
     background: @base01;
     border: 1px solid @base0D;
 }
-
 .widget-dnd > switch:hover {
     background: @base01;
 }
-
 .widget-dnd > switch:checked {
     background: @base0F;
 }
-
 .widget-dnd > switch slider {
     background: @base06;
 }
@@ -189,21 +195,35 @@ trough {
 .widget-mpris {
     color: @base05;
 }
-
 .widget-mpris .widget-mpris-player {
     background: @base01;
     border: 1px solid @base0D;
 }
-
 .widget-mpris .widget-mpris-player button:hover {
     background: @base01;
 }
-
 .widget-mpris .widget-mpris-player > box > button {
     border: 1px solid @base0D;
 }
-
 .widget-mpris .widget-mpris-player > box > button:hover {
     background: @base01;
+    border: 1px solid @base0D;
+}
+
+.notification-action {
+    color: @base05;
+    background: @base01;
+}
+.notification-action:hover {
+    background: @base01;
+    color: @base05;
+}
+.notification-action:active {
+    background: @base0F;
+    color: @base05;
+}
+
+.notification-content {
+    background: @base00;
     border: 1px solid @base0D;
 }
