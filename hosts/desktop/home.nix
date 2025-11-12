@@ -78,7 +78,7 @@
     # AI (terminal client)
     gemini-cli
     # Screen recording
-    wl-screenrec
+
     # Markdown tooling
     marksman
     deno
@@ -92,6 +92,14 @@
     starship
     zed-editor
     walker
+
+  gpu-screen-recorder   # the recorder backend (command: gpu-screen-recorder)
+  jq
+  ffmpeg
+  v4l-utils             # probe webcam formats (command: v4l2-ctl)
+  procps                # process utilities (commands: pgrep, pkill)
+  gawk                  # arithmetic/formatting (command: awk)
+  grep                  # pattern matching (command: grep)
  ];
   ################################################################################
   # Dotfiles / assets (copy from repo to $HOME)
