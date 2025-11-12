@@ -92,6 +92,7 @@
     starship
     zed-editor
     walker
+    neovim
 
   gpu-screen-recorder   # the recorder backend (command: gpu-screen-recorder)
   jq
