@@ -227,3 +227,5 @@ CONTROL CENTER
     background: @base00;
     border: 1px solid @base0D;
 }
+.floating-notifications .notification-row .notification-background {
+  border: 3px solid #00FF99 !important;
