@@ -1,41 +1,50 @@
 #!/usr/bin/env bash
-# WillwitcherOS: Waybar status JSON for the screen recorder (fancy)
-# Tip: export WBAR_REC_COLOR, WBAR_SEL_COLOR, WBAR_IDLE_COLOR to override colors (hex)
+# WillwitcherOS: Waybar status JSON for the screen recorder (no timer, symbol-only idle)
 set -euo pipefail
 
-REC_COLOR="${WBAR_REC_COLOR:-#ff5f5f}"   # recording icon color
-SEL_COLOR="${WBAR_SEL_COLOR:-#f2c94c}"   # selecting color (amber)
-IDLE_COLOR="${WBAR_IDLE_COLOR:-}"        # optional idle color
+# Optional: set WBAR_PANGO=1 to enable inline colors (requires Waybar module with escape=false)
+USE_PANGO="${WBAR_PANGO:-0}"
+REC_COLOR="${WBAR_REC_COLOR:-#ff5f5f}"   # red for recording
+SEL_COLOR="${WBAR_SEL_COLOR:-#f2c94c}"   # amber for selection
 
-json() { printf '%s\n' "$1"; }
-
-recording_json() {
-  local pid="$1"
-  # etimes = elapsed seconds since start
-  local et
-  et="$(ps -o etimes= -p "$pid" 2>/dev/null | tr -d ' ' || echo 0)"
-  [[ -z "$et" ]] && et=0
-  local mm=$(( et / 60 ))
-  local ss=$(( et % 60 ))
-  # Red stop icon + elapsed time
-  json "$(printf '{"text":"<span foreground=\\"%s\\">⏹</span> %d:%02d","class":"recording","alt":"rec","tooltip":"WillwitcherOS: Recording — middle click to stop","markup":"pango"}' "$REC_COLOR" "$mm" "$ss")"
-}
-
-selecting_json() {
-  # Square icon to hint selection box
-  json "$(printf '{"text":"<span foreground=\\"%s\\">▣</span> Select","class":"selecting","alt":"sel","tooltip":"WillwitcherOS: Select a region (ESC to cancel)","markup":"pango"}' "$SEL_COLOR")"
-}
-
-idle_json() {
-  if [[ -n "$IDLE_COLOR" ]]; then
-    json "$(printf '{"text":"<span foreground=\\"%s\\">●</span> rec","class":"idle","alt":"idle","tooltip":"WillwitcherOS: Idle — Left: Region • Right: Output • Middle: Toggle","markup":"pango"}' "$IDLE_COLOR")"
+emit() { printf '%s\n' "$1"; }
+span() {
+  # $1=color, $2=text
+  if [[ "$USE_PANGO" = "1" ]]; then
+    printf '<span foreground="%s">%s</span>' "$1" "$2"
   else
-    json '{"text":"● rec","class":"idle","alt":"idle","tooltip":"WillwitcherOS: Idle — Left: Region • Right: Output • Middle: Toggle"}'
+    printf '%s' "$2"
   fi
 }
 
-if pid="$(pgrep -f -n "gpu-screen-recorder")"; then
-  recording_json "$pid"
+recording_json() {
+  # Red stop icon while recording
+  local icon; icon="$(span "$REC_COLOR" "⏹")"
+  if [[ "$USE_PANGO" = "1" ]]; then
+    emit "{\"text\":\"$icon\",\"class\":\"recording\",\"alt\":\"rec\",\"tooltip\":\"WillwitcherOS: Recording — middle click to stop\",\"markup\":\"pango\"}"
+  else
+    emit "{\"text\":\"$icon\",\"class\":\"recording\",\"alt\":\"rec\",\"tooltip\":\"WillwitcherOS: Recording — middle click to stop\"}"
+  fi
+}
+
+selecting_json() {
+  # Square to hint selection box
+  local icon; icon="$(span "$SEL_COLOR" "▣")"
+  if [[ "$USE_PANGO" = "1" ]]; then
+    emit "{\"text\":\"$icon\",\"class\":\"selecting\",\"alt\":\"sel\",\"tooltip\":\"WillwitcherOS: Select a region (ESC to cancel)\",\"markup\":\"pango\"}"
+  else
+    emit "{\"text\":\"$icon\",\"class\":\"selecting\",\"alt\":\"sel\",\"tooltip\":\"WillwitcherOS: Select a region (ESC to cancel)\"}"
+  fi
+}
+
+idle_json() {
+  # Just the record symbol; no text
+  local icon="⏺"
+  emit "{\"text\":\"$icon\",\"class\":\"idle\",\"alt\":\"idle\",\"tooltip\":\"WillwitcherOS: Idle — Left: Region • Right: Output • Middle: Toggle\"}"
+}
+
+if pgrep -f -n "gpu-screen-recorder" >/dev/null; then
+  recording_json
 elif pgrep -x slurp >/dev/null; then
   selecting_json
 else
