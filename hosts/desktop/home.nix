@@ -112,7 +112,7 @@
         recursive = true;
         force = true;
     };
-    home.file.".local/bin" = {
+    ".local/bin" = {
         source = ../../scripts;
         recursive = true;
         force = true;
