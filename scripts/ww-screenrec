@@ -54,9 +54,14 @@
 [[ -f ~/.config/user-dirs.dirs ]] && source ~/.config/user-dirs.dirs
 OUTPUT_DIR="$HOME/Videos/Recordings"
 
+# Create output dir if missing (notify on create; hard fail if cannot create)
 if [[ ! -d "$OUTPUT_DIR" ]]; then
-  notify-send "WillwitcherOS Screen Recorder: directory does not exist" "$OUTPUT_DIR" -u critical -t 3000
-  exit 1
+  if mkdir -p -- "$OUTPUT_DIR"; then
+    notify-send "WillwitcherOS Screen Recorder" "Created $OUTPUT_DIR" -t 2000
+  else
+    notify-send "WillwitcherOS Screen Recorder: error" "Cannot create $OUTPUT_DIR" -u critical -t 5000
+    exit 1
+  fi
 fi
 
 SCOPE=""
@@ -79,15 +84,18 @@ start_webcam_overlay() {
   cleanup_webcam
 
   # Get monitor scale
-  local scale=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .scale')
+  local scale
+  scale=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .scale')
 
   # Target width (base 360px, scaled to monitor)
-  local target_width=$(awk "BEGIN {printf \"%.0f\", 360 * $scale}")
+  local target_width
+  target_width=$(awk "BEGIN {printf \"%.0f\", 360 * $scale}")
 
   # Try preferred 16:9 resolutions in order, use first available
   local preferred_resolutions=("640x360" "1280x720" "1920x1080")
   local video_size_arg=""
-  local available_formats=$(v4l2-ctl --list-formats-ext -d /dev/video0 2>/dev/null)
+  local available_formats
+  available_formats=$(v4l2-ctl --list-formats-ext -d /dev/video0 2>/dev/null)
 
   for resolution in "${preferred_resolutions[@]}"; do
     if echo "$available_formats" | grep -q "$resolution"; then
