@@ -189,7 +189,6 @@
     Install.WantedBy = [ "default.target" ];
   };
 
-
     # 3) Preload Walker as a background service (GTK app service)
     systemd.user.services.walker = {
       Unit = {

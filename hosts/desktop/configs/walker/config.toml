@@ -208,3 +208,7 @@ bookmarks = [
   { action = "create", bind = "ctrl a", after = "AsyncClearReload" },
   { action = "search", bind = "ctrl a", after = "AsyncClearReload" },
 ]
+# ~/.config/walker/config.toml
+theme = "willwitcher"
+# optional if you keep themes inside ~/.config/walker/
+additional_theme_location = "./themes/"
