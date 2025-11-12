@@ -14,14 +14,12 @@
   # Module imports (Home Manager modules from the repo)
   ################################################################################
   imports = [
-    ../../modules/home-manager/hyprland.nix
     ../../modules/home-manager/firefox.nix
   ];
 
   ################################################################################
   # Feature toggles (custom modules)
   ################################################################################
-  willwitcher.hyprland.enable = true;
 
   ################################################################################
   # Vesktop (Discord client fork)
