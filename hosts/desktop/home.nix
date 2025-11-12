@@ -22,21 +22,6 @@
   ################################################################################
 
   ################################################################################
-  # Vesktop (Discord client fork)
-  ################################################################################
-  programs.vesktop = {
-    enable = true;
-    # Optional quality-of-life settings
-    settings = {
-      tray                 = true;
-      minimizeToTray       = true;
-      hardwareAcceleration = true;
-      discordBranch        = "stable";
-    };
-
-};
-
-  ################################################################################
   # Firefox (declarative profile through custom module)
   ################################################################################
   willwitcher.firefox = {
@@ -94,6 +79,7 @@
     walker
     neovim
     swww
+    vesktop
 
   gpu-screen-recorder   # the recorder backend (command: gpu-screen-recorder)
   jq
@@ -201,7 +187,6 @@
     targets = {
       firefox.profileNames        = [ "willwitcher" ];
       gtk.enable                  = true;
-      vesktop.enable              = true;
     };
   };
 }

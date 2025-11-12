@@ -1,0 +1,6 @@
+{
+  "discordBranch": "stable",
+  "hardwareAcceleration": true,
+  "minimizeToTray": true,
+  "tray": true
+}
