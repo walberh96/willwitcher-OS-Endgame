@@ -99,7 +99,7 @@
   v4l-utils             # probe webcam formats (command: v4l2-ctl)
   procps                # process utilities (commands: pgrep, pkill)
   gawk                  # arithmetic/formatting (command: awk)
-  grep                  # pattern matching (command: grep)
+  gnugrep                  # pattern matching (command: grep)
  ];
   ################################################################################
   # Dotfiles / assets (copy from repo to $HOME)
