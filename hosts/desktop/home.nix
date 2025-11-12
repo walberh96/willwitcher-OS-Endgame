@@ -113,7 +113,7 @@
       force     = true;
     };
     ".config/" = {
-        source = ../../hosts/desktop/dotfiles/.config/;
+        source = ../../hosts/desktop/dotfiles/.config;
         recursive = true;
         force = true;
     };
