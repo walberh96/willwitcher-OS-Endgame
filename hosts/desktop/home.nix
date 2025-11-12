@@ -14,7 +14,6 @@
   imports = [
     ../../modules/home-manager/hyprland.nix
     ../../modules/home-manager/waybar.nix
-    ../../modules/home-manager/wofi.nix
     ../../modules/home-manager/swaync.nix
     ../../modules/home-manager/btop.nix
     ../../modules/home-manager/firefox.nix
@@ -29,7 +28,6 @@
   ################################################################################
   willwitcher.hyprland.enable = true;
   willwitcher.waybar.enable   = true;
-  willwitcher.wofi.enable     = true;
   willwitcher.swaync.enable   = true;
   willwitcher.btop.enable     = true;
   willwitcher.fzf.enable      = true;
@@ -77,7 +75,7 @@
   home.packages = with pkgs; [
     # Apps
     signal-desktop mpv zathura qimgv libreoffice
-    wofi hyprpaper hyprlock hyprpicker hyprshot wl-clipboard
+    hyprpaper hyprlock hyprpicker hyprshot wl-clipboard
     ntfs3g udiskie swaynotificationcenter waybar blueman
     mpvpaper xarchiver
     # Archivers / compression tools
@@ -109,6 +107,7 @@
     wezterm
     starship
     zed-editor
+    walker
  ];
   ################################################################################
   # Dotfiles / assets (copy from repo to $HOME)
@@ -194,7 +193,6 @@
       hyprland.enable             = true;
       hyprland.hyprpaper.enable   = true;
       waybar.enable               = true;
-      wofi.enable                 = true;
       zathura.enable              = true;
       gtk.enable                  = true;
       vesktop.enable              = true;

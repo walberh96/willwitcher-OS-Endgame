@@ -126,7 +126,7 @@ in
           "SUPER, M, exit,"
           "SUPER, E, exec, thunar"
           "SUPER, V, togglefloating,"
-          "SUPER, D, exec, wofi --show drun"
+          "SUPER, D, exec, walker"
           "SUPER, P, pseudo,"
           "SUPER, J, togglesplit,"
 
