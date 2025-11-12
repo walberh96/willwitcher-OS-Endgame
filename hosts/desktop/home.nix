@@ -14,13 +14,9 @@
   imports = [
     ../../modules/home-manager/hyprland.nix
     ../../modules/home-manager/waybar.nix
-    ../../modules/home-manager/swaync.nix
-    ../../modules/home-manager/btop.nix
     ../../modules/home-manager/firefox.nix
-    ../../modules/home-manager/zathura.nix
     ../../modules/home-manager/fzf.nix
     ../../modules/home-manager/vesktop.nix
-    ../../modules/home-manager/wlogout.nix
   ];
 
   ################################################################################
@@ -28,14 +24,7 @@
   ################################################################################
   willwitcher.hyprland.enable = true;
   willwitcher.waybar.enable   = true;
-  willwitcher.swaync.enable   = true;
-  willwitcher.btop.enable     = true;
   willwitcher.fzf.enable      = true;
-  willwitcher.wlogout.enable = true;
-
-  # Zathura (PDF viewer)
-  willwitcher.zathura.enable      = true;
-  willwitcher.zathura.makeDefault = true;
 
   ################################################################################
   # Vesktop (Discord client fork)
@@ -123,23 +112,8 @@
       recursive = true;
       force     = true;
     };
-    ".wezterm.lua" = {
-        source = ../../hosts/desktop/configs/.wezterm.lua;
-        recursive = true;
-        force = true;
-    };
-    ".config/nushell/config.nu" = {
-        source = ../../hosts/desktop/configs/nushell/config.nu;
-        recursive = true;
-        force = true;
-    };
-    ".config/starship.toml" = {
-        source = ../../hosts/desktop/configs/starship.toml;
-        recursive = true;
-        force = true;
-    };
-    ".config/walker/config.toml" = {
-        source = ../../hosts/desktop/configs/walker/config.toml;
+    ".config/" = {
+        source = ../../hosts/desktop/dotfiles/.config/;
         recursive = true;
         force = true;
     };
@@ -221,10 +195,6 @@
 
     targets = {
       firefox.profileNames        = [ "willwitcher" ];
-      hyprland.enable             = true;
-      hyprland.hyprpaper.enable   = true;
-      waybar.enable               = true;
-      zathura.enable              = true;
       gtk.enable                  = true;
       vesktop.enable              = true;
     };
