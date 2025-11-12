@@ -35,5 +35,8 @@ vim.keymap.set("n", "<leader>fg", function() require("telescope.builtin").live_g
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
 
 -- Setup lazy.nvim
-require("lazy").setup("plugins")
-lockfile = vim.fn.stdpath("data") .. "/lazy/lazy-lock.json"
+require("lazy").setup("plugins", {
+    -- put the lockfile in a writable dir (data or state are fine)
+    lockfile = vim.fn.stdpath("data") .. "/lazy/lazy-lock.json",
+    -- lockfile = vim.fn.stdpath("state") .. "/lazy/lazy-lock.json", -- alternative
+})
