@@ -70,7 +70,7 @@
       "hyprland/workspaces"
     ],
     "modules-right": [
-      "custom/ww_srec",
+      #"custom/ww_srec",
       "custom/notification",
       "pulseaudio",
       "tray",
