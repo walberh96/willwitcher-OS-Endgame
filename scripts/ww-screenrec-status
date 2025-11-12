@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# WillwitcherOS: Waybar status JSON for the screen recorder
+if pgrep -f "gpu-screen-recorder" >/dev/null; then
+  echo '{"text":"⏺ REC","class":"recording","tooltip":"WillwitcherOS: Recording… (middle click to stop)"}'
+elif pgrep -x slurp >/dev/null; then
+  echo '{"text":"… SEL","class":"selecting","tooltip":"WillwitcherOS: Select a region (ESC to cancel)"}'
+else
+  echo '{"text":"● rec","class":"idle","tooltip":"WillwitcherOS: Idle — Left: Region • Right: Output • Middle: Toggle"}'
+fi

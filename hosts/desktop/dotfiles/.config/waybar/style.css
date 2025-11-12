@@ -1,0 +1,67 @@
+* {
+    font-size: 16px;
+} /* font-family handled by Stylix */
+window#waybar {
+    background-color: transparent;
+}
+
+#workspaces {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border-radius: 15px;
+    margin-top: 10px;
+    margin-right: 10px;
+    margin-left: 5px;
+    padding: 4px;
+    border: 1px solid #313244;
+}
+#workspaces button {
+    background: transparent;
+    color: #cba6f7;
+    border-radius: 10px;
+    margin: 0 3px;
+    padding: 4px 10px;
+    font-weight: 600;
+    box-shadow: none;
+}
+#workspaces button.active {
+    background-color: #181825;
+    color: #89b4fa;
+}
+#workspaces button:not(.active):not(.empty) {
+    background-color: #1e1e2e;
+    color: #a6e3a1;
+}
+
+#clock,
+#tray,
+#custom-notification,
+#pulseaudio,
+#custom-power,
+#custom-ww_srec {
+    background: #1e1e2e;
+    color: #cba6f7;
+    border: 1px solid #313244;
+    border-radius: 15px;
+    margin-right: 10px;
+    margin-top: 10px;
+    padding: 4px 16px;
+    font-weight: 700;
+}
+#clock {
+    font-size: 20px;
+    padding-top: 4px;
+    padding-bottom: 2px;
+}
+#custom-power:hover {
+    color: #f38ba8;
+}
+
+/* Recorder states */
+#custom-wlrec.recording {
+    color: #f38ba8;
+    border-color: #f38ba8;
+}
+#custom-wlrec.idle {
+    color: #cba6f7;
+}

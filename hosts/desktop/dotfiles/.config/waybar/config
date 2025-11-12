@@ -1,0 +1,97 @@
+[
+  {
+    "clock": {
+      "format-alt": "{:%Y-%m-%d}",
+      "tooltip": false
+    },
+    "custom/notification": {
+      "escape": true,
+      "exec": "swaync-client -swb",
+      "exec-if": "which swaync-client",
+      "format": " {icon} ",
+      "format-icons": {
+        "dnd-inhibited-none": "",
+        "dnd-inhibited-notification": "<span foreground=\"red\"><sup></sup></span>",
+        "dnd-none": "",
+        "dnd-notification": "<span foreground=\"red\"><sup></sup></span>",
+        "inhibited-none": "",
+        "inhibited-notification": "<span foreground=\"red\"><sup></sup></span>",
+        "none": "",
+        "notification": "<span foreground=\"red\"><sup></sup></span>"
+      },
+      "on-click": "swaync-client -t -sw",
+      "on-click-right": "swaync-client -d -sw",
+      "return-type": "json",
+      "tooltip": false
+    },
+    "custom/power": {
+      "format": " ⏻ ",
+      "on-click": "wlogout",
+      "return-type": "string",
+      "tooltip": "Power menu"
+    },
+    "custom/ww_srec": {
+    "return-type": "json",
+    "exec": "ww-screenrec-status",
+    "interval": 3,
+    "exec-on-event": true,
+    "signal": 8,
+    "format": "{}",
+
+    "on-click": "bash -lc 'ww-screenrec region'",
+    "on-click-right": "bash -lc 'ww-screenrec output'",
+    "on-click-middle": "bash -lc 'ww-screenrec'",
+
+    "tooltip": true
+  },
+    "height": 50,
+    "hyprland/workspaces": {
+      "active-only": false,
+      "all-outputs": true,
+      "format": "{}",
+      "format-icons": {
+        "active": "",
+        "default": "",
+        "urgent": ""
+      },
+      "on-click": "activate",
+      "on-scroll-down": "hyprctl dispatch workspace r+1",
+      "on-scroll-up": "hyprctl dispatch workspace r-1",
+      "persistent-workspaces": {
+        "*": 5
+      }
+    },
+    "layer": "top",
+    "margin-bottom": -5,
+    "modules-center": [
+      "clock"
+    ],
+    "modules-left": [
+      "hyprland/workspaces"
+    ],
+    "modules-right": [
+      "custom/wlrec",
+      "custom/notification",
+      "pulseaudio",
+      "tray",
+      "custom/power"
+    ],
+    "position": "top",
+    "pulseaudio": {
+      "format": "{volume}% {icon}",
+      "format-icons": {
+        "default": [
+          "",
+          "",
+          ""
+        ]
+      },
+      "on-click": "pwvucontrol"
+    },
+    "spacing": 5,
+    "tray": {
+      "icon-size": 20,
+      "spacing": 13
+    }
+  }
+]

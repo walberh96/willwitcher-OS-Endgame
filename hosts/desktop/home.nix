@@ -13,7 +13,6 @@
   ################################################################################
   imports = [
     ../../modules/home-manager/hyprland.nix
-    ../../modules/home-manager/waybar.nix
     ../../modules/home-manager/firefox.nix
   ];
 
@@ -21,7 +20,6 @@
   # Feature toggles (custom modules)
   ################################################################################
   willwitcher.hyprland.enable = true;
-  willwitcher.waybar.enable   = true;
 
   ################################################################################
   # Vesktop (Discord client fork)
@@ -114,6 +112,11 @@
         recursive = true;
         force = true;
     };
+    home.file.".local/bin" = {
+        source = ../../scripts;
+        recursive = true;
+        force = true;
+      };
   };
 
   ################################################################################
