@@ -53,7 +53,7 @@
       hardwareAcceleration = true;
       discordBranch        = "stable";
     };
- 
+
 };
 
   ################################################################################
@@ -103,7 +103,7 @@
     marksman
     deno
     # or: nodePackages.prettier  # if you prefer Prettier instead of Deno fmt
-    
+
     #Under testing for now
     wlogout
     yazi
@@ -127,6 +127,11 @@
     };
     ".wezterm.lua" = {
         source = ../../hosts/desktop/configs/.wezterm.lua;
+        recursive = true;
+        force = true;
+    };
+    ".config/nushell/config.nu" = {
+        source = ../../hosts/desktop/configs/nushell/config.nu;
         recursive = true;
         force = true;
     };
@@ -193,4 +198,3 @@
     };
   };
 }
-

@@ -14,4 +14,7 @@ config.initial_rows = 28
 config.font_size = 16
 config.color_scheme = 'Catppuccin Mocha'
 -- Finally, return the configuration to wezterm:
+
+-- My own custom things
+config.hide_tab_bar_if_only_one_tab = false
 return config

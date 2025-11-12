@@ -100,8 +100,7 @@
   ############################
   # Display Manager
   ############################
-  # Lemurs (TUI display manager)
-    services.displayManager.lemurs.enable = true;
+  services.displayManager.ly.enable = true;
 
   ############################
   # Hyprland (Wayland compositor)
