@@ -107,15 +107,10 @@
   # Dotfiles / assets (copy from repo to $HOME)
   ################################################################################
   home.file = {
-    "Wallpapers/live" = {
-      source    = ../../wallpapers/live;
+    "Wallpapers/" = {
+      source    = ../../wallpapers;
       recursive = true;   # directory
       force     = true;   # overwrite if exists
-    };
-    "Wallpapers/images" = {
-      source    = ../../wallpapers/images;
-      recursive = true;
-      force     = true;
     };
     ".config/" = {
         source = ../../hosts/desktop/dotfiles/.config;
