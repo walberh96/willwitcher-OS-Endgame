@@ -91,7 +91,6 @@
     shell        = pkgs.nushell;
   };
   environment.shells = [ pkgs.nushell ];
-  programs.nushell.enable = true;
 
   ############################
   # Licensing
@@ -101,8 +100,8 @@
   ############################
   # Display Manager
   ############################
-  services.greetd.enable = true;
-  programs.regreet.enable = true;
+  # Lemurs (TUI display manager)
+    services.displayManager.lemurs.enable = true;
 
   ############################
   # Hyprland (Wayland compositor)
@@ -175,7 +174,7 @@
 
   #############################
   #############################
-  
+
   programs.gpu-screen-recorder.enable = true;
 
   ############################
@@ -206,4 +205,3 @@
   ############################
   system.stateVersion = "25.05";
 }
-

@@ -22,7 +22,6 @@
     ../../modules/home-manager/zathura.nix
     ../../modules/home-manager/fzf.nix
     ../../modules/home-manager/vesktop.nix
-    ../../modules/home-manager/nvf-willwitcher.nix
     ../../modules/home-manager/wlogout.nix
   ];
 
@@ -36,7 +35,6 @@
   willwitcher.starship.enable = true;
   willwitcher.btop.enable     = true;
   willwitcher.fzf.enable      = true;
-  willwitcher.nvim.enable     = true;
   willwitcher.wlogout.enable = true;
 
   # Zathura (PDF viewer)
@@ -111,6 +109,7 @@
     yazi
 
     wezterm
+    zed-editor
  ];
   ################################################################################
   # Dotfiles / assets (copy from repo to $HOME)
@@ -191,7 +190,6 @@
       zathura.enable              = true;
       gtk.enable                  = true;
       vesktop.enable              = true;
-      nvf.enable                  = true;
     };
   };
 }
