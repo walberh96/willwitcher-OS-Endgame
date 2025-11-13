@@ -86,11 +86,6 @@
         recursive = true;
         force = true;
     };
-    ".zshrc" = {
-        source = ../../hosts/desktop/dotfiles/.zshrc;
-        recursive = false;
-        force = true;
-    };
     ".local/bin" = {
         source = ../../scripts;
         recursive = true;

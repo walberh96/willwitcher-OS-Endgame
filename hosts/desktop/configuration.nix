@@ -88,11 +88,9 @@
     isNormalUser = true;
     description  = "willwitcher";
     extraGroups  = [ "networkmanager" "wheel" ];
-    shell        = pkgs.zsh;
+    shell        = pkgs.nushell;
   };
-  environment.shells = [ pkgs.zsh ];
-
-  programs.zsh.enable = true;
+  environment.shells = [ pkgs.nushell ];
 
   ############################
   # Licensing
