@@ -56,7 +56,6 @@
     yazi
 
     wezterm
-    starship
     zed-editor
     walker
     neovim
