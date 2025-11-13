@@ -1,44 +1,49 @@
 $env.config.buffer_editor = "nvim"
 $env.path ++= ["~/.local/bin"]
-# Nushell Config File
-# All snippets are taken directly from the official Nushell Book.
 
-########################
-# 1) Prompt configuration
-########################
-# From: “Reedline, Nu's Line Editor” – Customizing the prompt
-# https://www.nushell.sh/book/line_editor.html
+# ============================
+# Prompt with Nerd Font icons
+# ============================
 
 def create_left_prompt [] {
-    let path_segment = ($env.PWD)
+    # Current working directory
+    let path_segment = $env.PWD
 
-    $path_segment
+    # User (optional, in case $env.USER is not set)
+    let user = ($env.USER? | default "")
+    let user_segment = if $user == "" {
+        ""
+    } else {
+        #  = user icon (Nerd Font)
+        $"(ansi magenta) ($user)(ansi reset) "
+    }
+
+    #  = folder icon (Nerd Font)
+    let dir_segment = $"(ansi blue) ($path_segment)(ansi reset)"
+
+    # Join pieces into a single line
+    $"($user_segment)($dir_segment)"
 }
 
-# The book also shows a create_right_prompt with date/time, but
-# you requested *no* right prompt, so we do not use it.
+# Use our custom prompt function
+$env.PROMPT_COMMAND = {|| create_left_prompt }
 
-$env.PROMPT_COMMAND = { create_left_prompt }
-
-# From: “Configuration → Prompt Configuration”
-# How to disable the right prompt
-# https://www.nushell.sh/book/configuration.html
+# No right prompt
 $env.PROMPT_COMMAND_RIGHT = ""
 
-# Prompt indicators from the same Reedline chapter
-$env.PROMPT_INDICATOR = "〉"
+# Prompt indicators (also a bit nicer)
+$env.PROMPT_INDICATOR = "❯ "
 $env.PROMPT_INDICATOR_VI_INSERT = ": "
-$env.PROMPT_INDICATOR_VI_NORMAL = "〉"
-$env.PROMPT_MULTILINE_INDICATOR = "::: "
+$env.PROMPT_INDICATOR_VI_NORMAL = "❮ "
+$env.PROMPT_MULTILINE_INDICATOR = "··· "
 
 
 #############################################
 # 2) command_not_found hook (NixOS example)
 #############################################
-# From: “Hooks” chapter – command_not_found on NixOS
-# https://www.nushell.sh/book/hooks.html
 
 $env.config.hooks.command_not_found = {
   |command_name|
   print (command-not-found $command_name | str trim)
 }
+$env.config.show_banner = false
