@@ -37,35 +37,7 @@ vim.keymap.set("i", "<C-@>", "<C-x><C-o>", { silent = true }) -- some terminals 
 -- Improve completion UX
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
 
--- ============================================================================
--- USE TERMINAL COLORS (REMOVE IF USING NEOVIM THEME)
--- ============================================================================
-
-local function UseTerminalTheme()
-    vim.opt.termguicolors = false
-    vim.opt.background = "dark"
-
-    vim.cmd("highlight clear")
-
-    vim.cmd([[
-    hi Normal       ctermbg=NONE guibg=NONE
-    hi NormalNC     ctermbg=NONE guibg=NONE
-    hi NonText      ctermbg=NONE guibg=NONE
-    hi LineNr       ctermbg=NONE guibg=NONE
-    hi SignColumn   ctermbg=NONE guibg=NONE
-    hi VertSplit    ctermbg=NONE guibg=NONE
-    hi EndOfBuffer  ctermbg=NONE guibg=NONE
-    hi NormalFloat  ctermbg=NONE guibg=NONE
-    hi FloatBorder  ctermbg=NONE guibg=NONE
-  ]])
-end
-
-UseTerminalTheme()
-
-vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
-    callback = UseTerminalTheme,
-})
-
+vim.opt.termguicolors = true
 
 -- Setup lazy.nvim
 require("lazy").setup("plugins", {
