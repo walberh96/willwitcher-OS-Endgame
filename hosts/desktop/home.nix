@@ -56,7 +56,6 @@
     yazi
 
     wezterm
-    zed-editor
     walker
     neovim
     swww

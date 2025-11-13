@@ -56,3 +56,47 @@ $env.config.hooks.command_not_found = {
   print (command-not-found $command_name | str trim)
 }
 $env.config.show_banner = false
+
+# ============================
+# Aliases for nicer tools
+# ============================
+
+# Use lsd instead of ls
+alias ls = ^lsd
+
+# Use ripgrep instead of grep
+alias grep = ^rg
+
+# Use fd instead of find
+alias find = ^fd
+
+# Zoxide
+
+def "nu-complete zoxide path" [context: string] {
+    let parts = $context | str trim --left | split row " " | skip 1 | each { str downcase }
+    let completions = (
+        ^zoxide query --list --exclude $env.PWD -- ...$parts
+            | lines
+            | each { |dir|
+                if ($parts | length) <= 1 {
+                    $dir
+                } else {
+                    let dir_lower = $dir | str downcase
+                    let rem_start = $parts | drop 1 | reduce --fold 0 { |part, rem_start|
+                        ($dir_lower | str index-of --range $rem_start.. $part) + ($part | str length)
+                    }
+                    {
+                        value: ($dir | str substring $rem_start..),
+                        description: $dir
+                    }
+                }
+            })
+    {
+        options: {
+            sort: false,
+            completion_algorithm: substring,
+            case_sensitive: false,
+        },
+        completions: $completions,
+    }
+}
