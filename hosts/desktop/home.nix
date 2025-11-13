@@ -80,6 +80,7 @@
     neovim
     swww
     vesktop
+    oh-my-zsh
 
   gpu-screen-recorder   # the recorder backend (command: gpu-screen-recorder)
   jq
@@ -101,6 +102,11 @@
     ".config/" = {
         source = ../../hosts/desktop/dotfiles/.config;
         recursive = true;
+        force = true;
+    };
+    ".zshrc" = {
+        source = ../../hosts/desktop/dotfiles/.zshrc;
+        recursive = false;
         force = true;
     };
     ".local/bin" = {
