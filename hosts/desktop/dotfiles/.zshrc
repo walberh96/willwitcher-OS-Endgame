@@ -47,7 +47,6 @@ setopt INTERACTIVE_COMMENTS   # allow comments in interactive shell
 setopt COMPLETE_IN_WORD       # complete in the middle of a word
 setopt NO_BEEP                # no bell
 setopt GLOB_DOTS              # glob dotfiles with *
-setopt EXTENDED_GLOB          # advanced globbing
 
 # Case-insensitive completion
 zmodload zsh/complist
