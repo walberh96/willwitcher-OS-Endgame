@@ -29,8 +29,10 @@ def create_left_prompt [] {
     #  = folder icon (Nerd Font)
     let dir_segment = $"(ansi blue) ($display_path)(ansi reset)"
 
-    $"($user_segment)($dir_segment)"
+    # Add a newline so the indicator goes on the next line
+    $"($user_segment)($dir_segment)\n"
 }
+
 
 # Use our custom prompt function
 $env.PROMPT_COMMAND = {|| create_left_prompt }
