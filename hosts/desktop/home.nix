@@ -96,6 +96,11 @@
         recursive = true;
         force = true;
       };
+      ".mozilla" = {
+        source = ../../hosts/desktop/dotfiles/.mozilla;
+          recursive = true;
+          force = true;
+        };
   };
 
   ################################################################################
