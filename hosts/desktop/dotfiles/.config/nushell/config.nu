@@ -10,6 +10,13 @@ def create_left_prompt [] {
     let path = $env.PWD
     let home = ($env.HOME? | default "")
 
+    # If path starts with $HOME, replace that part with "~"
+    let display_path = if $home != "" and ($path | str starts-with $home) {
+        $path | str replace $home "~"
+    } else {
+        $path
+    }
+
     # User (optional)
     let user = ($env.USER? | default "")
     let user_segment = if $user == "" {
@@ -19,20 +26,11 @@ def create_left_prompt [] {
         $"(ansi magenta) ($user)(ansi reset) "
     }
 
-    # Directory segment:
-    # - If in home: only the folder icon (colored)
-    # - Else: folder icon + full path
-    let dir_segment = if $home != "" and $path == $home {
-        #  = folder icon (Nerd Font)
-        $"(ansi blue)(ansi reset)"
-    } else {
-        $"(ansi blue) ($path)(ansi reset)"
-    }
+    #  = folder icon (Nerd Font)
+    let dir_segment = $"(ansi blue) ($display_path)(ansi reset)"
 
     $"($user_segment)($dir_segment)"
 }
-
-
 
 # Use our custom prompt function
 $env.PROMPT_COMMAND = {|| create_left_prompt }
