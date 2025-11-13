@@ -845,7 +845,6 @@ $env.config = {
 }
 # --- Starship ---
 if ((which starship | length) > 0) {
-  mkdir ~/.cache/starship | ignore
-  starship init nu | save -f ~/.cache/starship/init.nu
-  source ~/.cache/starship/init.nu
+    mkdir ($nu.data-dir | path join "vendor/autoload")
+    starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.nu")
 }
