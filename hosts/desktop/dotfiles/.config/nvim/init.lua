@@ -32,10 +32,23 @@ vim.keymap.set("n", "<leader>ff", function() require("telescope.builtin").find_f
 vim.keymap.set("n", "<leader>fg", function() require("telescope.builtin").live_grep() end, { desc = "Live grep" })
 
 vim.keymap.set("i", "<C-Space>", "<C-x><C-o>", { silent = true })
-vim.keymap.set("i", "<C-@>", "<C-x><C-o>", { silent = true })     -- some terminals send C-@
+vim.keymap.set("i", "<C-@>", "<C-x><C-o>", { silent = true }) -- some terminals send C-@
 
 -- Improve completion UX
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
+
+-- Use terminal theme
+vim.opt.termguicolors = false
+vim.opt.background = "dark"
+vim.cmd.colorscheme("default")
+vim.cmd([[
+  hi Normal       ctermbg=NONE
+  hi NormalNC     ctermbg=NONE
+  hi NonText      ctermbg=NONE
+  hi LineNr       ctermbg=NONE
+  hi SignColumn   ctermbg=NONE
+  hi VertSplit    ctermbg=NONE
+]])
 
 -- Setup lazy.nvim
 require("lazy").setup("plugins", {
