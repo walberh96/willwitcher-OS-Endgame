@@ -90,19 +90,29 @@ $env.PROMPT_HOST = $prompt_host
 # ---------- Función auxiliar: estado de Git ----------
 def prompt_git [] {
   # ¿Estamos dentro de un repo?
-  let in_repo = (try { git rev-parse --is-inside-work-tree | str trim } catch { "false" })
+  let in_repo = (try {
+      ^git rev-parse --is-inside-work-tree err> /dev/null
+      | str trim
+    } catch { "false" })
+
   if $in_repo != "true" {
     ""
   } else {
     # Rama actual (o hash corto si no hay ref simbólica)
     let branch = (try {
-        git symbolic-ref --short HEAD | str trim
+        ^git symbolic-ref --short HEAD err> /dev/null
+        | str trim
       } catch {
-        git rev-parse --short HEAD | str trim
+        ^git rev-parse --short HEAD err> /dev/null
+        | str trim
       })
 
     # `git status --porcelain=v1 -uno` es relativamente ligero
-    let status_output = (try { git status --porcelain=v1 -uno } catch { "" })
+    let status_output = (try {
+        ^git status --porcelain=v1 -uno err> /dev/null
+        | str trim
+      } catch { "" })
+
     let is_dirty = not ($status_output | is-empty)
 
     let branch_segment = $"(ansi cyan) ($branch)(ansi reset)"
@@ -143,17 +153,17 @@ def create_left_prompt [] {
   # Segmento de Git (vacío si no es repo)
   let git_segment = (prompt_git)
 
-  # Código de salida del último comando
-  let exit_code = ($env.LAST_EXIT_CODE? | default 0)
+  # Código de salida del último comando (convertido a int por si viene como string)
+  let exit_code = (try { $env.LAST_EXIT_CODE | into int } catch { 0 })
   let status_icon = if $exit_code == 0 {
     $"(ansi green)(ansi reset)"
   } else {
     $"(ansi red)(ansi reset)"
   }
 
-  # Duración del último comando (solo si > 1s)
-  let duration_ms = ($env.CMD_DURATION_MS? | default 0)
-  let duration_segment = if $duration_ms > 1_000 {
+  # Duración del último comando (solo si > 1s, y convertido a int)
+  let duration_ms = (try { $env.CMD_DURATION_MS | into int } catch { 0 })
+  let duration_segment = if $duration_ms > 1000 {
     let secs = ($duration_ms / 1000)
     $"(ansi yellow) ($secs)s(ansi reset)"
   } else {
@@ -168,7 +178,8 @@ def create_left_prompt [] {
     $path_segment
     $git_segment
   ]
-  let non_empty = ($segments | where {|s| $s | is-not-empty })
+
+  let non_empty = ($segments | where {|s| not ($s | is-empty) })
   let line = ($non_empty | str join " ")
 
   # Línea final: todo arriba, abajo la flecha de comando
