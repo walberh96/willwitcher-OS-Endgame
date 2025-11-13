@@ -24,7 +24,7 @@ return {
             always_show_bufferline = true,
             show_buffer_close_icons = true,
             show_close_icon = false,
-            separator_style = "slant", -- try "thin" if you prefer subtle
+            separator_style = "thin", -- try "thin" if you prefer subtle
             hover = { enabled = true, delay = 150, reveal = { "close" } },
             offsets = {
                 { filetype = "neo-tree", text = "File Explorer", highlight = "Directory", separator = true },
