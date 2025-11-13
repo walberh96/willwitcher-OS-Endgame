@@ -1,10 +1,12 @@
 # ---- Global ----
 add_newline = false
-format = "$directory$git_branch$git_status$nix_shell$nodejs$python$rust$cmd_duration$line_break$character"
-right_format = "$time"               # time only on the right; keeps left prompt clean
+format = "$directory$git_branch$nix_shell$nodejs$python$rust$cmd_duration$line_break$character"
+right_format = "$time"
 palette = "base16"
-scan_timeout = 10                    # was 30
-command_timeout = 500                # cap slow external calls
+
+# Make starship bail out faster on slow commands
+scan_timeout = 5          # how long to scan for project files (ms)
+command_timeout = 250     # max time per external command (ms)
 
 # ---- Symbols / core ----
 [character]
@@ -14,38 +16,28 @@ vicmd_symbol   = "❮"
 
 [cmd_duration]
 format   = "[ $duration]($style) "
-min_time = 1500                      # only show if >1.5s (reduce noise & work)
+min_time = 1500           # only show if >1.5s
 
 [directory]
 read_only = " "
-truncate_to_repo = true              # cheaper & tidier
+truncate_to_repo = true
 truncation_length = 3
 
-# ---- Git ----
+# ---- Git (branch only, no status) ----
 [git_branch]
 symbol = " "
 truncation_length = 20
 only_attached = false
 
 [git_status]
-format = "[$all_status$ahead_behind]($style)"
-conflicted = " "
-deleted    = " "
-modified   = " "
-renamed    = " "
-staged     = " "
-stashed    = " "
-untracked  = " "
-ahead      = " ⇡$count"
-behind     = " ⇣$count"
-diverged   = " ⇕"
+disabled = true           # <- this is the big speed win
 
 # ---- Nix ----
 [nix_shell]
 symbol = "❄️ "
 format = "via [$symbol$name]($style) "
 
-# ---- Languages (restricted detection for speed) ----
+# ---- Languages ----
 [nodejs]
 format = "via [$symbol$version]($style) "
 detect_files = ["package.json","pnpm-workspace.yaml",".nvmrc",".node-version"]
@@ -61,6 +53,11 @@ detect_extensions = ["py"]
 format = "via [$symbol$version]($style) "
 detect_files = ["Cargo.toml","rust-toolchain.toml","rust-toolchain"]
 detect_extensions = ["rs"]
+
+# If you want **maximum** speed, you can also do:
+# [nodejs] disabled = true
+# [python] disabled = true
+# [rust]   disabled = true
 
 # ---- Disabled modules ----
 [dotnet]
