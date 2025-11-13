@@ -14,25 +14,7 @@
   # Module imports (Home Manager modules from the repo)
   ################################################################################
   imports = [
-    ../../modules/home-manager/firefox.nix
   ];
-
-  ################################################################################
-  # Feature toggles (custom modules)
-  ################################################################################
-
-  ################################################################################
-  # Firefox (declarative profile through custom module)
-  ################################################################################
-  willwitcher.firefox = {
-    enable       = true;
-    profileName  = "willwitcher";
-    makeDefault  = true;
-    policyExtensions = [
-      { id = "uBlock0@raymondhill.net"; slug = "ublock-origin"; }
-    ];
-  };
-
   ################################################################################
   # Fonts (user-scoped)
   ################################################################################
@@ -80,7 +62,7 @@
     neovim
     swww
     vesktop
-    oh-my-zsh
+    firefox
 
   gpu-screen-recorder   # the recorder backend (command: gpu-screen-recorder)
   jq
@@ -188,11 +170,6 @@
       package = pkgs.dracula-icon-theme;
       dark    = "Dracula";
       light   = "Dracula";
-    };
-
-    targets = {
-      firefox.profileNames        = [ "willwitcher" ];
-      gtk.enable                  = true;
     };
   };
 }
