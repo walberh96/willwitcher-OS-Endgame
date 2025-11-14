@@ -99,6 +99,11 @@
           recursive = false;
           force = true;
         };
+	".zsh" = {
+        source = ../../hosts/desktop/dotfiles/.zsh;
+          recursive = true;
+          force = true;
+        };
  };
 
   ################################################################################

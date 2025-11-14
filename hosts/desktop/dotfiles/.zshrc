@@ -3,20 +3,8 @@
 # ============================
 
 # Path to your Oh My Zsh installation.
-export ZSH="$HOME/.oh-my-zsh"
 
 ZSH_THEME=""
-
-# Plugins de Oh My Zsh
-# (zsh-syntax-highlighting mejor al final)
-plugins=(
-  git
-  fzf
-  zsh-completions
-  zsh-autosuggestions
-  zsh-syntax-highlighting
-  sudo
-)
 
 # ============================
 # Prompt estilo Nushell
