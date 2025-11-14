@@ -1,16 +1,11 @@
-# ============================
-# Oh My Zsh base
-# ============================
-
-# Path to your Oh My Zsh installation.
-
 ZSH_THEME=""
 
 # ============================
-# Prompt estilo Nushell
+# Prompt
 # ============================
-PROMPT=$'%F{magenta} %n%f %F{blue} %~%f\n❯ '
 
+PROMPT='%F{magenta} %n%f %F{blue} %~%f${vcs_info_msg_0_}
+%(?.%F{green}❯%f.%F{red}❯%f) '
 # ============================
 # Aliases for nicer tools
 # ============================
@@ -25,12 +20,29 @@ alias grep='rg'
 alias find='fd'
 
 # ============================
+# Lightweight git info (vcs_info)
+# ============================
+
+autoload -Uz vcs_info
+
+zstyle ':vcs_info:git:*' enable git
+zstyle ':vcs_info:*' check-for-changes false
+zstyle ':vcs_info:*' max-exports 2
+
+zstyle ':vcs_info:git:*' formats ' %F{yellow} %b%f'
+zstyle ':vcs_info:git:*' actionformats ' %F{yellow} %b|%a%f'
+
+precmd_vcs_info() { vcs_info }
+precmd_functions+=( precmd_vcs_info )
+
+setopt prompt_subst
+
+# ============================
 # zoxide
 # ============================
 
 eval "$(zoxide init zsh)"
 
-source ~/.zsh/catpuccin-mocha-syntax-highlighting/zsh-syntax-highlighting.zsh
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source ~/.zsh/zsh-completions/zsh-completions.plugin.zsh
