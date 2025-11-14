@@ -1,0 +1,160 @@
+/* ==========================================================================
+ *  Rofi color theme - Catppuccin Mocha
+ * ========================================================================== */
+
+* {
+  /* Behavior / general UI tweaks */
+  highlight: bold;      /* matched text styling */
+  scrollbar: true;
+
+  /* --- Catppuccin Mocha palette (subset) --- */
+  mocha-crust:    #11111b;
+  mocha-mantle:   #181825;
+  mocha-base:     #1e1e2e;
+  mocha-surface0: #313244;
+  mocha-surface1: #45475a;
+
+  mocha-text:     #cdd6f4;
+  mocha-subtext1: #bac2de;
+
+  mocha-blue:     #89b4fa;
+  mocha-lavender: #b4befe;
+  mocha-mauve:    #cba6f7;
+  mocha-red:      #f38ba8;
+  mocha-peach:    #fab387;
+  mocha-yellow:   #f9e2af;
+  mocha-green:    #a6e3a1;
+  mocha-sky:      #89dceb;
+
+  /* --- Map palette → rofi global colors --- */
+
+  /* Window background & frame */
+  background:        @mocha-base;
+  background-color:  @background;
+  foreground:        @mocha-text;
+  border-color:      @mocha-surface1;
+  separatorcolor:    @border-color;
+  scrollbar-handle:  @border-color;
+
+  /* Normal rows (unselected) */
+  normal-background:           @background;
+  normal-foreground:           @foreground;
+  alternate-normal-background: @mocha-surface0;
+  alternate-normal-foreground: @foreground;
+
+  /* Selected row (what your cursor is on) */
+  selected-normal-background:  @mocha-blue;   /* highlight bar */
+  selected-normal-foreground:  @mocha-crust;  /* dark text on bright blue */
+
+  /* “Active” rows (for modes that mark active items) */
+  active-background:           @mocha-green;
+  active-foreground:           @mocha-crust;
+  alternate-active-background: @active-background;
+  alternate-active-foreground: @active-foreground;
+  selected-active-background:  @mocha-sky;
+  selected-active-foreground:  @active-foreground;
+
+  /* Urgent rows (rare, but nice to theme) */
+  urgent-background:           @mocha-red;
+  urgent-foreground:           @mocha-crust;
+  alternate-urgent-background: @urgent-background;
+  alternate-urgent-foreground: @urgent-foreground;
+  selected-urgent-background:  @mocha-peach;
+  selected-urgent-foreground:  @urgent-foreground;
+}
+
+/* Basic widget layout tweaks (optional but nice) */
+
+window {
+  border:         1px;
+  padding:        8px;
+  background-color: @background;
+}
+
+mainbox {
+  border:  0;
+  padding: 4px;
+}
+
+inputbar {
+  padding: 4px;
+  spacing: 6px;
+}
+
+prompt {
+  text-color: @mocha-subtext1;
+}
+
+entry {
+  text-color:      @foreground;
+  background-color: transparent;
+}
+
+listview {
+  border:        0;
+  padding:       4px 0 0 0;
+  spacing:       2px;
+  fixed-height:  0;
+  scrollbar:     true;
+}
+
+/* Element rows */
+element {
+  border:  0;
+  padding: 2px;
+}
+
+/* States for element rows */
+element normal.normal {
+  background-color: @normal-background;
+  text-color:       @normal-foreground;
+}
+
+element normal.active {
+  background-color: @active-background;
+  text-color:       @active-foreground;
+}
+
+element normal.urgent {
+  background-color: @urgent-background;
+  text-color:       @urgent-foreground;
+}
+
+element selected.normal {
+  background-color: @selected-normal-background;
+  text-color:       @selected-normal-foreground;
+}
+
+element selected.active {
+  background-color: @selected-active-background;
+  text-color:       @selected-active-foreground;
+}
+
+element selected.urgent {
+  background-color: @selected-urgent-background;
+  text-color:       @selected-urgent-foreground;
+}
+
+element alternate.normal {
+  background-color: @alternate-normal-background;
+  text-color:       @alternate-normal-foreground;
+}
+
+element alternate.active {
+  background-color: @alternate-active-background;
+  text-color:       @alternate-active-foreground;
+}
+
+element alternate.urgent {
+  background-color: @alternate-urgent-background;
+  text-color:       @alternate-urgent-foreground;
+}
+
+/* Scrollbar styling */
+scrollbar {
+  width:        4px;
+  border:       0;
+  padding:      0;
+  handle-color: @foreground;
+}
+

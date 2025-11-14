@@ -28,7 +28,7 @@
     signal-desktop mpv zathura qimgv libreoffice
     hyprpaper hyprlock hyprpicker hyprshot wl-clipboard
     ntfs3g udiskie swaynotificationcenter waybar blueman
-    mpvpaper xarchiver cliphist
+    mpvpaper xarchiver cliphist calc
     # Archivers / compression tools
     p7zip unar xz zstd bzip3 gzip gnutar libarchive
     # CLI utilities
@@ -54,9 +54,8 @@
     #Under testing for now
     wlogout
     yazi
-
+    rofi-wayland
     wezterm
-    walker
     neovim
     swww
     vesktop
@@ -130,35 +129,9 @@
   ################################################################################
   services.gnome-keyring.enable = true;
 
-  # 2) Start Elephant (Walker's backend) in your user session
-  systemd.user.services.elephant = {
-    Unit = { Description = "Elephant backend for Walker"; };
-    Service = {
-      ExecStart = "${inputs.elephant.packages.${pkgs.system}.default}/bin/elephant";
-      Restart = "on-failure";
-    };
-    Install.WantedBy = [ "default.target" ];
-  };
-
-    # 3) Preload Walker as a background service (GTK app service)
-    systemd.user.services.walker = {
-      Unit = {
-        Description = "Walker service (preload)";
-        After = [ "elephant.service" ];
-        Wants = [ "elephant.service" ];
-      };
-      Service = {
-        ExecStart = "${pkgs.walker}/bin/walker --gapplication-service";
-        Restart = "on-failure";
-        # Optional safety guard if you notice leaks:
-        # MemoryMax = "512M";
-      };
-      Install.WantedBy = [ "default.target" ];
-    };
-
-  ################################################################################
+ ################################################################################
   # Stylix (user scope) — cursor is handled at the system level
-  ################################################################################
+################################################################################
   stylix = {
     autoEnable = true;
 

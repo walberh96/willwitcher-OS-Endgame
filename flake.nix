@@ -16,11 +16,7 @@
     };
     elephant.url = "github:abenz1267/elephant";
 
-    walker = {
-      url = "github:abenz1267/walker";
-      inputs.elephant.follows = "elephant";
-    };
-  };
+     };
 
   outputs = { self, nixpkgs, ... }@inputs: {
     # use "nixos", or your hostname as the name of the configuration
