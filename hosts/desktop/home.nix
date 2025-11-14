@@ -54,7 +54,7 @@
     #Under testing for now
     wlogout
     yazi
-    rofi-wayland
+    rofi
     wezterm
     neovim
     swww

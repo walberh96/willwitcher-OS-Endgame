@@ -19,5 +19,4 @@ configuration {
 }
 
 /* Load our custom Catppuccin Mocha theme */
-@theme "catpuccin-mocha"
-
+@theme "~/.config/rofi/themes/catppuccin-mocha.rasi"
