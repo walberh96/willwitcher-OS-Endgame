@@ -24,18 +24,23 @@
 # - Files save to: $HOME/Videos/Recordings/screenrecording-YYYY-MM-DD_HH-MM-SS.mp4
 # - Webcam overlay reads /dev/video0 by default; change if your cam is different.
 # - Hyprland is assumed. On other compositors, replace `hyprctl` + scale logic.
-
+#
 # =============================================================================
 # Usage Examples (replace `./script.sh` with your script path/name)
 # =============================================================================
-# Record the focused output (monitor):
+# Record the focused output (monitor), no audio:
 #   ./script.sh output
 #
-# Record a region (click & drag with slurp):
+# Record the focused output with merged audio from speakers + mic:
+#   ./script.sh output --with-audio
+#
+# Record a region (click & drag with slurp), no audio:
 #   ./script.sh region
 #
-# Include merged audio from speakers + mic:
-#   ./script.sh output --with-audio
+# Record a region explicitly *without* audio (even if you normally use audio):
+#   ./script.sh region --no-audio
+#
+# Record a region with merged audio from speakers + mic:
 #   ./script.sh region --with-audio
 #
 # Add a live webcam overlay window:
@@ -50,6 +55,10 @@
 #   ./script.sh
 #
 # Cancel a region selection: press ESC while the slurp selector is active.
+#
+# Summary of audio flags:
+#   --with-audio  → force enable audio capture
+#   --no-audio    → force disable audio capture (useful for “silent region” keybinds)
 
 [[ -f ~/.config/user-dirs.dirs ]] && source ~/.config/user-dirs.dirs
 OUTPUT_DIR="$HOME/Videos/Recordings"
@@ -68,11 +77,24 @@ SCOPE=""
 AUDIO="false"
 WEBCAM="false"
 
+# -------------------------------------------------------------------------
+# Argument parsing
+# -------------------------------------------------------------------------
 for arg in "$@"; do
   case "$arg" in
-    --with-audio) AUDIO="true" ;;
-    --with-webcam) WEBCAM="true" ;;
-    output|region) SCOPE="$arg" ;;
+    --with-audio)
+      AUDIO="true"
+      ;;
+    --no-audio)
+      # Explicitly force audio off (even if some wrapper or alias adds --with-audio)
+      AUDIO="false"
+      ;;
+    --with-webcam)
+      WEBCAM="true"
+      ;;
+    output|region)
+      SCOPE="$arg"
+      ;;
   esac
 done
 
@@ -119,7 +141,9 @@ start_screenrecording() {
   local audio_args=""
 
   # Merge audio tracks into one - separate tracks only play one at a time in most players
-  [[ "$AUDIO" == "true" ]] && audio_args="-a default_output|default_input"
+  if [[ "$AUDIO" == "true" ]]; then
+    audio_args="-a default_output|default_input"
+  fi
 
   gpu-screen-recorder -w "$@" -f 60 -c mp4 -o "$filename" $audio_args &
   toggle_screenrecording_indicator
@@ -154,14 +178,21 @@ screenrecording_active() {
   pgrep -f "gpu-screen-recorder" >/dev/null || pgrep -x slurp >/dev/null || pgrep -f "WillwitcherOS-WebcamOverlay" >/dev/null
 }
 
+# -------------------------------------------------------------------------
+# Main logic
+# -------------------------------------------------------------------------
 if screenrecording_active; then
+  # If user hits the key while slurp is active, cancel the selection
   if pgrep -x slurp >/dev/null; then
     pkill -x slurp 2>/dev/null
+  # If only webcam is running (no recorder), stop webcam
   elif pgrep -f "WillwitcherOS-WebcamOverlay" >/dev/null && ! pgrep -f "gpu-screen-recorder" >/dev/null; then
     cleanup_webcam
+  # Otherwise stop the recording
   else
     stop_screenrecording
   fi
+
 elif [[ "$SCOPE" == "output" ]]; then
   [[ "$WEBCAM" == "true" ]] && start_webcam_overlay
 
@@ -177,7 +208,9 @@ elif [[ "$SCOPE" == "output" ]]; then
   fi
 
   start_screenrecording "$output"
+
 else
+  # Default: region capture (with or without audio depending on flags)
   [[ "$WEBCAM" == "true" ]] && start_webcam_overlay
 
   scale=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .scale')
@@ -199,3 +232,4 @@ else
 
   start_screenrecording region -region "$scaled_region"
 fi
+
