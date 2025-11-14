@@ -99,17 +99,7 @@
           recursive = false;
           force = true;
         };
-	".zsh" = {
-        source = ../../hosts/desktop/dotfiles/catppuccin_mocha-zsh-syntax-highlighting.zsh;
-          recursive = true;
-          force = true;
-        };
-	".oh-my-zsh" = {
-        source = ../../hosts/desktop/dotfiles/.oh-my-zsh;
-          recursive = true;
-          force = true;
-        };
-  };
+ };
 
   ################################################################################
   # Environment variables (session)

@@ -15,15 +15,8 @@ plugins=(
   zsh-completions
   zsh-autosuggestions
   zsh-syntax-highlighting
+  sudo
 )
-
-source $ZSH/oh-my-zsh.sh
-
-# ============================
-# Catppuccin syntax highlighting
-# ============================
-
-source ~/.zsh/catppuccin_mocha-zsh-syntax-highlighting.zsh
 
 # ============================
 # Prompt estilo Nushell
@@ -48,4 +41,11 @@ alias find='fd'
 # ============================
 
 eval "$(zoxide init zsh)"
+
+source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source ~/.zsh/zsh-completions/zsh-completions.plugin.zsh
+source ~/.zsh/sudo/sudo.plugin.zsh
+source ~/.zsh/fzf/fzf.plugin.zsh
+source ~/.zsh/git/git.plugin.zsh
 
