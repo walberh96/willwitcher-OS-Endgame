@@ -36,4 +36,5 @@ source ~/.zsh/zsh-completions/zsh-completions.plugin.zsh
 source ~/.zsh/sudo/sudo.plugin.zsh
 source ~/.zsh/fzf/fzf.plugin.zsh
 source ~/.zsh/git/git.plugin.zsh
+source ~/.zsh/catpuccin-mocha-syntax-highlighting/zsh-syntax-highlighting.zsh
 
