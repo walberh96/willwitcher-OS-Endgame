@@ -28,7 +28,7 @@
     signal-desktop mpv zathura qimgv libreoffice
     hyprpaper hyprlock hyprpicker hyprshot wl-clipboard
     ntfs3g udiskie swaynotificationcenter waybar blueman
-    mpvpaper xarchiver cliphist calc
+    mpvpaper xarchiver cliphist
     # Archivers / compression tools
     p7zip unar xz zstd bzip3 gzip gnutar libarchive
     # CLI utilities
