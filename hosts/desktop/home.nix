@@ -60,6 +60,7 @@
     swww
     vesktop
     firefox
+    networkmanagerapplet
 
   gpu-screen-recorder   # the recorder backend (command: gpu-screen-recorder)
   jq
@@ -90,6 +91,21 @@
       };
       ".mozilla" = {
         source = ../../hosts/desktop/dotfiles/.mozilla;
+          recursive = true;
+          force = true;
+        };
+	".zshrc" = {
+        source = ../../hosts/desktop/dotfiles/.zshrc;
+          recursive = false;
+          force = true;
+        };
+	".zsh" = {
+        source = ../../hosts/desktop/dotfiles/catppuccin_mocha-zsh-syntax-highlighting.zsh;
+          recursive = true;
+          force = true;
+        };
+	".oh-my-zsh" = {
+        source = ../../hosts/desktop/dotfiles/.oh-my-zsh;
           recursive = true;
           force = true;
         };
@@ -128,7 +144,6 @@
   # Services
   ################################################################################
   services.gnome-keyring.enable = true;
-
  ################################################################################
   # Stylix (user scope) — cursor is handled at the system level
 ################################################################################
