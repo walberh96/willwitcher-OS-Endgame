@@ -44,11 +44,8 @@
   // Right click: region WITHOUT audio
   "on-click-right": "bash -lc 'ww-screenrec region --no-audio'",
 
-  // Middle click:
-  // - If recording: stop via ww-screenrec (toggle)
-  // - Always: open gpu-screen-recorder-gtk
-  "on-click-middle": "bash -lc 'if pgrep -f gpu-screen-recorder >/dev/null; then ww-screenrec; fi; gpu-screen-recorder-gtk >/dev/null 2>&1 &'",
-
+// Middle click: always just open the GTK app
+  "on-click-middle": "bash -lc 'gpu-screen-recorder-gtk >/dev/null 2>&1 &'",  
   "tooltip": true
 },
 
