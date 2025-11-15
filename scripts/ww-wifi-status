@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# ww-wifi-status: JSON for Waybar custom module
+
+set -euo pipefail
+
+# Nerd Fonts
+ICON_CONNECTED="󰤨"     # Wi-Fi connected (strong signal)
+ICON_DISCONNECTED="󰤭"  # Wi-Fi enabled but not connected
+ICON_DISABLED="󰤮"      # Wi-Fi disabled / off
+
+# Check nmcli availability
+if ! command -v nmcli >/dev/null 2>&1; then
+  printf '{"text":"%s","alt":"no-nmcli","class":"wifi-error","tooltip":"nmcli (NetworkManager) not found"}\n' "$ICON_DISABLED"
+  exit 0
+fi
+
+# Wi-Fi radio state (enabled / disabled)
+wifi_radio="$(nmcli radio wifi 2>/dev/null | tr '[:upper:]' '[:lower:]')"
+
+if [[ "$wifi_radio" != "enabled" ]]; then
+  # Disabled  -> use red in CSS (class: wifi-disabled)
+  printf '{"text":"%s","alt":"disabled","class":"wifi-disabled","tooltip":"Wi-Fi disabled"}\n' "$ICON_DISABLED"
+  exit 0
+fi
+
+# Wi-Fi device state when radio is enabled
+wifi_state="$(nmcli -t -f TYPE,STATE dev 2>/dev/null | awk -F: '$1=="wifi"{print $2; exit}')"
+
+if [[ "$wifi_state" == "connected" ]]; then
+  # Enabled + connected -> use green in CSS (class: wifi-on wifi-connected)
+  printf '{"text":"%s","alt":"connected","class":"wifi-on wifi-connected","tooltip":"Wi-Fi enabled and connected"}\n' "$ICON_CONNECTED"
+else
+  # Enabled + not connected -> use yellow in CSS (class: wifi-on wifi-disconnected)
+  printf '{"text":"%s","alt":"disconnected","class":"wifi-on wifi-disconnected","tooltip":"Wi-Fi enabled but not connected"}\n' "$ICON_DISCONNECTED"
+fi
+
