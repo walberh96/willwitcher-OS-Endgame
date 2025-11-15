@@ -139,6 +139,7 @@ choice=$(printf "%s\n" \
   " Region (Output only)" \
   " Region (Input only)" \
   " Region (No audio)" \
+  "Open App" \
   " Cancel" | rofi_menu || true)
 
 case "$choice" in
@@ -153,6 +154,9 @@ case "$choice" in
     ;;
   " Region (No audio)")
     start_region_recording "none"
+    ;;
+    "Open App")
+    gpu-screen-recorder-gtk >/dev/null 2>&1 &
     ;;
   *)
     # Cancel or empty selection
