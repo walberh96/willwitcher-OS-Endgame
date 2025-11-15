@@ -128,6 +128,7 @@ choice=$(printf "%s\n" \
   " Full screen (Output only)" \
   " Full screen (Input only)" \
   " Full screen (No audio)" \
+  "Open App" \
   " Cancel" | rofi_menu || true)
 
 case "$choice" in
@@ -142,6 +143,9 @@ case "$choice" in
     ;;
   " Full screen (No audio)")
     start_screen_recording "none"
+    ;;
+    "Open App")
+    gpu-screen-recorder-gtk >/dev/null 2>&1 &
     ;;
   *)
     # Cancel or empty selection
