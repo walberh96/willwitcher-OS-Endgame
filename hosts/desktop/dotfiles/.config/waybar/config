@@ -18,7 +18,7 @@
       "escape": true,
       "exec": "swaync-client -swb",
       "exec-if": "which swaync-client",
-      "format": " {icon} ",
+      "format": "{icon}",
       "format-icons": {
         "dnd-inhibited-none": "",
         "dnd-inhibited-notification": "<span foreground=\"red\"><sup></sup></span>",
@@ -76,7 +76,7 @@
   "tooltip": true
 },
 
-    "height": 50,
+    "height": 54,
     "hyprland/workspaces": {
       "active-only": false,
       "all-outputs": true,
@@ -108,8 +108,8 @@
 ],
     "position": "top",
    "pulseaudio": {
-  "format": "{volume}% {icon}",
-  "format-muted": "{volume}% 󰝟",
+  "format": "{icon}",
+  "format-muted": "",
   "format-icons": {
     "default": [
       "",
