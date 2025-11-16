@@ -24,6 +24,23 @@
       "return-type": "json",
       "tooltip": false
     },
+    "custom/bluetooth": {
+    "format": "{}",
+    "return-type": "json",
+    "exec": "~/.local/bin/ww-bluetooth-status",
+    "interval": 3,
+    "on-click": "~/.local/bin/ww-bluetooth-toggle",   // Left click: toggle on/off
+    "on-click-right": "blueman-manager"               // Right click: open Blueman
+  },
+
+  "custom/wifi": {
+    "format": "{}",
+    "return-type": "json",
+    "exec": "~/.local/bin/ww-wifi-status",
+    "interval": 3,
+    "on-click": "~/.local/bin/ww-wifi-toggle",        // Left click: toggle on/off
+    "on-click-right": "nm-connection-editor"          // Right click: open NM editor
+  },
     "custom/power": {
       "format": " ⏻ ",
       "on-click": "wlogout",
