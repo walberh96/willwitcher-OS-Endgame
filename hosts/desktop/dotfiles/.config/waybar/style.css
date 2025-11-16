@@ -38,6 +38,8 @@ window#waybar {
 #custom-notification,
 #pulseaudio,
 #custom-power,
+#custom-bluetooth,
+#custom-wifi,
 #custom-ww_srec {
     background: #1e1e2e;
     color: #cba6f7;
