@@ -107,8 +107,9 @@
   "custom/power"
 ],
     "position": "top",
-    "pulseaudio": {
+   "pulseaudio": {
   "format": "{volume}% {icon}",
+  "format-muted": "{volume}% 󰝟",
   "format-icons": {
     "default": [
       "",
@@ -119,7 +120,6 @@
   "on-click": "~/.local/bin/ww-audio-toggle",
   "on-click-right": "pwvucontrol"
 },
-
     "spacing": 5,
     "tray": {
       "icon-size": 20,

@@ -1,9 +1,14 @@
 * {
     font-size: 16px;
 } /* font-family handled by Stylix */
+
 window#waybar {
     background-color: transparent;
 }
+
+/* ---------------------- */
+/*       WORKSPACES       */
+/* ---------------------- */
 
 #workspaces {
     background: #1e1e2e;
@@ -15,6 +20,7 @@ window#waybar {
     padding: 4px;
     border: 1px solid #313244;
 }
+
 #workspaces button {
     background: transparent;
     color: #cba6f7;
@@ -24,21 +30,27 @@ window#waybar {
     font-weight: 600;
     box-shadow: none;
 }
+
 #workspaces button.active {
     background-color: #181825;
     color: #89b4fa;
 }
+
 #workspaces button:not(.active):not(.empty) {
     background-color: #1e1e2e;
     color: #a6e3a1;
 }
 
-/* Islas grandes (clock, tray, power) */
+/* ---------------------- */
+/*     MAIN BIG ISLANDS   */
+/* ---------------------- */
+
+/* Clock, tray, power: islas individuales */
 #clock,
 #tray,
 #custom-power {
     background: #1e1e2e;
-    color: #cba6f7;
+    color: #cdd6f4;
     border: 1px solid #313244;
     border-radius: 15px;
     margin-right: 10px;
@@ -47,21 +59,30 @@ window#waybar {
     font-weight: 700;
 }
 
-/* Isla combinada: notifs + rec + audio + wifi + bt */
-#group-sys_controls {
+#clock {
+    font-size: 20px;
+    padding-top: 4px;
+    padding-bottom: 2px;
+}
+
+/* ---------------------- */
+/*   RIGHT COMBINED ISLE  */
+/*   group/sys_controls   */
+/* ---------------------- */
+
+/* Contenedor de la isla derecha */
+#sys_controls {
     background: #1e1e2e;
-    color: #cba6f7;
+    color: #cdd6f4;
     border: 1px solid #313244;
     border-radius: 15px;
     margin-right: 10px;
     margin-top: 10px;
-    padding: 4px 10px;
+    padding: 4px 4px;   /* borde externo de la pill */
     font-weight: 700;
-
-    /* Los hijos se ven pegados en una sola "píldora" */
 }
 
-/* Módulos dentro de la isla (sin fondo propio) */
+/* Cada módulo dentro de la isla: separación tipo tray */
 #custom-notification,
 #custom-ww_srec,
 #pulseaudio,
@@ -69,11 +90,26 @@ window#waybar {
 #custom-bluetooth {
     background: transparent;
     border: none;
-    margin: 0 6px;
-    padding: 0;
+    padding: 0 14px;
+    margin: 0;
+}
+/* Tamaño de iconos en la isla */
+#custom-notification,
+#custom-ww_srec,
+#custom-wifi,
+#custom-bluetooth {
+    font-size: 20px;
 }
 
-/* --- Colores por estado: Wi-Fi --- */
+/* Audio lleva texto + icono, un poco más pequeño */
+#pulseaudio {
+    font-size: 20px;
+}
+
+/* ---------------------- */
+/*   WIFI / BLUETOOTH     */
+/*   STATE-BASED COLORS   */
+/* ---------------------- */
 
 /* Wi-Fi apagado (radio off) -> rojo */
 #custom-wifi.wifi-disabled {
@@ -90,8 +126,6 @@ window#waybar {
     color: #f9e2af; /* yellow */
 }
 
-/* --- Colores por estado: Bluetooth --- */
-
 /* Bluetooth apagado -> rojo */
 #custom-bluetooth.bluetooth-disabled {
     color: #f38ba8; /* red */
@@ -107,9 +141,13 @@ window#waybar {
     color: #f9e2af; /* yellow */
 }
 
-/* --- Recorder states (clases que manda ww-screenrec-status) --- */
+/* ---------------------- */
+/*     SCREEN RECORDER    */
+/* ---------------------- */
+
+/* Clases que manda ww-screenrec-status */
 #custom-ww_srec.recording {
-    /* El color principal viene del Pango markup, esto es por si lo cambias luego */
+    /* el ● ya viene rojo por Pango, esto es backup */
     color: #f38ba8;
 }
 
@@ -121,32 +159,22 @@ window#waybar {
     color: #cba6f7;
 }
 
-/* --- Hover para todos los módulos principales --- */
-#clock:hover,
+/* ---------------------- */
+/*         HOVERS         */
+/* ---------------------- */
+
+/* Hover general (sin afectar al clock) */
 #tray:hover,
 #custom-notification:hover,
 #pulseaudio:hover,
 #custom-power:hover,
-#custom-bluetooth:hover,
-#custom-wifi:hover,
 #custom-ww_srec:hover {
-    color: #f38ba8;
+    color: #f5c2e7; /* rosita Catppuccin, distinto del rojo de "disabled" */
 }
 
-#clock {
-    font-size: 20px;
-    padding-top: 4px;
-    padding-bottom: 2px;
-}
-#custom-power:hover {
-    color: #f38ba8;
+/* Wi-Fi / Bluetooth: hover suave, sin cambiar color de estado */
+#custom-wifi:hover,
+#custom-bluetooth:hover {
+    text-shadow: 0 0 6px currentColor;
 }
 
-/* Recorder states */
-#custom-wlrec.recording {
-    color: #f38ba8;
-    border-color: #f38ba8;
-}
-#custom-wlrec.idle {
-    color: #cba6f7;
-}
