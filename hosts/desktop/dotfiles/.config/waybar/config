@@ -24,23 +24,6 @@
       "return-type": "json",
       "tooltip": false
     },
-    "custom/bluetooth": {
-    "format": "{}",
-    "return-type": "json",
-    "exec": "~/.local/bin/ww-bluetooth-status",
-    "interval": 3,
-    "on-click": "~/.local/bin/ww-bluetooth-toggle",   // Left click: toggle on/off
-    "on-click-right": "blueman-manager"               // Right click: open Blueman
-  },
-
-  "custom/wifi": {
-    "format": "{}",
-    "return-type": "json",
-    "exec": "~/.local/bin/ww-wifi-status",
-    "interval": 3,
-    "on-click": "~/.local/bin/ww-wifi-toggle",        // Left click: toggle on/off
-    "on-click-right": "nm-connection-editor"          // Right click: open NM editor
-  },
     "custom/power": {
       "format": " ⏻ ",
       "on-click": "wlogout",
@@ -56,10 +39,10 @@
   "format": "{}", 
 
   // Left click: full screen (output) WITH audio
-  "on-click": "bash -lc 'ww-screenrec output --with-audio'",
+  "on-click": "bash -lc 'ww-rec-rofi-screen'",
 
   // Right click: region WITHOUT audio
-  "on-click-right": "bash -lc 'ww-screenrec region --no-audio'",
+  "on-click-right": "bash -lc 'ww-rec-rofi-region'",
 
 // Middle click: always just open the GTK app
   "on-click-middle": "bash -lc 'gpu-screen-recorder-gtk >/dev/null 2>&1 &'",  
