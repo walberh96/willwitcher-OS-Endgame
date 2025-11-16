@@ -1,9 +1,19 @@
 [
   {
-    "clock": {
-      "format-alt": "{:%Y-%m-%d}",
-      "tooltip": false
-    },
+   "clock": {
+  "format": "{:%I:%M %p  %m/%d}",
+  "tooltip": false
+},
+"group/sys_controls": {
+  "orientation": "horizontal",
+  "modules": [
+    "custom/notification",
+    "custom/ww_srec",
+    "pulseaudio",
+    "custom/wifi",
+    "custom/bluetooth"
+  ]
+},
     "custom/notification": {
       "escape": true,
       "exec": "swaync-client -swb",
@@ -92,26 +102,24 @@
       "hyprland/workspaces"
     ],
     "modules-right": [
-      "custom/ww_srec",
-      "custom/notification",
-      "pulseaudio",
-      "custom/bluetooth",
-      "custom/wifi",
-      "tray",
-      "custom/power"
-    ],
+  "group/sys_controls",
+  "tray",
+  "custom/power"
+],
     "position": "top",
     "pulseaudio": {
-      "format": "{volume}% {icon}",
-      "format-icons": {
-        "default": [
-          "",
-          "",
-          ""
-        ]
-      },
-      "on-click": "pwvucontrol"
-    },
+  "format": "{volume}% {icon}",
+  "format-icons": {
+    "default": [
+      "",
+      "",
+      ""
+    ]
+  },
+  "on-click": "~/.local/bin/ww-audio-toggle",
+  "on-click-right": "pwvucontrol"
+},
+
     "spacing": 5,
     "tray": {
       "icon-size": 20,

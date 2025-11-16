@@ -33,14 +33,10 @@ window#waybar {
     color: #a6e3a1;
 }
 
+/* Islas grandes (clock, tray, power) */
 #clock,
 #tray,
-#custom-notification,
-#pulseaudio,
-#custom-power,
-#custom-bluetooth,
-#custom-wifi,
-#custom-ww_srec {
+#custom-power {
     background: #1e1e2e;
     color: #cba6f7;
     border: 1px solid #313244;
@@ -50,6 +46,93 @@ window#waybar {
     padding: 4px 16px;
     font-weight: 700;
 }
+
+/* Isla combinada: notifs + rec + audio + wifi + bt */
+#group-sys_controls {
+    background: #1e1e2e;
+    color: #cba6f7;
+    border: 1px solid #313244;
+    border-radius: 15px;
+    margin-right: 10px;
+    margin-top: 10px;
+    padding: 4px 10px;
+    font-weight: 700;
+
+    /* Los hijos se ven pegados en una sola "píldora" */
+}
+
+/* Módulos dentro de la isla (sin fondo propio) */
+#custom-notification,
+#custom-ww_srec,
+#pulseaudio,
+#custom-wifi,
+#custom-bluetooth {
+    background: transparent;
+    border: none;
+    margin: 0 6px;
+    padding: 0;
+}
+
+/* --- Colores por estado: Wi-Fi --- */
+
+/* Wi-Fi apagado (radio off) -> rojo */
+#custom-wifi.wifi-disabled {
+    color: #f38ba8; /* red */
+}
+
+/* Wi-Fi encendido + conectado -> verde */
+#custom-wifi.wifi-on.wifi-connected {
+    color: #a6e3a1; /* green */
+}
+
+/* Wi-Fi encendido + sin conexión -> amarillo */
+#custom-wifi.wifi-on.wifi-disconnected {
+    color: #f9e2af; /* yellow */
+}
+
+/* --- Colores por estado: Bluetooth --- */
+
+/* Bluetooth apagado -> rojo */
+#custom-bluetooth.bluetooth-disabled {
+    color: #f38ba8; /* red */
+}
+
+/* Bluetooth encendido + conectado -> verde */
+#custom-bluetooth.bluetooth-on.bluetooth-connected {
+    color: #a6e3a1; /* green */
+}
+
+/* Bluetooth encendido + sin conexión -> amarillo */
+#custom-bluetooth.bluetooth-on.bluetooth-disconnected {
+    color: #f9e2af; /* yellow */
+}
+
+/* --- Recorder states (clases que manda ww-screenrec-status) --- */
+#custom-ww_srec.recording {
+    /* El color principal viene del Pango markup, esto es por si lo cambias luego */
+    color: #f38ba8;
+}
+
+#custom-ww_srec.selecting {
+    color: #f9e2af;
+}
+
+#custom-ww_srec.idle {
+    color: #cba6f7;
+}
+
+/* --- Hover para todos los módulos principales --- */
+#clock:hover,
+#tray:hover,
+#custom-notification:hover,
+#pulseaudio:hover,
+#custom-power:hover,
+#custom-bluetooth:hover,
+#custom-wifi:hover,
+#custom-ww_srec:hover {
+    color: #f38ba8;
+}
+
 #clock {
     font-size: 20px;
     padding-top: 4px;

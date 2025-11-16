@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# ww-audio-toggle: toggle mute/unmute for default sink
+
+set -euo pipefail
+
+if ! command -v pactl >/dev/null 2>&1; then
+  printf "ww-audio-toggle: pactl not found\n" >&2
+  exit 1
+fi
+
+# Try to get default sink name (PipeWire/PulseAudio)
+default_sink="$(pactl get-default-sink 2>/dev/null || pactl info 2>/dev/null | awk -F': ' '/Default Sink:/{print $2}')"
+
+if [[ -n "${default_sink:-}" ]]; then
+  pactl set-sink-mute "$default_sink" toggle
+else
+  # Fallback
+  pactl set-sink-mute @DEFAULT_SINK@ toggle
+fi
+

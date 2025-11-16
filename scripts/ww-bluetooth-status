@@ -5,11 +5,12 @@ set -euo pipefail
 
 # Nerd Fonts
 ICON_CONNECTED="󰂯"      # Bluetooth connected
-ICON_DISCONNECTED="󰂲"   # Bluetooth not connected / disabled
+ICON_DISCONNECTED="󰂱"   # Bluetooth enabled but not connected
+ICON_DISABLED="󰂲"       # Bluetooth disabled / off
 
 # Check bluetoothctl availability
 if ! command -v bluetoothctl >/dev/null 2>&1; then
-  printf '{"text":"%s","alt":"no-bluetoothctl","class":"bluetooth-error","tooltip":"bluetoothctl not found"}\n' "$ICON_DISCONNECTED"
+  printf '{"text":"%s","alt":"no-bluetoothctl","class":"bluetooth-error","tooltip":"bluetoothctl not found"}\n' "$ICON_DISABLED"
   exit 0
 fi
 
@@ -17,17 +18,17 @@ fi
 powered="$(bluetoothctl show 2>/dev/null | awk -F': ' '/Powered:/ {print $2; exit}')"
 
 if [[ "$powered" != "yes" ]]; then
-  # Disabled  -> use red in CSS (class: bluetooth-disabled)
-  printf '{"text":"%s","alt":"disabled","class":"bluetooth-disabled","tooltip":"Bluetooth disabled"}\n' "$ICON_DISCONNECTED"
+  # Disabled  -> CSS: bluetooth-disabled (rojo)
+  printf '{"text":"%s","alt":"disabled","class":"bluetooth-disabled","tooltip":"Bluetooth disabled"}\n' "$ICON_DISABLED"
   exit 0
 fi
 
 # Enabled: check if any device is connected
 if bluetoothctl devices Connected 2>/dev/null | grep -q '^Device'; then
-  # Enabled + connected -> use green in CSS (class: bluetooth-on bluetooth-connected)
+  # Enabled + connected -> CSS: bluetooth-on bluetooth-connected (verde)
   printf '{"text":"%s","alt":"connected","class":"bluetooth-on bluetooth-connected","tooltip":"Bluetooth enabled and connected"}\n' "$ICON_CONNECTED"
 else
-  # Enabled + not connected -> use yellow in CSS (class: bluetooth-on bluetooth-disconnected)
+  # Enabled + not connected -> CSS: bluetooth-on bluetooth-disconnected (amarillo)
   printf '{"text":"%s","alt":"disconnected","class":"bluetooth-on bluetooth-disconnected","tooltip":"Bluetooth enabled but not connected"}\n' "$ICON_DISCONNECTED"
 fi
 

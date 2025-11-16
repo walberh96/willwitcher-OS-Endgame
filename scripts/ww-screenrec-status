@@ -8,8 +8,8 @@ SEL_COLOR="#f2c94c"   # amber when selecting
 emit() { printf '%s\n' "$1"; }
 
 recording_json() {
-  # Red stop icon
-  emit "{\"text\":\"<span foreground=\\\"$REC_COLOR\\\">⏹</span>\",\"class\":\"recording\",\"alt\":\"rec\",\"tooltip\":\"WillwitcherOS: Recording — middle click to stop\",\"markup\":\"pango\"}"
+  # Red dot when recording
+  emit "{\"text\":\"<span foreground=\\\"$REC_COLOR\\\">●</span>\",\"class\":\"recording\",\"alt\":\"rec\",\"tooltip\":\"WillwitcherOS: Recording — middle click to stop\",\"markup\":\"pango\"}"
 }
 
 selecting_json() {
@@ -18,8 +18,7 @@ selecting_json() {
 }
 
 idle_json() {
-  # Video camera icon when idle, with new tooltip mapping:
-  # Left: Screen • Right: Region • Middle: Open App
+  # Video camera icon when idle
   emit "{\"text\":\"\",\"class\":\"idle\",\"alt\":\"idle\",\"tooltip\":\"WillwitcherOS: Idle — Left: Screen • Right: Region • Middle: Open App\"}"
 }
 
