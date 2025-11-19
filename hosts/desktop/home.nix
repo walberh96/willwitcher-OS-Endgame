@@ -104,17 +104,7 @@
           recursive = true;
           force = true;
         };
-	".local/share/applications/" = {
-        source = ../../hosts/desktop/dotfiles/applications/shown;
-          recursive = true;
-          force = true;
-        };
-	".local/share/applications/" = {
-        source = ../../hosts/desktop/dotfiles/applications/hidden;
-          recursive = true;
-          force = true;
-        };
- };
+};
 
   ################################################################################
   # Environment variables (session)
