@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Neovim
+Comment=Open Neovim
+Exec=nvim %F
+Icon=nvim
+Terminal=true
+NoDisplay=false
+Categories=Utility;TextEditor;
+

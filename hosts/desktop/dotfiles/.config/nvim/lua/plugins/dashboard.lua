@@ -6,50 +6,31 @@ return {
     local db = require("dashboard")
 
     db.setup({
-      theme = "doom", -- también puedes usar "hyper"
+      theme = "doom",
 
-      config = {
-        header = {
-          "",
-          "██╗    ██╗██╗██╗     ██╗    ██╗██╗████████╗ ██████╗██╗  ██╗███████╗██████╗ ",
-          "██║    ██║██║██║     ██║    ██║██║╚══██╔══╝██╔════╝██║ ██╔╝██╔════╝██╔══██╗",
-          "██║ █╗ ██║██║██║     ██║ █╗ ██║██║   ██║   ██║     █████╔╝ █████╗  ██████╔╝",
-          "██║███╗██║██║██║     ██║███╗██║██║   ██║   ██║     ██╔═██╗ ██╔══╝  ██╔══██╗",
-          "╚███╔███╔╝██║███████╗╚███╔███╔╝██║   ██║   ╚██████╗██║  ██╗███████╗██║  ██║",
-          " ╚══╝╚══╝ ╚═╝╚══════╝ ╚══╝╚══╝ ╚═╝   ╚═╝    ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝",
-          "",
-          "                          WillwitcherOS • Neovim",
-          "",
-        },
-
-        center = {
+      config = {      
+	center = {
           {
-            icon = "  ",
-            desc = "Nuevo archivo                         ",
+            icon = "  ",
+            desc = "New file                             ",
             key = "n",
             action = "enew",
           },
           {
             icon = "  ",
-            desc = "Buscar archivo (Telescope)            ",
+            desc = "Find file (Telescope)                ",
             key = "f",
             action = "Telescope find_files",
           },
           {
-            icon = "  ",
-            desc = "Archivos recientes (Telescope)        ",
+            icon = "󰭎  ",
+            desc = "Recent files (Telescope)             ",
             key = "r",
             action = "Telescope oldfiles",
           },
           {
-            icon = "  ",
-            desc = "Editar config de Neovim               ",
-            key = "c",
-            action = "edit ~/.config/nvim/init.lua",
-          },
-          {
-            icon = "󰦕  ",
-            desc = "Salir de Neovim                       ",
+            icon = "󱄊  ",
+            desc = "Quit Neovim                          ",
             key = "q",
             action = "qa",
           },
@@ -57,7 +38,7 @@ return {
 
         footer = {
           "",
-          "💜 Disfruta tu setup, Will",
+          "WillwitcherOS",
           "",
         },
       },
