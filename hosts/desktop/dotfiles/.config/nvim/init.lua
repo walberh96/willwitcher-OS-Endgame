@@ -39,6 +39,10 @@ vim.opt.completeopt = { "menu", "menuone", "noselect" }
 
 vim.opt.termguicolors = true
 
+-- Set inline relative numbers
+vim.opt.number = true
+vim.opt.relativenumber = true
+
 -- Setup lazy.nvim
 require("lazy").setup("plugins", {
     -- put the lockfile in a writable dir (data or state are fine)
