@@ -107,12 +107,12 @@
 };
 
 home.activation.initWallpaperCurrent =
-    lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-      current="${config.home.homeDirectory}/.wallpaper.current"
-      if [ ! -f "$current" ]; then
-        cp ${defaultWallpaperFile} "$current"
-      fi
-    '';
+  lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    current="${config.home.homeDirectory}/.wallpaper.current"
+    if [ ! -f "$current" ]; then
+      cp ${../../hosts/desktop/dotfiles/.wallpaper.default} "$current"
+    fi
+  '';
 
   ################################################################################
   # Environment variables (session)

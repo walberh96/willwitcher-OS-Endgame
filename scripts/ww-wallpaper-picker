@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+WALLPAPER_DIR="${HOME}/wallpapers"
+CURRENT_FILE="${HOME}/.wallpaper.current"
+
+# Asegurar que el directorio existe
+[ -d "$WALLPAPER_DIR" ] || exit 0
+
+# Construir lista de entries
+entries="$(
+  cd "$WALLPAPER_DIR" || exit 1
+
+  # Estáticos (images/)
+  if [ -d images ]; then
+    find images -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' -o -iname '*.bmp' \) 2>/dev/null \
+      | sort \
+      | while IFS= read -r path; do
+          base="${path##*/}"
+          printf "[image] %s :: %s\n" "$base" "$path"
+        done
+  fi
+
+  # Live (gif en live/)
+  if [ -d live ]; then
+    find live -type f -iname '*.gif' 2>/dev/null \
+      | sort \
+      | while IFS= read -r path; do
+          base="${path##*/}"
+          printf "[live]  %s :: %s\n" "$base" "$path"
+        done
+  fi
+)"
+
+# Si no hay nada, salir
+[ -n "$entries" ] || exit 0
+
+# Lanzar rofi con barra de búsqueda
+choice="$(
+  printf '%s\n' "$entries" | rofi -dmenu -i -p "Wallpaper"
+)" || exit 0  # ESC / cancel -> no cambiar nada
+
+# Si por alguna razón devuelve vacío, salir
+[ -n "$choice" ] || exit 0
+
+# Obtener ruta relativa (lo que está después de ":: ")
+rel_path="${choice##*:: }"
+rel_path="$(printf '%s' "$rel_path" | sed -e 's/^\s*//' -e 's/\s*$//')"
+[ -n "$rel_path" ] || exit 0
+
+# Guardar en ~/.wallpaper.current
+printf '%s\n' "$rel_path" > "$CURRENT_FILE"
+
+# Aplicar usando el script base
+~/.local/bin/ww-wallpaper-apply
+
