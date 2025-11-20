@@ -1,0 +1,6 @@
+# Drag & drop via dragon
+[[mgr.prepend_keymap]]
+on   = "<C-n>"
+run  = 'shell -- dragon -x -i -T "$@"'
+desc = "Drag selected files with dragon"
+

@@ -61,6 +61,7 @@
     vesktop
     firefox
     networkmanagerapplet
+    ripdrag
     
   gpu-screen-recorder   # the recorder backend (command: gpu-screen-recorder)
   jq
