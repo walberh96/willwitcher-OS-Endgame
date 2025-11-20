@@ -1,0 +1,53 @@
+[opener]
+edit = [
+  # Default editor -> nvim
+  { run = 'nvim "$@"', block = true, for = "unix", desc = "Edit with nvim" },
+]
+
+extract = [
+  { run = 'ya pub extract --list "$@"', desc = "Extract here", for = "unix" },
+  { run = 'ya pub extract --list %*',   desc = "Extract here", for = "windows" },
+]
+
+archive_gui = [
+  { run = 'xarchiver "$@"', desc = "Open in Xarchiver", orphan = true, for = "unix" },
+]
+
+pdf = [
+  # PDF reader -> zathura
+  { run = 'zathura "$@"', block = false, orphan = true, for = "unix", desc = "Open PDF with zathura" },
+]
+
+image = [
+  # Image viewer -> qimgv
+  { run = 'qimgv "$@"', block = false, orphan = true, for = "unix", desc = "Open image with qimgv" },
+]
+
+video = [
+  # Video (and audio) -> mpv
+  { run = 'mpv "$@"', block = false, orphan = true, for = "unix", desc = "Play media with mpv" },
+]
+
+# Generic fallback to system default
+open = [
+  { run = 'xdg-open "$@"', block = false, orphan = true, for = "unix", desc = "System default" },
+]
+
+[open]
+rules = [
+  # Any text file -> nvim
+  { mime = "text/*", use = "edit" },
+
+  # PDF files -> zathura
+  { mime = "application/pdf", use = "pdf" },
+
+  # Images -> qimgv
+  { mime = "image/*", use = "image" },
+
+  # Audio and video -> mpv
+  { mime = "{audio,video}/*", use = "video" },
+
+  # Anything else -> xdg-open
+  { name = "*", use = "open" },
+]
+
