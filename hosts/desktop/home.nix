@@ -104,21 +104,15 @@
           recursive = true;
           force = true;
         };
-	".wallpaper.default" = {
-        source = ../../hosts/desktop/dotfiles/.wallpaper.default;
-          recursive = true;
-          force = true;
-        };
-
 };
 
-	home.activation.initWallpaperCurrent =
-    	lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      	current="${config.home.homeDirectory}/.wallpaper.current"
-      	if [ ! -f "$current" ]; then
-        	cp "${config.home.homeDirectory}/.wallpaper.default" "$current"
-      	fi
-    	'';
+home.activation.initWallpaperCurrent =
+    lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      current="${config.home.homeDirectory}/.wallpaper.current"
+      if [ ! -f "$current" ]; then
+        cp ${defaultWallpaperFile} "$current"
+      fi
+    '';
 
   ################################################################################
   # Environment variables (session)
