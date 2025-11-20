@@ -61,7 +61,7 @@
     vesktop
     firefox
     networkmanagerapplet
-
+    
   gpu-screen-recorder   # the recorder backend (command: gpu-screen-recorder)
   jq
   ffmpeg
@@ -104,7 +104,21 @@
           recursive = true;
           force = true;
         };
+	".wallpaper.default" = {
+        source = ../../hosts/desktop/dotfiles/.wallpaper.default;
+          recursive = true;
+          force = true;
+        };
+
 };
+
+	home.activation.initWallpaperCurrent =
+    	lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      	current="${config.home.homeDirectory}/.wallpaper.current"
+      	if [ ! -f "$current" ]; then
+        	cp "${config.home.homeDirectory}/.wallpaper.default" "$current"
+      	fi
+    	'';
 
   ################################################################################
   # Environment variables (session)
