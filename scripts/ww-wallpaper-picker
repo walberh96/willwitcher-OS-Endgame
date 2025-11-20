@@ -64,25 +64,24 @@ full_path="${WALLPAPER_DIR}/${rel_path}"
 ext="${full_path##*.}"
 lower_ext="$(printf '%s' "$ext" | tr '[:upper:]' '[:lower:]')"
 
-# 6) Apply wallpaper:
-#    - For live (gif/mp4/webm/mkv/mov): use mpvpaper
-#    - For images: kill mpvpaper so the video disappears, then use swww
-
 if [ "$lower_ext" = "gif" ] || [ "$lower_ext" = "mp4" ] || [ "$lower_ext" = "webm" ] || [ "$lower_ext" = "mkv" ] || [ "$lower_ext" = "mov" ]; then
   # LIVE → kill any existing mpvpaper and start a new one
   pkill mpvpaper 2>/dev/null || true
   mpvpaper -o "no-audio --loop" '*' "$full_path" >/dev/null 2>&1 &
 else
-  # STATIC IMAGE → kill mpvpaper so it doesn't cover the image, then use swww
+  # STATIC IMAGE:
+  # 1) Kill mpvpaper so no video is on top
+  # 2) Kill any existing swww daemon
+  # 3) Start a fresh swww-daemon
+  # 4) Set the new image with NO transition
   pkill mpvpaper 2>/dev/null || true
 
-  if ! pgrep -x swww-daemon >/dev/null 2>&1; then
-    swww init 2>/dev/null || true
-  fi
+  swww kill 2>/dev/null || true
+  swww-daemon >/dev/null 2>&1 &
+  sleep 0.15
 
   swww img "$full_path" \
-    --transition-type random \
-    --transition-fps 60 \
-    --transition-duration 1
+    --transition-type none \
+    --transition-duration 0
 fi
 

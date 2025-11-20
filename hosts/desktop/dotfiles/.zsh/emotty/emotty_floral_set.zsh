@@ -1,1 +1,0 @@
-/nix/store/6c5w0p29br71ss7i5ns1ylcp7h14h38v-home-manager-files/.oh-my-zsh/plugins/emotty/emotty_floral_set.zsh
