@@ -47,6 +47,17 @@ rules = [
   # Audio and video -> mpv
   { mime = "{audio,video}/*", use = "video" },
 
+  # Archives - default: extract, interactive: choose GUI as well
+  { mime = "application/zip",             use = [ "extract", "archive_gui" ] },
+  { mime = "application/x-zip-compressed",use = [ "extract", "archive_gui" ] },
+  { mime = "application/x-tar",           use = [ "extract", "archive_gui" ] },
+  { mime = "application/gzip",            use = [ "extract", "archive_gui" ] },
+  { mime = "application/x-bzip2",         use = [ "extract", "archive_gui" ] },
+  { mime = "application/x-xz",            use = [ "extract", "archive_gui" ] },
+  { mime = "application/x-7z-compressed", use = [ "extract", "archive_gui" ] },
+  { mime = "application/x-rar-compressed",use = [ "extract", "archive_gui" ] },
+  { mime = "application/vnd.rar",         use = [ "extract", "archive_gui" ] },
+
   # Anything else -> xdg-open
   { name = "*", use = "open" },
 ]
