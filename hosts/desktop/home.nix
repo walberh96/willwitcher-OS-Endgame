@@ -104,6 +104,9 @@
           recursive = true;
           force = true;
         };
+	".local/share/applications/ww-wallpaper-picker.desktop" = {
+    	source = ../../hosts/desktop/dotfiles/.desktop_files/ww-wallpaper-picker.desktop;
+  	};
 };
 
 home.activation.initWallpaperCurrent =

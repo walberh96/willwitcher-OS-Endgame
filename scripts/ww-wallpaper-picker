@@ -1,56 +1,88 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-WALLPAPER_DIR="${HOME}/wallpapers"
+WALLPAPER_DIR="${HOME}/Wallpapers"
 CURRENT_FILE="${HOME}/.wallpaper.current"
 
-# Asegurar que el directorio existe
-[ -d "$WALLPAPER_DIR" ] || exit 0
+# 1) Go to the wallpapers directory
+cd "$WALLPAPER_DIR" || exit 1
 
-# Construir lista de entries
+# 2) Build the list using fd (as you normally do)
 entries="$(
-  cd "$WALLPAPER_DIR" || exit 1
+  fd 2>/dev/null | sort | while IFS= read -r path; do
+    [ -n "$path" ] || continue
 
-  # Estáticos (images/)
-  if [ -d images ]; then
-    find images -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' -o -iname '*.bmp' \) 2>/dev/null \
-      | sort \
-      | while IFS= read -r path; do
-          base="${path##*/}"
-          printf "[image] %s :: %s\n" "$base" "$path"
-        done
-  fi
+    # Skip directories (fd also returns images/ and live/)
+    if [ -d "$path" ]; then
+      continue
+    fi
 
-  # Live (gif en live/)
-  if [ -d live ]; then
-    find live -type f -iname '*.gif' 2>/dev/null \
-      | sort \
-      | while IFS= read -r path; do
-          base="${path##*/}"
-          printf "[live]  %s :: %s\n" "$base" "$path"
-        done
-  fi
+    rel="$path"           # e.g. images/cat.png or live/ganyu.gif
+    base="${rel##*/}"     # file name
+    ext="${base##*.}"
+    lower_ext="$(printf '%s' "$ext" | tr '[:upper:]' '[:lower:]')"
+
+    case "$lower_ext" in
+      jpg|jpeg|png|webp|bmp)
+        tag="[image]"
+        ;;
+      gif|mp4|webm|mkv|mov)
+        tag="[live]"
+        ;;
+      *)
+        # Ignore extensions we don't care about
+        continue
+        ;;
+    esac
+
+    # Format for rofi: "[image] cat.png :: images/cat.png"
+    printf "%s %s :: %s\n" "$tag" "$base" "$rel"
+  done
 )"
 
-# Si no hay nada, salir
-[ -n "$entries" ] || exit 0
+# 3) If nothing valid was found, exit quietly
+[ -n "$entries" ] || { echo "No valid wallpapers found in $WALLPAPER_DIR" >&2; exit 0; }
 
-# Lanzar rofi con barra de búsqueda
+# 4) Show the list in rofi with a search bar
 choice="$(
   printf '%s\n' "$entries" | rofi -dmenu -i -p "Wallpaper"
-)" || exit 0  # ESC / cancel -> no cambiar nada
+)" || exit 0   # ESC / cancel
 
-# Si por alguna razón devuelve vacío, salir
 [ -n "$choice" ] || exit 0
 
-# Obtener ruta relativa (lo que está después de ":: ")
-rel_path="${choice##*:: }"
-rel_path="$(printf '%s' "$rel_path" | sed -e 's/^\s*//' -e 's/\s*$//')"
+# 5) Extract the relative path after " :: "
+rel_path="${choice##* :: }"
+rel_path="$(printf '%s\n' "$rel_path" | sed -e 's/^\s*//' -e 's/\s*$//')"
 [ -n "$rel_path" ] || exit 0
 
-# Guardar en ~/.wallpaper.current
+# Save relative path to ~/.wallpaper.current
 printf '%s\n' "$rel_path" > "$CURRENT_FILE"
 
-# Aplicar usando el script base
-~/.local/bin/ww-wallpaper-apply
+# Absolute path to the selected file
+full_path="${WALLPAPER_DIR}/${rel_path}"
+
+ext="${full_path##*.}"
+lower_ext="$(printf '%s' "$ext" | tr '[:upper:]' '[:lower:]')"
+
+# 6) Apply wallpaper:
+#    - For live (gif/mp4/webm/mkv/mov): use mpvpaper
+#    - For images: kill mpvpaper so the video disappears, then use swww
+
+if [ "$lower_ext" = "gif" ] || [ "$lower_ext" = "mp4" ] || [ "$lower_ext" = "webm" ] || [ "$lower_ext" = "mkv" ] || [ "$lower_ext" = "mov" ]; then
+  # LIVE → kill any existing mpvpaper and start a new one
+  pkill mpvpaper 2>/dev/null || true
+  mpvpaper -o "no-audio --loop" '*' "$full_path" >/dev/null 2>&1 &
+else
+  # STATIC IMAGE → kill mpvpaper so it doesn't cover the image, then use swww
+  pkill mpvpaper 2>/dev/null || true
+
+  if ! pgrep -x swww-daemon >/dev/null 2>&1; then
+    swww init 2>/dev/null || true
+  fi
+
+  swww img "$full_path" \
+    --transition-type random \
+    --transition-fps 60 \
+    --transition-duration 1
+fi
 
