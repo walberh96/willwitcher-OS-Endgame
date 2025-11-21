@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
-# Simple volume control + notification for PipeWire (wpctl) + swaync
+# Volume control + notification (PipeWire + swaync)
 
 SINK='@DEFAULT_AUDIO_SINK@'
-STEP='5%'
+STEP='5%'     # cambia a 2% o 10% si quieres
 
-case "$1" in
+action="$1"
+
+case "$action" in
   up)
+    # Si subes volumen, asegúrate de que NO está muteado
+    wpctl set-mute "$SINK" 0
     wpctl set-volume "$SINK" "${STEP}+"
     ;;
   down)
+    wpctl set-mute "$SINK" 0
     wpctl set-volume "$SINK" "${STEP}-"
     ;;
   toggle-mute|mute)
@@ -20,34 +25,45 @@ case "$1" in
     ;;
 esac
 
-# Obtener info actual
+# Obtener info actual del sink
 INFO="$(wpctl get-volume "$SINK")"
-# Ejemplo: "Volume: 0.45 [MUTED]" o "Volume: 0.45"
+# Ejemplos típicos:
+#   "Volume: 0.45"
+#   "Volume: 0.45 [MUTED]"
+
+# Segundo campo -> valor flotante
 VOL_FLOAT="$(printf '%s\n' "$INFO" | awk '{print $2}')"
 
-# Convertir 0.45 -> 45
+# Evitar problemas si por alguna razón falla
+if [ -z "$VOL_FLOAT" ]; then
+  VOL_FLOAT="0"
+fi
+
+# Convertir a porcentaje
 PCT="$(printf '%.0f\n' "$(echo "$VOL_FLOAT * 100" | bc -l)")"
 
-if echo "$INFO" | grep -q 'MUTED'; then
+# Detectar mute (case-insensitive, por si en tu idioma cambia el texto)
+if printf '%s\n' "$INFO" | grep -qi 'MUTED'; then
   MUTED=1
 else
   MUTED=0
 fi
 
-# Elegir icono según volumen
-if [ "$MUTED" -eq 1 ] || [ "$PCT" -eq 0 ]; then
-  ICON=""  # mute
+# Elegir icono + texto
+if [ "$MUTED" -eq 1 ] || [ "$PCT" -le 0 ]; then
+  ICON=""            # Nerd Font mute
   TEXT="Muted"
+  PCT=0               # por si acaso
 elif [ "$PCT" -lt 50 ]; then
-  ICON=""  # volumen bajo
+  ICON=""            # volumen bajo
   TEXT="${PCT}%"
 else
-  ICON=""  # volumen alto
+  ICON=""            # volumen alto
   TEXT="${PCT}%"
 fi
 
-# Notificación via libnotify (swaync la mostrará)
-notify-send "Volume" "$TEXT" \
+# Notificación (swaync la muestra)
+notify-send -t 3000 "Volume $ICON" "$TEXT" \
   -h int:value:"$PCT" \
   -h string:x-canonical-private-synchronous:volume \
   -i audio-volume-high
