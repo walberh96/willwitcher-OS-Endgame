@@ -1,68 +1,51 @@
 #!/usr/bin/env bash
-# Volume control + notification (PipeWire + swaync)
 
+# Dispositivo por defecto de salida
 SINK='@DEFAULT_AUDIO_SINK@'
-STEP='5%'     # cambia a 2% o 10% si quieres
+STEP='5%'   # 5% por “click” / scroll
 
-action="$1"
-
-case "$action" in
+case "$1" in
   up)
-    # Si subes volumen, asegúrate de que NO está muteado
-    wpctl set-mute "$SINK" 0
-    wpctl set-volume "$SINK" "${STEP}+"
+    wpctl set-volume "$SINK" "$STEP+"
     ;;
   down)
-    wpctl set-mute "$SINK" 0
-    wpctl set-volume "$SINK" "${STEP}-"
+    wpctl set-volume "$SINK" "$STEP-"
     ;;
-  toggle-mute|mute)
+  mute|toggle-mute)
     wpctl set-mute "$SINK" toggle
     ;;
   *)
-    echo "Usage: $0 {up|down|toggle-mute}" >&2
+    echo "Uso: $0 {up|down|mute}" >&2
     exit 1
     ;;
 esac
 
-# Obtener info actual del sink
+# Ejemplo de salida de este comando:
+#   Volume: 0.61
+#   Volume: 0.61 [MUTED]
 INFO="$(wpctl get-volume "$SINK")"
-# Ejemplos típicos:
-#   "Volume: 0.45"
-#   "Volume: 0.45 [MUTED]"
 
-# Segundo campo -> valor flotante
-VOL_FLOAT="$(printf '%s\n' "$INFO" | awk '{print $2}')"
+# Segundo campo = 0.xx
+VOL="$(printf '%s\n' "$INFO" | awk '{print $2}')"
 
-# Evitar problemas si por alguna razón falla
-if [ -z "$VOL_FLOAT" ]; then
-  VOL_FLOAT="0"
-fi
+# Porcentaje = 0.xx * 100
+PCT="$(awk -v v="$VOL" 'BEGIN { printf("%d", v * 100) }')"
 
-# Convertir a porcentaje
-PCT="$(printf '%.0f\n' "$(echo "$VOL_FLOAT * 100" | bc -l)")"
-
-# Detectar mute (case-insensitive, por si en tu idioma cambia el texto)
-if printf '%s\n' "$INFO" | grep -qi 'MUTED'; then
-  MUTED=1
-else
-  MUTED=0
-fi
-
-# Elegir icono + texto
-if [ "$MUTED" -eq 1 ] || [ "$PCT" -le 0 ]; then
-  ICON=""            # Nerd Font mute
+# ¿Está muteado?
+if printf '%s\n' "$INFO" | grep -q '\[MUTED\]'; then
+  ICON=""
   TEXT="Muted"
-  PCT=0               # por si acaso
-elif [ "$PCT" -lt 50 ]; then
-  ICON=""            # volumen bajo
-  TEXT="${PCT}%"
+  PCT=0
 else
-  ICON=""            # volumen alto
+  if [ "$PCT" -lt 50 ]; then
+    ICON=""
+  else
+    ICON=""
+  fi
   TEXT="${PCT}%"
 fi
 
-# Notificación (swaync la muestra)
+# Notificación (máx. ~3s)
 notify-send -t 3000 "Volume $ICON" "$TEXT" \
   -h int:value:"$PCT" \
   -h string:x-canonical-private-synchronous:volume \
