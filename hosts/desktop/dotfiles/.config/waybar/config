@@ -107,19 +107,17 @@
   "custom/power"
 ],
     "position": "top",
-   "pulseaudio": {
-  "format": "{icon}",
-  "format-muted": "",
-  "format-icons": {
-    "default": [
-      "",
-      "",
-      ""
-    ]
-  },
-  "on-click": "~/.local/bin/ww-audio-toggle",
-  "on-click-right": "pwvucontrol"
-},
+
+  "pulseaudio": {
+  "format": "{icon} {volume}%",
+  "format-muted": " Muted",
+  "scroll-step": 5, 
+  "on-scroll-up": "~/.local/bin/ww-volume up",
+  "on-scroll-down": "~/.local/bin/ww-volume down",
+  "on-click": "~/.local/bin/ww-volume toggle-mute",
+  "on-click-right": "pavucontrol"
+}
+,
     "spacing": 5,
     "tray": {
       "icon-size": 20,

@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# Simple volume control + notification for PipeWire (wpctl) + swaync
+
+SINK='@DEFAULT_AUDIO_SINK@'
+STEP='5%'
+
+case "$1" in
+  up)
+    wpctl set-volume "$SINK" "${STEP}+"
+    ;;
+  down)
+    wpctl set-volume "$SINK" "${STEP}-"
+    ;;
+  toggle-mute|mute)
+    wpctl set-mute "$SINK" toggle
+    ;;
+  *)
+    echo "Usage: $0 {up|down|toggle-mute}" >&2
+    exit 1
+    ;;
+esac
+
+# Obtener info actual
+INFO="$(wpctl get-volume "$SINK")"
+# Ejemplo: "Volume: 0.45 [MUTED]" o "Volume: 0.45"
+VOL_FLOAT="$(printf '%s\n' "$INFO" | awk '{print $2}')"
+
+# Convertir 0.45 -> 45
+PCT="$(printf '%.0f\n' "$(echo "$VOL_FLOAT * 100" | bc -l)")"
+
+if echo "$INFO" | grep -q 'MUTED'; then
+  MUTED=1
+else
+  MUTED=0
+fi
+
+# Elegir icono según volumen
+if [ "$MUTED" -eq 1 ] || [ "$PCT" -eq 0 ]; then
+  ICON=""  # mute
+  TEXT="Muted"
+elif [ "$PCT" -lt 50 ]; then
+  ICON=""  # volumen bajo
+  TEXT="${PCT}%"
+else
+  ICON=""  # volumen alto
+  TEXT="${PCT}%"
+fi
+
+# Notificación via libnotify (swaync la mostrará)
+notify-send "Volume" "$TEXT" \
+  -h int:value:"$PCT" \
+  -h string:x-canonical-private-synchronous:volume \
+  -i audio-volume-high
+
