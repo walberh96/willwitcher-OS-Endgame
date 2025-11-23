@@ -28,14 +28,12 @@
     signal-desktop mpv zathura qimgv libreoffice
     hyprpaper hyprlock hyprpicker hyprshot wl-clipboard
     ntfs3g udiskie swaynotificationcenter waybar blueman
-    mpvpaper xarchiver cliphist pandoc
+    mpvpaper xarchiver cliphist pandoc texliveTeTeX
     # Archivers / compression tools
     p7zip unar xz zstd bzip3 gzip gnutar libarchive
     # CLI utilities
     zoxide ripgrep-all ripgrep fd fzf jq lsd bat gh nb pass gnupg
     fastfetch btop git libnotify gpu-screen-recorder-gtk lutris
-    # Fonts (user scope)
-    nerd-fonts.hack noto-fonts noto-fonts-emoji font-awesome
     # Wayland helpers
     slurp
     # Rust toolchain
@@ -62,6 +60,7 @@
     firefox
     networkmanagerapplet
     ripdrag
+    flavours
     
   gpu-screen-recorder   # the recorder backend (command: gpu-screen-recorder)
   jq
@@ -151,18 +150,4 @@ home.activation.initWallpaperCurrent =
   # Services
   ################################################################################
   services.gnome-keyring.enable = true;
- ################################################################################
-  # Stylix (user scope) — cursor is handled at the system level
-################################################################################
-  stylix = {
-    autoEnable = true;
-
-    # Icons (kept under Home Manager if you prefer user-scoped icon theme)
-    icons = {
-      enable  = true;
-      package = pkgs.dracula-icon-theme;
-      dark    = "Dracula";
-      light   = "Dracula";
-    };
-  };
 }

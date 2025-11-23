@@ -6,7 +6,6 @@
   ############################
   imports = [
     ./hardware-configuration.nix
-    inputs.stylix.nixosModules.stylix
   ];
 
   ############################
@@ -43,42 +42,6 @@
   services.xserver.xkb = {
     layout = "us";
     variant = "";
-  };
-
-  ############################
-  # Stylix (system theming)
-  ############################
-  stylix = {
-    enable = true;
-    autoEnable = true;
-    image = ../../wallpapers/images/cat.png;
-    base16Scheme = ../../themes/catppuccin-mocha.yaml;
-    polarity = "dark";
-
-    fonts = {
-      serif = {
-        package = pkgs.nerd-fonts.hack;
-        name    = "Hack Nerd Font";
-      };
-      sansSerif = {
-        package = pkgs.nerd-fonts.hack;
-        name    = "Hack Nerd Font";
-      };
-      monospace = {
-        package = pkgs.nerd-fonts.hack;
-        name    = "Hack Nerd Font Mono";
-      };
-      emoji = {
-        package = pkgs.noto-fonts-emoji;
-        name    = "Noto Color Emoji";
-      };
-    };
-
-    cursor = {
-      package = pkgs.catppuccin-cursors.mochaDark;
-      name    = "catppuccin-mocha-dark-cursors";
-      size    = 32;
-    };
   };
 
   ############################
