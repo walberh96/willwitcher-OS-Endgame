@@ -88,8 +88,18 @@
         source = ../../hosts/desktop/dotfiles/.icons;
         recursive = true;
         force = true;
-    }
+    };
     ".fonts/" = {
+        source = ../../hosts/desktop/dotfiles/.fonts;
+        recursive = true;
+        force = true;
+    };
+     ".local/share/icons/" = {
+        source = ../../hosts/desktop/dotfiles/.icons;
+        recursive = true;
+        force = true;
+    };
+    ".local/sharefonts/" = {
         source = ../../hosts/desktop/dotfiles/.fonts;
         recursive = true;
         force = true;
