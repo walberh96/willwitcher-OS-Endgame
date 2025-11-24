@@ -18,8 +18,6 @@ config.color_scheme = 'Catppuccin Mocha'
 -- My own custom things
 config.hide_tab_bar_if_only_one_tab = true
 
-config.font = wezterm.font_with_fallback {
-  'Hack',
-  'DengXian',
-}
+wezterm.font("Hack Nerd Font", {weight="Regular", stretch="Normal", style="Normal"}) -- /home/willwitcher/.local/share/fonts/HackNerdFont-Regular.ttf, FontConfig
+
 return config

@@ -60,7 +60,6 @@
     firefox
     networkmanagerapplet
     ripdrag
-    flavours
     
   gpu-screen-recorder   # the recorder backend (command: gpu-screen-recorder)
   jq
