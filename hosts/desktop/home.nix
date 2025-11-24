@@ -84,6 +84,21 @@
         recursive = true;
         force = true;
     };
+    ".icons/" = {
+        source = ../../hosts/desktop/dotfiles/.icons;
+        recursive = true;
+        force = true;
+    }
+    ".fonts/" = {
+        source = ../../hosts/desktop/dotfiles/.fonts;
+        recursive = true;
+        force = true;
+    };
+    ".themes/" = {
+        source = ../../hosts/desktop/dotfiles/.themes;
+        recursive = true;
+        force = true;
+    };
     ".local/bin" = {
         source = ../../scripts;
         recursive = true;
