@@ -8,15 +8,7 @@
     url = "github:nix-community/home-manager";
     inputs.nixpkgs.follows = "nixpkgs";
      };
-     # Stylix: theming framework for NixOS + HM
-     # Stylix on master (matches unstable)  ⬅️ change here
-  stylix = {
-    url = "github:nix-community/stylix";
-    inputs.nixpkgs.follows = "nixpkgs";
-    };
-    elephant.url = "github:abenz1267/elephant";
-
-     };
+};
 
   outputs = { self, nixpkgs, ... }@inputs: {
     # use "nixos", or your hostname as the name of the configuration
