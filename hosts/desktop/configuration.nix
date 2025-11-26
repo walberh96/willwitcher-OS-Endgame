@@ -138,9 +138,7 @@
   # System Packages
   ############################
   environment.systemPackages = with pkgs; [
-	qmk   # QMK CLI for building/flashing
-    	via   # native VIA app (optional but nice to have)
-
+  	import ./system_packages.nix { inherit pkgs; };
   ];
 
   ############################
@@ -164,6 +162,8 @@
 
   # VIA package includes its own udev rules, so this must be added
   services.udev.packages = [ pkgs.via ];
+
+  services.udev.packages = [ pkgs.headsetcontrol ];
 
   ############################
   # State Version

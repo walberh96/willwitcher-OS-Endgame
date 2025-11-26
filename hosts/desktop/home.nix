@@ -24,51 +24,7 @@
   # User packages
   ################################################################################
   home.packages = with pkgs; [
-    # Apps
-    signal-desktop mpv zathura qimgv libreoffice
-    hyprpaper hyprlock hyprpicker hyprshot wl-clipboard
-    ntfs3g udiskie swaynotificationcenter waybar blueman
-    mpvpaper xarchiver cliphist pandoc texliveTeTeX
-    # Archivers / compression tools
-    p7zip unar xz zstd bzip3 gzip gnutar libarchive
-    # CLI utilities
-    zoxide ripgrep-all ripgrep fd fzf jq lsd bat gh nb pass gnupg
-    fastfetch btop git libnotify gpu-screen-recorder-gtk lutris
-    # Wayland helpers
-    slurp
-    # Rust toolchain
-    rustc cargo rustfmt clippy rust-analyzer lldb gcc binutils pkg-config
-    # Audio control
-    pwvucontrol
-    # AI (terminal client)
-    gemini-cli
-    # Screen recording
-
-    # Markdown tooling
-    marksman
-    deno
-    # or: nodePackages.prettier  # if you prefer Prettier instead of Deno fmt
-
-    #Under testing for now
-    wlogout
-    yazi
-    rofi
-    wezterm
-    neovim
-    swww
-    vesktop
-    firefox
-    networkmanagerapplet
-    ripdrag
-    
-  gpu-screen-recorder   # the recorder backend (command: gpu-screen-recorder)
-  jq
-  ffmpeg
-  v4l-utils             # probe webcam formats (command: v4l2-ctl)
-  procps                # process utilities (commands: pgrep, pkill)
-  gawk                  # arithmetic/formatting (command: awk)
-  gnugrep                  # pattern matching (command: grep)
- ];
+     ];
   ################################################################################
   # Dotfiles / assets (copy from repo to $HOME)
   ################################################################################
