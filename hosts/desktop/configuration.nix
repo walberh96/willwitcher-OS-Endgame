@@ -50,7 +50,7 @@
   users.users.willwitcher = {
     isNormalUser = true;
     description  = "willwitcher";
-    extraGroups  = [ "networkmanager" "wheel" ];
+    extraGroups  = [ "networkmanager" "wheel" "plugdev" ];
     shell        = pkgs.zsh;
   };
 
@@ -137,7 +137,11 @@
   ############################
   # System Packages
   ############################
-  environment.systemPackages = with pkgs; [ ];
+  environment.systemPackages = with pkgs; [
+	qmk   # QMK CLI for building/flashing
+    	via   # native VIA app (optional but nice to have)
+
+  ];
 
   ############################
   # Nix (features & flakes)
@@ -153,6 +157,13 @@
     backupFileExtension  = "hm-bak";
     users.willwitcher    = import ./home.nix;
   };
+
+  # QMK + Keychron support (udev rules for WebHID/VIA)
+  hardware.keyboard.qmk.enable = true;
+  hardware.keyboard.qmk.keychronSupport = true;  # if your nixpkgs is new enough
+
+  # VIA package includes its own udev rules, so this must be added
+  services.udev.packages = [ pkgs.via ];
 
   ############################
   # State Version

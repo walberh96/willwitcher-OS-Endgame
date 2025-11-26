@@ -98,7 +98,7 @@
         recursive = true;
         force = true;
     };
-    ".local/sharefonts/" = {
+    ".local/share/fonts/" = {
         source = ../../hosts/desktop/dotfiles/.fonts;
         recursive = true;
         force = true;
