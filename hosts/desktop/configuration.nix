@@ -7,6 +7,7 @@
   imports = [
     ./hardware-configuration.nix
     ./initializer.nix
+    ./git_config.nix
   ];
 
   ############################
@@ -157,18 +158,6 @@
   # Nix (features & flakes)
   ############################
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
-  ############################
-  # Git
-  ############################
-  programs.git = {
-    enable = true;
-    config = {
-      user.name  = "Willwitcher";
-      user.email = "willgamedevelopment@gmail.com";
-      credential.helper = "!gh auth git-credential";
-    };
-  };
 
   ############################
   # GNOME Keyring
