@@ -2,11 +2,11 @@
 set -euo pipefail
 
 WALLPAPER_DIR="${HOME}/Wallpapers"
-CURRENT_FILE="${HOME}/.wallpaper.current"
+STATE_FILE="${HOME}/.ww-state.json"
 
-[ -f "$CURRENT_FILE" ] || exit 0
+[ -f "$STATE_FILE" ] || exit 0
 
-rel_path="$(sed -e 's/^\s*//' -e 's/\s*$//' "$CURRENT_FILE")"
+rel_path="$(jq -r '.current_wallpaper // ""' "$STATE_FILE" 2>/dev/null || printf '')"
 [ -n "$rel_path" ] || exit 0
 
 # Resolve absolute path
@@ -22,11 +22,9 @@ ext="${full_path##*.}"
 lower_ext="$(printf '%s' "$ext" | tr '[:upper:]' '[:lower:]')"
 
 if [ "$lower_ext" = "gif" ] || [ "$lower_ext" = "mp4" ] || [ "$lower_ext" = "webm" ] || [ "$lower_ext" = "mkv" ] || [ "$lower_ext" = "mov" ]; then
-  # LIVE at startup → ensure only one mpvpaper
   pkill mpvpaper 2>/dev/null || true
   mpvpaper -o "no-audio --loop" '*' "$full_path" >/dev/null 2>&1 &
 else
-  # STATIC IMAGE at startup → same "hard reset" as in the picker
   pkill mpvpaper 2>/dev/null || true
 
   swww kill 2>/dev/null || true

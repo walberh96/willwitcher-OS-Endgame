@@ -2,23 +2,22 @@
 set -euo pipefail
 
 WALLPAPER_DIR="${HOME}/Wallpapers"
-CURRENT_FILE="${HOME}/.wallpaper.current"
+STATE_FILE="${HOME}/.ww-state.json"
 
 # 1) Go to the wallpapers directory
 cd "$WALLPAPER_DIR" || exit 1
 
-# 2) Build the list using fd (as you normally do)
+# 2) Build the list using fd
 entries="$(
   fd 2>/dev/null | sort | while IFS= read -r path; do
     [ -n "$path" ] || continue
 
-    # Skip directories (fd also returns images/ and live/)
     if [ -d "$path" ]; then
       continue
     fi
 
-    rel="$path"           # e.g. images/cat.png or live/ganyu.gif
-    base="${rel##*/}"     # file name
+    rel="$path"
+    base="${rel##*/}"
     ext="${base##*.}"
     lower_ext="$(printf '%s' "$ext" | tr '[:upper:]' '[:lower:]')"
 
@@ -30,50 +29,64 @@ entries="$(
         tag="[live]"
         ;;
       *)
-        # Ignore extensions we don't care about
         continue
         ;;
     esac
 
-    # Format for rofi: "[image] cat.png :: images/cat.png"
     printf "%s %s :: %s\n" "$tag" "$base" "$rel"
   done
 )"
 
-# 3) If nothing valid was found, exit quietly
 [ -n "$entries" ] || { echo "No valid wallpapers found in $WALLPAPER_DIR" >&2; exit 0; }
 
-# 4) Show the list in rofi with a search bar
 choice="$(
   printf '%s\n' "$entries" | rofi -dmenu -i -p "Wallpaper"
-)" || exit 0   # ESC / cancel
+)" || exit 0
 
 [ -n "$choice" ] || exit 0
 
-# 5) Extract the relative path after " :: "
 rel_path="${choice##* :: }"
 rel_path="$(printf '%s\n' "$rel_path" | sed -e 's/^\s*//' -e 's/\s*$//')"
 [ -n "$rel_path" ] || exit 0
 
-# Save relative path to ~/.wallpaper.current
-printf '%s\n' "$rel_path" > "$CURRENT_FILE"
-
-# Absolute path to the selected file
 full_path="${WALLPAPER_DIR}/${rel_path}"
 
 ext="${full_path##*.}"
 lower_ext="$(printf '%s' "$ext" | tr '[:upper:]' '[:lower:]')"
 
+# Update .ww-state.json
+if command -v jq >/dev/null 2>&1; then
+  if [ ! -f "$STATE_FILE" ]; then
+    cat > "$STATE_FILE" <<EOF
+{
+  "if_initialized": true,
+  "current_wallpaper": "",
+  "current_gtk_theme": "",
+  "current_cursor": ""
+}
+EOF
+  fi
+
+  tmp="$(mktemp)"
+
+  jq \
+    --arg wp "$rel_path" \
+    '
+      .if_initialized = true
+      | .current_wallpaper = $wp
+      | if has("current_gtk_theme") then . else . + { "current_gtk_theme": "" } end
+      | if has("current_cursor") then . else . + { "current_cursor": "" } end
+    ' \
+    "$STATE_FILE" > "$tmp"
+
+  mv "$tmp" "$STATE_FILE"
+fi
+
+# Apply wallpaper immediately
 if [ "$lower_ext" = "gif" ] || [ "$lower_ext" = "mp4" ] || [ "$lower_ext" = "webm" ] || [ "$lower_ext" = "mkv" ] || [ "$lower_ext" = "mov" ]; then
-  # LIVE → kill any existing mpvpaper and start a new one
   pkill mpvpaper 2>/dev/null || true
   mpvpaper -o "no-audio --loop" '*' "$full_path" >/dev/null 2>&1 &
 else
-  # STATIC IMAGE:
-  # 1) Kill mpvpaper so no video is on top
-  # 2) Kill any existing swww daemon
-  # 3) Start a fresh swww-daemon
-  # 4) Set the new image with NO transition
   pkill mpvpaper 2>/dev/null || true
 
   swww kill 2>/dev/null || true
