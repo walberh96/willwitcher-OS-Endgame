@@ -70,4 +70,6 @@ with pkgs; [
   ripdrag
   btop
   headsetcontrol
+  brave
+  gnused
 ]

@@ -1,17 +1,18 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, ... }:
 
 let
   normalUserNames =
     lib.attrNames (lib.filterAttrs (_: u: (u.isNormalUser or false)) config.users.users);
 
   usersList = lib.concatStringsSep " " normalUserNames;
-  jqBin = "${pkgs.jq}/bin/jq";
 in
 {
   system.activationScripts.bootstrapHome = {
     text = ''
-      JQ="${jqBin}"
       users="${usersList}"
+
+      DEFAULT_GTK_THEME="Catppuccin-BL-LB-Dark"
+      DEFAULT_CURSOR="catppuccin-mocha-dark-cursors"
 
       ensure_clean_path() {
         target="$1"
@@ -20,7 +21,17 @@ in
         fi
       }
 
-      # Path where extra .desktop files live in the repo
+      # Simple helper: we do NOT support double quotes in these values
+      esc() {
+        case "$1" in
+          *\"*)
+            echo "bootstrapHome: value contains double quotes, which are not supported: $1" >&2
+            # Print value as-is anyway; all your current values do not use quotes
+            ;;
+        esac
+        printf '%s' "$1"
+      }
+
       src_desktop_dir=${../../hosts/desktop/dotfiles/.desktop_files}
 
       for user in $users; do
@@ -36,19 +47,25 @@ in
         current_gtk_theme=""
         current_cursor=""
 
+        # Read existing state if present
         if [ -f "$state_file" ]; then
-          current_wallpaper="$($JQ -r '.current_wallpaper // ""' "$state_file" 2>/dev/null || printf '')"
-          current_gtk_theme="$($JQ -r '.current_gtk_theme // ""' "$state_file" 2>/dev/null || printf '')"
-          current_cursor="$($JQ -r '.current_cursor // ""' "$state_file" 2>/dev/null || printf '')"
-          init_raw="$($JQ -r '.if_initialized // "false"' "$state_file" 2>/dev/null || printf 'false')"
+          if command -v jq >/dev/null 2>&1; then
+            current_wallpaper="$(jq -r '.current_wallpaper // ""' "$state_file" 2>/dev/null)"
+            current_gtk_theme="$(jq -r '.current_gtk_theme // ""' "$state_file" 2>/dev/null)"
+            current_cursor="$(jq -r '.current_cursor // ""' "$state_file" 2>/dev/null)"
+            init_raw="$(jq -r '.if_initialized // false' "$state_file" 2>/dev/null)"
 
-          if [ "$init_raw" = "true" ]; then
+            if [ "$init_raw" = "true" ]; then
+              init_flag="true"
+            fi
+          else
+            # State exists but jq is missing → assume initialized to avoid corrupting unknown content
             init_flag="true"
           fi
         fi
 
         if [ "$init_flag" = "true" ]; then
-          echo "bootstrapHome: $user already initialized (flag true), skipping."
+          echo "bootstrapHome: $user already initialized, skipping."
           continue
         fi
 
@@ -58,7 +75,7 @@ in
 
         mkdir -p "$user_home"
 
-        # Clean legacy wallpaper marker if present
+        # Clean legacy markers / symlinks from previous setups
         ensure_clean_path "$user_home/.wallpaper.current"
 
         # Wallpapers
@@ -112,7 +129,7 @@ in
         mkdir -p "$user_home/.zsh"
         cp -R ${../../hosts/desktop/dotfiles/.zsh}/. "$user_home/.zsh"
 
-        # Desktop files: copy ALL .desktop files from .desktop_files/
+        # Desktop files: copy all .desktop files from .desktop_files/
         mkdir -p "$user_home/.local/share/applications"
         if [ -d "$src_desktop_dir" ]; then
           for f in "$src_desktop_dir"/*.desktop; do
@@ -124,29 +141,24 @@ in
           done
         fi
 
-        # Default wallpaper relative path
-        # This assumes the repo ships Wallpapers/images/cat.png
+        # Default wallpaper relative path: Wallpapers/images/cat.png
         default_wp_rel="images/cat.png"
         if [ ! -f "$user_home/Wallpapers/$default_wp_rel" ]; then
           default_wp_rel=""
         fi
 
-        # Only overwrite current_wallpaper if empty; preserve if it already has a value
+        # Fill defaults only when empty (to preserve custom values on reseed)
         if [ -z "$current_wallpaper" ]; then
           current_wallpaper="$default_wp_rel"
         fi
 
         if [ -z "$current_gtk_theme" ]; then
-          current_gtk_theme=""
+          current_gtk_theme="$DEFAULT_GTK_THEME"
         fi
 
         if [ -z "$current_cursor" ]; then
-          current_cursor=""
+          current_cursor="$DEFAULT_CURSOR"
         fi
-
-        esc() {
-          printf '%s' "$1" | sed 's/"/\\"/g'
-        }
 
         cat > "$state_file" <<EOF
 {
