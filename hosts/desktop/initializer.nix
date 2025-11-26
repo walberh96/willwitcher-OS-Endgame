@@ -1,18 +1,16 @@
-{ ... }:
+{ config, lib, ... }:
 
+let
+  normalUserNames =
+    lib.attrNames (lib.filterAttrs (_: u: (u.isNormalUser or false)) config.users.users);
+
+  usersList = lib.concatStringsSep " " normalUserNames;
+in
 {
-  # One-time home bootstrap (dotfiles, assets, scripts)
+  # One-time home bootstrap (dotfiles, assets, scripts) for all normal users
   system.activationScripts.bootstrapHome = {
     text = ''
-      user_home="/home/willwitcher"
-      marker="$user_home/.ww-home-initialized"
-
-      if [ -e "$marker" ]; then
-        echo "bootstrapHome: already initialized, skipping."
-        exit 0
-      fi
-
-      echo "bootstrapHome: seeding dotfiles into $user_home"
+      users="${usersList}"
 
       ensure_clean_path() {
         target="$1"
@@ -21,81 +19,109 @@
         fi
       }
 
-      mkdir -p "$user_home"
+      for user in $users; do
+        user_home="$(getent passwd "$user" | cut -d: -f6 || true)"
+        if [ -z "$user_home" ]; then
+          continue
+        fi
 
-      # Wallpapers
-      ensure_clean_path "$user_home/Wallpapers"
-      mkdir -p "$user_home/Wallpapers"
-      cp -R ${../../wallpapers}/. "$user_home/Wallpapers"
+        marker="$user_home/.ww-home-initialized"
 
-      # Configuration directory
-      ensure_clean_path "$user_home/.config"
-      mkdir -p "$user_home/.config"
-      cp -R ${../../hosts/desktop/dotfiles/.config}/. "$user_home/.config"
+        if [ -e "$marker" ]; then
+          echo "bootstrapHome: $user already initialized, skipping."
+          continue
+        fi
 
-      # Icons
-      ensure_clean_path "$user_home/.icons"
-      mkdir -p "$user_home/.icons"
-      cp -R ${../../hosts/desktop/dotfiles/.icons}/. "$user_home/.icons"
+        echo "bootstrapHome: seeding dotfiles into $user_home for user $user"
 
-      ensure_clean_path "$user_home/.local/share/icons"
-      mkdir -p "$user_home/.local/share/icons"
-      cp -R ${../../hosts/desktop/dotfiles/.icons}/. "$user_home/.local/share/icons"
+        user_group="$(id -gn "$user" 2>/dev/null || echo "$user")"
 
-      # Fonts
-      ensure_clean_path "$user_home/.fonts"
-      mkdir -p "$user_home/.fonts"
-      cp -R ${../../hosts/desktop/dotfiles/.fonts}/. "$user_home/.fonts"
+        mkdir -p "$user_home"
 
-      ensure_clean_path "$user_home/.local/share/fonts"
-      mkdir -p "$user_home/.local/share/fonts"
-      cp -R ${../../hosts/desktop/dotfiles/.fonts}/. "$user_home/.local/share/fonts"
+        # Wallpapers
+        ensure_clean_path "$user_home/Wallpapers"
+        mkdir -p "$user_home/Wallpapers"
+        cp -R ${../../wallpapers}/. "$user_home/Wallpapers"
 
-      # Themes
-      ensure_clean_path "$user_home/.themes"
-      mkdir -p "$user_home/.themes"
-      cp -R ${../../hosts/desktop/dotfiles/.themes}/. "$user_home/.themes"
+        # Configuration directory
+        ensure_clean_path "$user_home/.config"
+        mkdir -p "$user_home/.config"
+        cp -R ${../../hosts/desktop/dotfiles/.config}/. "$user_home/.config"
 
-      # Scripts
-      ensure_clean_path "$user_home/.local/bin"
-      mkdir -p "$user_home/.local/bin"
-      cp -R ${../../scripts}/. "$user_home/.local/bin"
+        # Icons
+        ensure_clean_path "$user_home/.icons"
+        mkdir -p "$user_home/.icons"
+        cp -R ${../../hosts/desktop/dotfiles/.icons}/. "$user_home/.icons"
 
-      # Mozilla profile
-      ensure_clean_path "$user_home/.mozilla"
-      mkdir -p "$user_home/.mozilla"
-      cp -R ${../../hosts/desktop/dotfiles/.mozilla}/. "$user_home/.mozilla"
+        ensure_clean_path "$user_home/.local/share/icons"
+        mkdir -p "$user_home/.local/share/icons"
+        cp -R ${../../hosts/desktop/dotfiles/.icons}/. "$user_home/.local/share/icons"
 
-      # Zsh configuration
-      ensure_clean_path "$user_home/.zshrc"
-      cp ${../../hosts/desktop/dotfiles/.zshrc} "$user_home/.zshrc"
+        # Fonts
+        ensure_clean_path "$user_home/.fonts"
+        mkdir -p "$user_home/.fonts"
+        cp -R ${../../hosts/desktop/dotfiles/.fonts}/. "$user_home/.fonts"
 
-      ensure_clean_path "$user_home/.zsh"
-      mkdir -p "$user_home/.zsh"
-      cp -R ${../../hosts/desktop/dotfiles/.zsh}/. "$user_home/.zsh"
+        ensure_clean_path "$user_home/.local/share/fonts"
+        mkdir -p "$user_home/.local/share/fonts"
+        cp -R ${../../hosts/desktop/dotfiles/.fonts}/. "$user_home/.local/share/fonts"
 
-      # Desktop file
-      ensure_clean_path "$user_home/.local/share/applications/ww-wallpaper-picker.desktop"
-      mkdir -p "$user_home/.local/share/applications"
-      cp ${../../hosts/desktop/dotfiles/.desktop_files/ww-wallpaper-picker.desktop} \
-        "$user_home/.local/share/applications/ww-wallpaper-picker.desktop"
+        # Themes
+        ensure_clean_path "$user_home/.themes"
+        mkdir -p "$user_home/.themes"
+        cp -R ${../../hosts/desktop/dotfiles/.themes}/. "$user_home/.themes"
 
-      chown -R willwitcher:users "$user_home"
+        # Scripts
+        ensure_clean_path "$user_home/.local/bin"
+        mkdir -p "$user_home/.local/bin"
+        cp -R ${../../scripts}/. "$user_home/.local/bin"
 
-      touch "$marker"
+        # Mozilla profile
+        ensure_clean_path "$user_home/.mozilla"
+        mkdir -p "$user_home/.mozilla"
+        cp -R ${../../hosts/desktop/dotfiles/.mozilla}/. "$user_home/.mozilla"
+
+        # Zsh configuration
+        ensure_clean_path "$user_home/.zshrc"
+        cp ${../../hosts/desktop/dotfiles/.zshrc} "$user_home/.zshrc"
+
+        ensure_clean_path "$user_home/.zsh"
+        mkdir -p "$user_home/.zsh"
+        cp -R ${../../hosts/desktop/dotfiles/.zsh}/. "$user_home/.zsh"
+
+        # Desktop file
+        ensure_clean_path "$user_home/.local/share/applications/ww-wallpaper-picker.desktop"
+        mkdir -p "$user_home/.local/share/applications"
+        cp ${../../hosts/desktop/dotfiles/.desktop_files/ww-wallpaper-picker.desktop} \
+          "$user_home/.local/share/applications/ww-wallpaper-picker.desktop"
+
+        chown -R "$user:$user_group" "$user_home"
+
+        touch "$marker"
+      done
     '';
   };
 
-  # Ensure a default wallpaper pointer exists
+  # Ensure a default wallpaper pointer exists for all normal users
   system.activationScripts.initWallpaperCurrent = {
     text = ''
-      user_home="/home/willwitcher"
-      current="$user_home/.wallpaper.current"
+      users="${usersList}"
 
-      if [ ! -f "$current" ]; then
-        cp ${../../hosts/desktop/dotfiles/.wallpaper.default} "$current"
-        chown willwitcher:users "$current"
-      fi
+      for user in $users; do
+        user_home="$(getent passwd "$user" | cut -d: -f6 || true)"
+        if [ -z "$user_home" ]; then
+          continue
+        fi
+
+        user_group="$(id -gn "$user" 2>/dev/null || echo "$user")"
+        current="$user_home/.wallpaper.current"
+
+        if [ ! -f "$current" ]; then
+          mkdir -p "$user_home"
+          cp ${../../hosts/desktop/dotfiles/.wallpaper.default} "$current"
+          chown "$user:$user_group" "$current"
+        fi
+      done
     '';
   };
 }
