@@ -161,10 +161,10 @@ environment.systemPackages =
   hardware.keyboard.qmk.keychronSupport = true;  # if your nixpkgs is new enough
 
   # VIA package includes its own udev rules, so this must be added
-  services.udev.packages = [ pkgs.via ];
-
-  services.udev.packages = [ pkgs.headsetcontrol ];
-
+  services.udev.packages = with pkgs; [
+  	headsetcontrol
+  	via
+];
   ############################
   # State Version
   ############################
