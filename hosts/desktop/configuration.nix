@@ -6,6 +6,7 @@
   ############################
   imports = [
     ./hardware-configuration.nix
+    ./initializer.nix
   ];
 
   ############################
@@ -38,7 +39,9 @@
     LC_TIME           = "en_US.UTF-8";
   };
 
-  # Keyboard layout for X11/Xwayland apps
+  ############################
+  # Keyboard layout (X11/Xwayland)
+  ############################
   services.xserver.xkb = {
     layout = "us";
     variant = "";
@@ -52,6 +55,8 @@
     description  = "willwitcher";
     extraGroups  = [ "networkmanager" "wheel" "plugdev" ];
     shell        = pkgs.zsh;
+
+    # Per-user packages (from user_packages.nix)
     packages = import ./user_packages.nix { inherit pkgs; };
   };
 
@@ -94,7 +99,7 @@
   security.polkit.enable = true;
 
   ############################
-  # XDG Portals (screen sharing, file pickers, etc.)
+  # XDG Portals
   ############################
   xdg.portal.extraPortals = with pkgs; [
     xdg-desktop-portal-hyprland
@@ -102,7 +107,13 @@
     xdg-desktop-portal-gnome
   ];
   xdg.portal.config.common.default = [ "hyprland" "gnome" "gtk" ];
+
+  ############################
+  # Icons and Fonts
+  ############################
   xdg.icons.enable = true;
+  fonts.fontconfig.enable = true;
+
   ############################
   # Session Environment
   ############################
@@ -110,7 +121,11 @@
     XDG_CURRENT_DESKTOP = "Hyprland";
     XDG_SESSION_TYPE    = "wayland";
     NIXOS_OZONE_WL      = "1";
+    EDITOR              = "nvim";
   };
+
+  # Ensure ~/.local/bin is in PATH
+  environment.localBinInPath = true;
 
   ############################
   # Gaming
@@ -120,26 +135,23 @@
   programs.gamemode.enable       = true;
 
   ############################
-  # nix-ld (run non-Nix binaries with missing libs)
+  # nix-ld
   ############################
   programs.nix-ld.enable = true;
   programs.nix-ld.libraries = with pkgs; [
     icu
   ];
 
-  #############################
-  #############################
-
+  ############################
+  # GPU Screen Recorder
+  ############################
   programs.gpu-screen-recorder.enable = true;
 
   ############################
+  # System Packages (all users)
   ############################
-
-  ############################
-  # System Packages
-  ############################
-environment.systemPackages =
-  import ./system_packages.nix { inherit pkgs; };
+  environment.systemPackages =
+    import ./system_packages.nix { inherit pkgs; };
 
   ############################
   # Nix (features & flakes)
@@ -147,27 +159,48 @@ environment.systemPackages =
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   ############################
-  # Home Manager (user scope)
+  # Git
   ############################
-  home-manager = {
-    useGlobalPkgs        = true;
-    extraSpecialArgs     = { inherit inputs; };
-    backupFileExtension  = "hm-bak";
-    users.willwitcher    = import ./home.nix;
+  programs.git = {
+    enable = true;
+    config = {
+      user.name  = "Willwitcher";
+      user.email = "willgamedevelopment@gmail.com";
+      credential.helper = "!gh auth git-credential";
+    };
   };
 
-  # QMK + Keychron support (udev rules for WebHID/VIA)
-  hardware.keyboard.qmk.enable = true;
-  hardware.keyboard.qmk.keychronSupport = true;  # if your nixpkgs is new enough
+  ############################
+  # GitHub CLI
+  ############################
+  programs.gh = {
+    enable = true;
+    settings.git_protocol = "https";
+  };
 
-  # VIA package includes its own udev rules, so this must be added
+  ############################
+  # GNOME Keyring
+  ############################
+  services.gnome.gnome-keyring.enable = true;
+
+  ############################
+  # QMK / Keychron
+  ############################
+  hardware.keyboard.qmk.enable = true;
+  hardware.keyboard.qmk.keychronSupport = true;
+
+  ############################
+  # Udev packages
+  ############################
   services.udev.packages = with pkgs; [
-  	headsetcontrol
-	keychron-udev-rules
-  	via
-];
+    headsetcontrol
+    keychron-udev-rules
+    via
+  ];
+
   ############################
   # State Version
   ############################
   system.stateVersion = "25.05";
 }
+
