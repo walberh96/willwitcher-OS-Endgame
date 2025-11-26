@@ -52,7 +52,7 @@
     description  = "willwitcher";
     extraGroups  = [ "networkmanager" "wheel" "plugdev" ];
     shell        = pkgs.zsh;
-    packages = import ./user_packages.nix { inherit pkgs };
+    packages = import ./user_packages.nix { inherit pkgs; };
   };
 
   programs.zsh.enable = true;
@@ -138,9 +138,8 @@
   ############################
   # System Packages
   ############################
-  environment.systemPackages = with pkgs; [
-  	import ./system_packages.nix { inherit pkgs };
-  ];
+environment.systemPackages =
+  import ./system_packages.nix { inherit pkgs; };
 
   ############################
   # Nix (features & flakes)
