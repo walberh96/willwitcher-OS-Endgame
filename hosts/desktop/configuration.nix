@@ -171,14 +171,6 @@
   };
 
   ############################
-  # GitHub CLI
-  ############################
-  programs.gh = {
-    enable = true;
-    settings.git_protocol = "https";
-  };
-
-  ############################
   # GNOME Keyring
   ############################
   services.gnome.gnome-keyring.enable = true;
