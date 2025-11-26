@@ -34,6 +34,7 @@ v4l-utils
 procps
 gawk
 gnugrep
+papirus-icon-theme
 
 #------------------------------------------------------
 ]

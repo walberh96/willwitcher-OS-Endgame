@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# Dispositivo por defecto de salida
 SINK='@DEFAULT_AUDIO_SINK@'
 STEP='5%'   # 5% por “click” / scroll
 
@@ -20,9 +19,6 @@ case "$1" in
     ;;
 esac
 
-# Ejemplo de salida de este comando:
-#   Volume: 0.61
-#   Volume: 0.61 [MUTED]
 INFO="$(wpctl get-volume "$SINK")"
 
 # Segundo campo = 0.xx
@@ -33,21 +29,23 @@ PCT="$(awk -v v="$VOL" 'BEGIN { printf("%d", v * 100) }')"
 
 # ¿Está muteado?
 if printf '%s\n' "$INFO" | grep -q '\[MUTED\]'; then
-  ICON=""
+  ICON=""         # Nerd Font mute
+  TITLE="$ICON  Volume"
   TEXT="Muted"
   PCT=0
 else
   if [ "$PCT" -lt 50 ]; then
-    ICON=""
+    ICON=""       # bajo
   else
-    ICON=""
+    ICON=""       # alto
   fi
+  TITLE="$ICON  Volume"
   TEXT="${PCT}%"
 fi
 
-# Notificación (máx. ~3s)
-notify-send -t 3000 "Volume $ICON" "$TEXT" \
+# Notificación SOLO con texto (Nerd Font), sin -i (sin imagen del icon theme)
+notify-send -t 1500 \
+  "$TITLE" "$TEXT" \
   -h int:value:"$PCT" \
-  -h string:x-canonical-private-synchronous:volume \
-  -i audio-volume-high
+  -h string:x-canonical-private-synchronous:volume
 

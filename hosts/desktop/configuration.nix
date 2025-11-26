@@ -102,7 +102,7 @@
     xdg-desktop-portal-gnome
   ];
   xdg.portal.config.common.default = [ "hyprland" "gnome" "gtk" ];
-
+  xdg.icons.enable = true;
   ############################
   # Session Environment
   ############################
@@ -163,6 +163,7 @@ environment.systemPackages =
   # VIA package includes its own udev rules, so this must be added
   services.udev.packages = with pkgs; [
   	headsetcontrol
+	keychron-udev-rules
   	via
 ];
   ############################

@@ -69,8 +69,5 @@ with pkgs; [
   networkmanagerapplet
   ripdrag
   btop
-
-  brave
-  candy-icons
   headsetcontrol
 ]
