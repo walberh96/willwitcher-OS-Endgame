@@ -10,6 +10,8 @@ in
 {
   system.activationScripts.bootstrapHome = {
     text = ''
+      set -eu
+
       users="${usersList}"
 
       # Remove existing path (file/dir/symlink) if present
@@ -120,10 +122,32 @@ in
         fi
 
         ########################################################################
-        # Final ownership + marker
+        # Final ownership (only what we manage) + marker
         ########################################################################
-        chown -R "$user:$user_group" "$user_home"
-        touch "$marker"
+
+        paths_to_chown="
+$user_home/Wallpapers
+$user_home/.config
+$user_home/.icons
+$user_home/.local/share/icons
+$user_home/.fonts
+$user_home/.local/share/fonts
+$user_home/.themes
+$user_home/.local/bin
+$user_home/.zshrc
+$user_home/.zsh
+$user_home/.local/share/applications
+$marker
+"
+
+        # Create marker now so we can chown it too
+        touch "$marker" || true
+
+        for p in $paths_to_chown; do
+          if [ -e "$p" ] || [ -L "$p" ]; then
+            chown -R "$user:$user_group" "$p" || true
+          fi
+        done
       done
     '';
   };
