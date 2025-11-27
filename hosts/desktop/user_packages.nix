@@ -72,4 +72,7 @@ with pkgs; [
   headsetcontrol
   brave
   gnused
+  nwg-look
+  gradience
+  waypaper
 ]

@@ -7,7 +7,6 @@
   imports = [
     ./hardware-configuration.nix
     ./initializer.nix
-    ./git_config.nix
   ];
 
   ############################
