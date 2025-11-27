@@ -1,9 +1,0 @@
-2025/11/26-19:16:53.789 5 Reusing MANIFEST /home/willwitcher/.config/BraveSoftware/Brave-Browser/Default/Local Storage/leveldb/MANIFEST-000001
-2025/11/26-19:16:53.793 5 Recovering log #3
-2025/11/26-19:16:53.793 5 Reusing old log /home/willwitcher/.config/BraveSoftware/Brave-Browser/Default/Local Storage/leveldb/000003.log 
-2025/11/26-19:17:44.542 7 Level-0 table #5: started
-2025/11/26-19:17:44.607 7 Level-0 table #5: 20245 bytes OK
-2025/11/26-19:17:44.665 7 Delete type=0 #3
-2025/11/26-19:26:37.963 7 Level-0 table #7: started
-2025/11/26-19:26:38.034 7 Level-0 table #7: 14576 bytes OK
-2025/11/26-19:26:38.094 7 Delete type=0 #4
