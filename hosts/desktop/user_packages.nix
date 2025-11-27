@@ -73,6 +73,5 @@ with pkgs; [
   brave
   gnused
   nwg-look
-  gradience
   waypaper
 ]
