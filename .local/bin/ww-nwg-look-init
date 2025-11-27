@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CONFIG_HOME="${XDG_CONFIG_HOME:-"$HOME/.config"}"
+NWG_DIR="$CONFIG_HOME/nwg-look"
+
+if ! command -v nwg-look >/dev/null 2>&1; then
+  echo "ww-nwg-look-init: nwg-look not found, skipping." >&2
+  exit 0
+fi
+
+dir_non_empty() {
+  [ -d "$NWG_DIR" ] && find "$NWG_DIR" -mindepth 1 -print -quit | grep -q .
+}
+
+# Función helper para aplicar cursor si está el script
+apply_cursor_if_available() {
+  if command -v ww-apply-cursor >/dev/null 2>&1; then
+    ww-apply-cursor || true
+  fi
+}
+
+if dir_non_empty; then
+  # Ya hay configuración: re-aplicar ajustes de nwg-look y luego sincronizar cursor
+  nwg-look -a >/dev/null 2>&1 || true
+  apply_cursor_if_available
+else
+  # Primera vez: abrir GUI y esperar a que cierres nwg-look
+  nwg-look
+  # Cuando la cierres, aplicamos el cursor desde lo que quedó en gsettings
+  apply_cursor_if_available
+fi
+
+exit 0
+

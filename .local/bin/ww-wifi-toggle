@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# ww-wifi-toggle: toggle Wi-Fi on/off using NetworkManager (nmcli)
+
+set -euo pipefail
+
+if ! command -v nmcli >/dev/null 2>&1; then
+  echo "nmcli not found (NetworkManager is required)" >&2
+  exit 1
+fi
+
+state="$(nmcli radio wifi | tr '[:upper:]' '[:lower:]')"
+
+if [[ "$state" == "enabled" ]]; then
+  nmcli radio wifi off
+else
+  nmcli radio wifi on
+fi
+

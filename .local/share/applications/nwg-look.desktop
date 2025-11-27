@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=nwg-look
+GenericName=GTK settings
+Comment=Configure GTK theme, icons and cursor
+Exec=ww-nwg-look-gui
+TryExec=ww-nwg-look-gui
+Icon=nwg-look
+Terminal=false
+Categories=Settings;DesktopSettings;GTK;
+StartupNotify=true
+

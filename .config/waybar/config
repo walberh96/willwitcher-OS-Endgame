@@ -1,0 +1,204 @@
+[
+  {
+    // =========================
+    // General bar configuration
+    // =========================
+    "layer": "top",
+    "position": "top",
+    "height": 54,
+    "margin-bottom": -5,
+    "spacing": 5,
+
+    // =========================
+    // Module placement
+    // =========================
+    "modules-left": [
+      "hyprland/workspaces"
+    ],
+    "modules-center": [
+      "clock"
+    ],
+    "modules-right": [
+      "group/sys_controls",
+      "tray",
+      "custom/power"
+    ],
+
+    // Group with system controls (notifications, recording, audio, wifi, bluetooth)
+    "group/sys_controls": {
+      "orientation": "horizontal",
+      "modules": [
+        "custom/notification",
+        "custom/ww_srec",
+        "pulseaudio",
+        "custom/wifi",
+        "custom/bluetooth"
+      ]
+    },
+
+    // =========================
+    // Clock (center)
+    // =========================
+    "clock": {
+      "format": "{:%I:%M %p  %m/%d}",
+      "tooltip": false
+    },
+
+    // =========================
+    // Hyprland workspaces (left)
+    // =========================
+    "hyprland/workspaces": {
+      "active-only": false,
+      "all-outputs": true,
+      "format": "{}",
+      "format-icons": {
+        "active": "",
+        "default": "",
+        "urgent": ""
+      },
+      "on-click": "activate",
+      // Scroll: move through workspaces
+      "on-scroll-up": "hyprctl dispatch workspace r-1",
+      "on-scroll-down": "hyprctl dispatch workspace r+1",
+      "persistent-workspaces": {
+        "*": 5
+      }
+    },
+
+    // =========================
+    // Notifications (swaync)
+    // =========================
+    "custom/notification": {
+      "escape": true,
+      "exec": "swaync-client -swb",
+      "exec-if": "which swaync-client",
+      "format": "{icon}",
+      "format-icons": {
+        "dnd-inhibited-none": "",
+        "dnd-inhibited-notification": "<span foreground=\"red\"><sup></sup></span>",
+        "dnd-none": "",
+        "dnd-notification": "<span foreground=\"red\"><sup></sup></span>",
+        "inhibited-none": "",
+        "inhibited-notification": "<span foreground=\"red\"><sup></sup></span>",
+        "none": "",
+        "notification": "<span foreground=\"red\"><sup></sup></span>"
+      },
+      "on-click": "swaync-client -t -sw",
+      "on-click-right": "swaync-client -d -sw",
+      // Scroll workaround: do nothing on scroll to avoid Waybar crash
+      "on-scroll-up": "",
+      "on-scroll-down": "",
+      "return-type": "json",
+      "tooltip": false
+    },
+
+    // =========================
+    // GPU screen recorder status
+    // =========================
+    "custom/ww_srec": {
+      "return-type": "json",
+      "exec": "ww-screenrec-status",
+      "interval": 3,
+      "exec-on-event": true,
+      "signal": 8,
+      "format": "{}",
+
+      // Left click: open full-screen recording menu
+      "on-click": "bash -lc 'ww-rec-rofi-screen'",
+
+      // Right click: open region recording menu
+      "on-click-right": "bash -lc 'ww-rec-rofi-region'",
+
+      // Middle click: open GPU Screen Recorder GTK UI
+      "on-click-middle": "bash -lc 'gpu-screen-recorder-gtk >/dev/null 2>&1 &'",
+
+      "tooltip": true,
+
+      // Scroll workaround: do nothing on scroll to avoid Waybar crash
+      "on-scroll-up": "",
+      "on-scroll-down": ""
+    },
+
+    // =========================
+    // Audio volume (PulseAudio/PipeWire)
+    // =========================
+    "pulseaudio": {
+      "format": "{icon} {volume}%",
+      "format-muted": " {volume}%",
+      "scroll-step": 5,
+      "format-icons": {
+        "default": [
+          "",
+          ""
+        ]
+      },
+      // Use your custom ww-volume helper for volume control
+      "on-scroll-up": "~/.local/bin/ww-volume up",
+      "on-scroll-down": "~/.local/bin/ww-volume down",
+      "on-click-right": "bash -lc 'pwvucontrol'",
+      "on-click": "~/.local/bin/ww-volume toggle-mute"
+    },
+
+    // =========================
+    // Wi-Fi status and toggle
+    // =========================
+    "custom/wifi": {
+      "format": "{}",
+      "return-type": "json",
+      "exec": "~/.local/bin/ww-wifi-status",
+      "interval": 3,
+
+      // Left click: toggle Wi-Fi on/off
+      "on-click": "~/.local/bin/ww-wifi-toggle",
+
+      // Right click: open Network Manager connection editor
+      "on-click-right": "nm-connection-editor",
+
+      // Scroll workaround: do nothing on scroll to avoid Waybar crash
+      "on-scroll-up": "",
+      "on-scroll-down": ""
+    },
+
+    // =========================
+    // Bluetooth status and toggle
+    // =========================
+    "custom/bluetooth": {
+      "format": "{}",
+      "return-type": "json",
+      "exec": "~/.local/bin/ww-bluetooth-status",
+      "interval": 3,
+
+      // Left click: toggle Bluetooth on/off
+      "on-click": "~/.local/bin/ww-bluetooth-toggle",
+
+      // Right click: open Blueman manager
+      "on-click-right": "blueman-manager",
+
+      // Scroll workaround: do nothing on scroll to avoid Waybar crash
+      "on-scroll-up": "",
+      "on-scroll-down": ""
+    },
+
+    // =========================
+    // Power menu button
+    // =========================
+    "custom/power": {
+      "format": " ⏻ ",
+      "return-type": "string",
+      "tooltip": "Power menu",
+      "on-click": "wlogout",
+      // Scroll workaround: do nothing on scroll to avoid Waybar crash
+      "on-scroll-up": "",
+      "on-scroll-down": ""
+    },
+
+    // =========================
+    // System tray
+    // =========================
+    "tray": {
+      "icon-size": 20,
+      "spacing": 13
+    }
+  }
+]
+

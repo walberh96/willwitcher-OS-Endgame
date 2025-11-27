@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# WillwitcherOS: Waybar status JSON for the screen recorder (red when recording)
+set -euo pipefail
+
+REC_COLOR="#ff4d4d"   # red when recording
+SEL_COLOR="#f2c94c"   # amber when selecting
+
+emit() { printf '%s\n' "$1"; }
+
+recording_json() {
+  # Red dot when recording
+  emit "{\"text\":\"<span foreground=\\\"$REC_COLOR\\\">●</span>\",\"class\":\"recording\",\"alt\":\"rec\",\"tooltip\":\"WillwitcherOS: Recording — middle click to stop\",\"markup\":\"pango\"}"
+}
+
+selecting_json() {
+  # Amber square (selection box hint)
+  emit "{\"text\":\"<span foreground=\\\"$SEL_COLOR\\\">▣</span>\",\"class\":\"selecting\",\"alt\":\"sel\",\"tooltip\":\"WillwitcherOS: Select a region (ESC to cancel)\",\"markup\":\"pango\"}"
+}
+
+idle_json() {
+  # Video camera icon when idle
+  emit "{\"text\":\"\",\"class\":\"idle\",\"alt\":\"idle\",\"tooltip\":\"WillwitcherOS: Idle — Left: Screen • Right: Region • Middle: Open App\"}"
+}
+
+if pgrep -f -n "gpu-screen-recorder" >/dev/null; then
+  recording_json
+elif pgrep -x slurp >/dev/null; then
+  selecting_json
+else
+  idle_json
+fi
+

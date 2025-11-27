@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# ww-audio-toggle: toggle mute/unmute for default audio sink (PipeWire-first)
+
+set -euo pipefail
+
+# 1) PipeWire (wpctl) – preferido
+if command -v wpctl >/dev/null 2>&1; then
+  wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+  exit 0
+fi
+
+# 2) Fallback: PulseAudio / pipewire-pulse (pactl)
+if command -v pactl >/dev/null 2>&1; then
+  default_sink="$(pactl get-default-sink 2>/dev/null || pactl info 2>/dev/null | awk -F': ' '/Default Sink:/{print $2; exit}')"
+
+  if [[ -n "${default_sink:-}" ]]; then
+    pactl set-sink-mute "$default_sink" toggle
+  else
+    pactl set-sink-mute @DEFAULT_SINK@ toggle
+  fi
+  exit 0
+fi
+
+echo "ww-audio-toggle: no wpctl or pactl found" >&2
+exit 1
+

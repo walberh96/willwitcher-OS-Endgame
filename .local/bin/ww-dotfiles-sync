@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Change this to your real dotfiles repo URL
+DOTFILES_REPO="${DOTFILES_REPO:-https://github.com/walberh96/dotfiles.git}"
+DOTFILES_DIR="${HOME}/dotfiles"
+
+need_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "Error: '$1' is required but not installed." >&2
+    exit 1
+  fi
+}
+
+# We always need stow
+need_cmd stow
+
+# Clone only if the directory does not exist
+if [ ! -d "$DOTFILES_DIR" ]; then
+  echo "ww-dotfiles-sync: '$DOTFILES_DIR' does not exist, cloning from repo..."
+  need_cmd git
+  git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+else
+  echo "ww-dotfiles-sync: using existing dotfiles directory at '$DOTFILES_DIR' (no git pull)."
+fi
+
+cd "$DOTFILES_DIR"
+
+echo "ww-dotfiles-sync: applying stow packages..."
+for dir in */; do
+  [ -d "$dir" ] || continue
+  case "$dir" in
+    .git/ ) continue ;;
+  esac
+
+  pkg="${dir%/}"
+  echo "  -> stow $pkg"
+  stow -R -t "$HOME" "$pkg"
+done
+
+echo "ww-dotfiles-sync: done."
+

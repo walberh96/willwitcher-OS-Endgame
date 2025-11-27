@@ -1,0 +1,339 @@
+#!/usr/bin/env bash
+# =============================================================================
+# ww-rec — WillwitcherOS "complete" wrapper for gpu-screen-recorder
+# =============================================================================
+# This wrapper is built *only* from the official gpu-screen-recorder --help
+# text you provided. It does not invent new backend behavior; it just:
+#
+#   • Provides subcommands for common actions.
+#   • Forwards all gpu-screen-recorder options unchanged.
+#   • Wraps the documented signals (SIGINT, SIGUSR1, SIGUSR2, SIGRTMIN+N).
+#
+# -----------------------------------------------------------------------------
+# SUBCOMMANDS
+# -----------------------------------------------------------------------------
+#
+# 1) Start / configure recording
+#
+#   ww-rec record [GPU_SCREEN_RECORDER_OPTIONS...]
+#       → Direct passthrough. Every gpu-screen-recorder option is supported:
+#         -w, -c, -s, -region, -f, -a, -q, -r, -replay-storage,
+#         -restart-replay-on-save, -k, -ac, -ab, -oc, -fm, -bm, -cr, -tune,
+#         -df, -sc, -p, -cursor, -keyint, -restore-portal-session,
+#         -portal-session-token-filepath, -encoder, -o, -ro, -v, -gl-debug,
+#         --info, --list-capture-options, --list-audio-devices,
+#         --list-application-audio, --version, -h, --help.
+#
+#   ww-rec screen [GPU_SCREEN_RECORDER_OPTIONS...]
+#       → Convenience for:
+#           gpu-screen-recorder -w screen [OPTIONS...]
+#
+#   ww-rec screen-direct [GPU_SCREEN_RECORDER_OPTIONS...]
+#       → Convenience for:
+#           gpu-screen-recorder -w screen-direct [OPTIONS...]
+#
+#   ww-rec focused [GPU_SCREEN_RECORDER_OPTIONS...]
+#       → Convenience for:
+#           gpu-screen-recorder -w focused [OPTIONS...]
+#
+#   ww-rec window <WINDOW_ID> [GPU_SCREEN_RECORDER_OPTIONS...]
+#       → Convenience for:
+#           gpu-screen-recorder -w <WINDOW_ID> [OPTIONS...]
+#
+#   ww-rec monitor <MONITOR_NAME> [GPU_SCREEN_RECORDER_OPTIONS...]
+#       → Convenience for:
+#           gpu-screen-recorder -w <MONITOR_NAME> [OPTIONS...]
+#         Monitor names are what `--list-capture-options` prints (e.g. DP-1).
+#
+#   ww-rec portal [GPU_SCREEN_RECORDER_OPTIONS...]
+#       → Convenience for:
+#           gpu-screen-recorder -w portal [OPTIONS...]
+#
+#   ww-rec region [GPU_SCREEN_RECORDER_OPTIONS...]
+#       → Convenience for:
+#           gpu-screen-recorder -w region [OPTIONS...]
+#         You must then provide -region WxH+X+Y yourself.
+#
+#   ww-rec region-slurp [GPU_SCREEN_RECORDER_OPTIONS...]
+#       → Uses the exact example from the documentation:
+#           gpu-screen-recorder -w region -region $(slurp -f "%wx%h+%x+%y") [OPTIONS...]
+#         Requires `slurp` to be installed. If slurp fails, exits non-zero.
+#
+#
+# 2) Info / listing (wrapping documented options)
+#
+#   ww-rec info
+#       → gpu-screen-recorder --info
+#
+#   ww-rec list-capture-options [CARD_PATH]
+#       → gpu-screen-recorder --list-capture-options [CARD_PATH]
+#
+#   ww-rec list-audio-devices
+#       → gpu-screen-recorder --list-audio-devices
+#
+#   ww-rec list-application-audio
+#       → gpu-screen-recorder --list-application-audio
+#
+#   ww-rec version
+#       → gpu-screen-recorder --version
+#
+#
+# 3) Controlling an existing recording (signals from the documentation)
+#
+#   ww-rec stop
+#       → Send SIGINT to gpu-screen-recorder
+#         "Stop and save the recording. When in replay mode this stops
+#          recording without saving."
+#
+#   ww-rec pause
+#       → Send SIGUSR2 to gpu-screen-recorder
+#         "Pause/unpause recording. Only applicable when recording
+#          (not streaming nor replay)."
+#
+#   ww-rec save-replay
+#       → Send SIGUSR1 to gpu-screen-recorder
+#         "Save a replay (when in replay mode)."
+#
+#   ww-rec replay-10s
+#       → Send SIGRTMIN+1 to gpu-screen-recorder
+#         "Save a replay of the last 10 seconds (when in replay mode)."
+#
+#   ww-rec replay-30s
+#       → Send SIGRTMIN+2 to gpu-screen-recorder
+#         "Save a replay of the last 30 seconds (when in replay mode)."
+#
+#   ww-rec replay-60s
+#       → Send SIGRTMIN+3 to gpu-screen-recorder
+#         "Save a replay of the last 60 seconds (when in replay mode)."
+#
+#   ww-rec replay-5m
+#       → Send SIGRTMIN+4 to gpu-screen-recorder
+#         "Save a replay of the last 5 minutes (when in replay mode)."
+#
+#   ww-rec replay-10m
+#       → Send SIGRTMIN+5 to gpu-screen-recorder
+#         "Save a replay of the last 10 minutes (when in replay mode)."
+#
+#   ww-rec replay-30m
+#       → Send SIGRTMIN+6 to gpu-screen-recorder
+#         "Save a replay of the last 30 minutes (when in replay mode)."
+#
+#   ww-rec regular-toggle
+#       → Send SIGRTMIN to gpu-screen-recorder
+#         "Start/stop recording a regular video when in replay/streaming mode."
+#
+#
+# 4) Quick summary of GPU Screen Recorder options (from the documentation)
+#    You can use any of these after `ww-rec record` or after the convenience
+#    subcommands. Example:
+#      ww-rec screen -f 60 -a "default_output|default_input" -o "$HOME/Videos/out.mp4"
+#
+#   -w <window_id|monitor|focused|portal|region|screen|screen-direct>
+#   -c <container_format>         # mp4, mkv, flv, webm...
+#   -s WxH                        # resolution limit, 0x0 = original
+#   -region WxH+X+Y               # region when -w region
+#   -f <fps>                      # target / max frame rate (defaults to 60)
+#   -a <audio_input>              # may be given multiple times; devices/apps
+#   -q <quality|bitrate>          # medium/high/very_high/ultra or kbps with -bm cbr
+#   -r <seconds>                  # replay buffer length (2–86400); enables replay mode
+#   -replay-storage ram|disk      # temporary replay location
+#   -restart-replay-on-save yes|no
+#   -k auto|h264|hevc|av1|vp8|vp9|hevc_hdr|av1_hdr|hevc_10bit|av1_10bit
+#   -ac aac|opus|flac             # audio codec (flac temporarily disabled)
+#   -ab <kbps>                    # audio bitrate; 0 = auto
+#   -oc yes|no                    # overclock memory transfer rate (Nvidia X11)
+#   -fm cfr|vfr|content           # framerate mode
+#   -bm auto|qp|vbr|cbr           # bitrate mode
+#   -cr limited|full              # color range
+#   -tune performance|quality
+#   -df yes|no                    # organize replays in date-based folders
+#   -sc <script_path>             # run script on saved file (regular/replay/screenshot)
+#   -p <plugin_path>              # load plugin; may be repeated
+#   -cursor yes|no                # record cursor
+#   -keyint <seconds>             # keyframe interval (float)
+#   -restore-portal-session yes|no
+#   -portal-session-token-filepath <filepath>
+#   -encoder gpu|cpu              # cpu only works with h264
+#   --info
+#   --list-capture-options [card_path]
+#   --list-audio-devices
+#   --list-application-audio
+#   --version
+#   -o <output_file_or_dir>       # required in replay mode (must be directory)
+#   -ro <output_directory>        # regular recordings in replay/streaming mode
+#   -v yes|no                     # print fps/damage once per second
+#   -gl-debug yes|no              # OpenGL debug output
+#   -h, --help
+#
+# =============================================================================
+
+set -euo pipefail
+
+GSR_BIN="gpu-screen-recorder"
+
+usage() {
+  sed -n '1,200p' "$0" | sed 's/^# \{0,1\}//' | sed -n '1,160p'
+  echo
+  echo "Short usage:"
+  echo "  ww-rec record [gpu-screen-recorder options...]"
+  echo "  ww-rec screen|screen-direct|focused|window|monitor|portal|region|region-slurp [...]"
+  echo "  ww-rec stop|pause|save-replay|replay-10s|replay-30s|replay-60s|replay-5m|replay-10m|replay-30m|regular-toggle"
+  echo "  ww-rec info|list-capture-options|list-audio-devices|list-application-audio|version|help"
+}
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit 0
+fi
+
+cmd="$1"
+shift || true
+
+case "$cmd" in
+  # ---------------------------------------------------------------------------
+  # Direct passthrough: all options supported
+  # ---------------------------------------------------------------------------
+  record)
+    exec "$GSR_BIN" "$@"
+    ;;
+
+  # ---------------------------------------------------------------------------
+  # Convenience wrappers around -w
+  # ---------------------------------------------------------------------------
+  screen)
+    exec "$GSR_BIN" -w screen "$@"
+    ;;
+
+  screen-direct)
+    exec "$GSR_BIN" -w screen-direct "$@"
+    ;;
+
+  focused)
+    exec "$GSR_BIN" -w focused "$@"
+    ;;
+
+  portal)
+    exec "$GSR_BIN" -w portal "$@"
+    ;;
+
+  window)
+    if [[ $# -lt 1 ]]; then
+      echo "ww-rec: 'window' requires a WINDOW_ID argument." >&2
+      exit 1
+    fi
+    window_id="$1"
+    shift
+    exec "$GSR_BIN" -w "$window_id" "$@"
+    ;;
+
+  monitor)
+    if [[ $# -lt 1 ]]; then
+      echo "ww-rec: 'monitor' requires a MONITOR_NAME argument." >&2
+      echo "Use 'ww-rec list-capture-options' to see monitor names." >&2
+      exit 1
+    fi
+    monitor_name="$1"
+    shift
+    exec "$GSR_BIN" -w "$monitor_name" "$@"
+    ;;
+
+  region)
+    # Pure wrapper: sets -w region and lets you provide -region WxH+X+Y yourself.
+    exec "$GSR_BIN" -w region "$@"
+    ;;
+
+  region-slurp)
+    # Uses the exact documented pattern:
+    #   gpu-screen-recorder -w region -region $(slurp -f "%wx%h+%x+%y") -o video.mp4
+    if ! command -v slurp >/dev/null 2>&1; then
+      echo "ww-rec: 'region-slurp' requires 'slurp' to be installed." >&2
+      exit 1
+    fi
+    if ! region_geom=$(slurp -f "%wx%h+%x+%y"); then
+      echo "ww-rec: slurp was cancelled or failed." >&2
+      exit 1
+    fi
+    exec "$GSR_BIN" -w region -region "$region_geom" "$@"
+    ;;
+
+  # ---------------------------------------------------------------------------
+  # Info / listing wrappers
+  # ---------------------------------------------------------------------------
+  info)
+    exec "$GSR_BIN" --info
+    ;;
+
+  list-capture-options)
+    # Optional card_path argument
+    exec "$GSR_BIN" --list-capture-options "$@"
+    ;;
+
+  list-audio-devices)
+    exec "$GSR_BIN" --list-audio-devices
+    ;;
+
+  list-application-audio)
+    exec "$GSR_BIN" --list-application-audio
+    ;;
+
+  version)
+    exec "$GSR_BIN" --version
+    ;;
+
+  # ---------------------------------------------------------------------------
+  # Signal-based control: stop, pause, replay saves
+  # ---------------------------------------------------------------------------
+  stop)
+    pkill -SIGINT -f "$GSR_BIN" || true
+    ;;
+
+  pause)
+    pkill -SIGUSR2 -f "$GSR_BIN" || true
+    ;;
+
+  save-replay)
+    pkill -SIGUSR1 -f "$GSR_BIN" || true
+    ;;
+
+  replay-10s)
+    pkill -SIGRTMIN+1 -f "$GSR_BIN" || true
+    ;;
+
+  replay-30s)
+    pkill -SIGRTMIN+2 -f "$GSR_BIN" || true
+    ;;
+
+  replay-60s)
+    pkill -SIGRTMIN+3 -f "$GSR_BIN" || true
+    ;;
+
+  replay-5m)
+    pkill -SIGRTMIN+4 -f "$GSR_BIN" || true
+    ;;
+
+  replay-10m)
+    pkill -SIGRTMIN+5 -f "$GSR_BIN" || true
+    ;;
+
+  replay-30m)
+    pkill -SIGRTMIN+6 -f "$GSR_BIN" || true
+    ;;
+
+  regular-toggle)
+    pkill -SIGRTMIN -f "$GSR_BIN" || true
+    ;;
+
+  # ---------------------------------------------------------------------------
+  # Help / fallback
+  # ---------------------------------------------------------------------------
+  help|-h|--help)
+    usage
+    ;;
+
+  *)
+    echo "ww-rec: unknown subcommand '$cmd'" >&2
+    usage >&2
+    exit 1
+    ;;
+esac
+

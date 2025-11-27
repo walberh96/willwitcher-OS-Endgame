@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Interactive Git setup script (per user).
+# - Asks for Git user.name and user.email
+# - Sets GitHub CLI (gh) as the credential helper
+# - Optionally runs `gh auth login` if you're not authenticated
+
+# Check dependencies
+if ! command -v git >/dev/null 2>&1; then
+  echo "Error: git is not installed or not in PATH."
+  exit 1
+fi
+
+if ! command -v gh >/dev/null 2>&1; then
+  echo "Error: gh (GitHub CLI) is not installed or not in PATH."
+  echo "Install it and run this script again."
+  exit 1
+fi
+
+echo "=== Git global configuration ==="
+
+# Ask for user.name
+read -rp "Git user.name (your name): " GIT_NAME
+# Ask for user.email
+read -rp "Git user.email (your email): " GIT_EMAIL
+
+echo
+echo "You entered:"
+echo "  user.name  = \"$GIT_NAME\""
+echo "  user.email = \"$GIT_EMAIL\""
+echo
+
+read -rp "Apply these settings? [y/N]: " CONFIRM
+CONFIRM=${CONFIRM:-n}
+
+if [[ "$CONFIRM" != [yY] ]]; then
+  echo "Aborted. No changes were made."
+  exit 0
+fi
+
+# Apply git configs (per user: --global)
+git config --global user.name "$GIT_NAME"
+git config --global user.email "$GIT_EMAIL"
+
+# Set GitHub CLI as credential helper
+git config --global credential.helper "!gh auth git-credential"
+
+echo
+echo "✅ Git global config updated for this user."
+echo "   user.name          = $(git config --global user.name)"
+echo "   user.email         = $(git config --global user.email)"
+echo "   credential.helper  = $(git config --global credential.helper)"
+
+echo
+echo "=== GitHub authentication via gh ==="
+
+# Check if already authenticated
+if gh auth status >/dev/null 2>&1; then
+  echo "You are already authenticated with GitHub (gh auth status OK)."
+else
+  echo "You are NOT authenticated with GitHub yet."
+  read -rp "Run 'gh auth login' now? [Y/n]: " GH_CONFIRM
+  GH_CONFIRM=${GH_CONFIRM:-y}
+
+  if [[ "$GH_CONFIRM" == [yY] ]]; then
+    echo
+    echo "Running: gh auth login"
+    echo "Follow the interactive prompts to log in to GitHub."
+    echo
+    gh auth login
+    echo
+    if gh auth status >/dev/null 2>&1; then
+      echo "✅ GitHub authentication completed successfully."
+    else
+      echo "⚠️  gh auth login finished, but gh auth status still fails."
+      echo "   You may need to re-run 'gh auth login' manually."
+    fi
+  else
+    echo "Skipping 'gh auth login'."
+    echo "You can run it later with:"
+    echo "  gh auth login"
+  fi
+fi
+
+echo
+echo "Done."
+

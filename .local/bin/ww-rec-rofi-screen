@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+# =============================================================================
+# ww-rec-rofi-screen — Rofi menu for full-screen recording with gpu-screen-recorder
+# =============================================================================
+# This script uses patterns described in the gpu-screen-recorder --help:
+#
+#   - Full screen capture:
+#       -w screen
+#
+#   - Audio devices:
+#       -a default_output
+#       -a default_input
+#       -a "default_output|default_input"
+#
+#   - Basic options we use:
+#       -w screen
+#       -f <fps>           (we use 60 as a default)
+#       -a <audio_input>   (optional, can be omitted for no audio)
+#       -o <output_file>   (required for normal recording)
+#
+# Signals (for stopping):
+#   - Send SIGINT to gpu-screen-recorder to stop and save the recording:
+#       pkill -SIGINT -f gpu-screen-recorder
+#
+# Requirements:
+#   - gpu-screen-recorder
+#   - rofi
+#
+# Output:
+#   - Files are saved to: $HOME/Videos/Recordings/screenrecording-YYYY-MM-DD_HH-MM-SS.mp4
+#
+# Menu options when idle:
+#   - Full screen (Output + Input)   → -a "default_output|default_input"
+#   - Full screen (Output only)      → -a default_output
+#   - Full screen (Input only)       → -a default_input
+#   - Full screen (No audio)         → no -a
+#
+# When a recording is active:
+#   -  Stop current recording
+#   -  Cancel
+# =============================================================================
+
+set -euo pipefail
+
+GSR_BIN="gpu-screen-recorder"
+OUTPUT_DIR="$HOME/Videos/Recordings"
+FPS_DEFAULT=60
+
+# Ensure output directory exists
+mkdir -p "$OUTPUT_DIR"
+
+# Simple helper: show a rofi dmenu
+rofi_menu() {
+  rofi -dmenu -p "Screen record" -no-fixed-num-lines -i
+}
+
+# Check if gpu-screen-recorder is running
+is_recording() {
+  pgrep -f "$GSR_BIN" >/dev/null 2>&1
+}
+
+# Stop current recording with SIGINT (as described in the documentation)
+stop_recording() {
+  pkill -SIGINT -f "$GSR_BIN" || true
+}
+
+# Start a full-screen recording with a given "audio mode" (both/output/input/none)
+start_screen_recording() {
+  local audio_mode="$1"
+
+  # Build output filename
+  local filename="$OUTPUT_DIR/screenrecording-$(date +'%Y-%m-%d_%H-%M-%S').mp4"
+
+  # Build audio args according to the documentation:
+  #   -a default_output
+  #   -a default_input
+  #   -a "default_output|default_input"
+  #
+  # If no audio is desired, we simply don't pass -a.
+  local audio_args=()
+  case "$audio_mode" in
+    both)
+      audio_args=(-a "default_output|default_input")
+      ;;
+    output)
+      audio_args=(-a "default_output")
+      ;;
+    input)
+      audio_args=(-a "default_input")
+      ;;
+    none)
+      audio_args=()
+      ;;
+    *)
+      audio_args=()
+      ;;
+  esac
+
+  # Run gpu-screen-recorder with full-screen capture:
+  #   gpu-screen-recorder -w screen -f 60 [audio] -o "$filename"
+  "$GSR_BIN" -w screen -f "$FPS_DEFAULT" "${audio_args[@]}" -o "$filename" &
+}
+
+# -----------------------------------------------------------------------------
+# Main logic:
+#   - If a recording is running: show a menu that includes "Stop current recording".
+#   - If no recording is running: show menu of full-screen + audio profiles.
+# -----------------------------------------------------------------------------
+
+if is_recording; then
+  # Recording active: offer to stop it
+  choice=$(printf " Stop current recording\n Cancel\n" | rofi_menu || true)
+
+  case "$choice" in
+    " Stop current recording")
+      stop_recording
+      ;;
+    *)
+      # Cancel or empty selection
+      ;;
+  esac
+  exit 0
+fi
+
+# No recording active: show full screen menu
+choice=$(printf "%s\n" \
+  " Full screen (Output + Input)" \
+  " Full screen (Output only)" \
+  " Full screen (Input only)" \
+  " Full screen (No audio)" \
+  "Open App" \
+  " Cancel" | rofi_menu || true)
+
+case "$choice" in
+  " Full screen (Output + Input)")
+    start_screen_recording "both"
+    ;;
+  " Full screen (Output only)")
+    start_screen_recording "output"
+    ;;
+  " Full screen (Input only)")
+    start_screen_recording "input"
+    ;;
+  " Full screen (No audio)")
+    start_screen_recording "none"
+    ;;
+    "Open App")
+    gpu-screen-recorder-gtk >/dev/null 2>&1 &
+    ;;
+  *)
+    # Cancel or empty selection
+    ;;
+esac
+

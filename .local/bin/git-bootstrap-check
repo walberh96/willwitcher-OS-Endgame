@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# NO usamos 'set -e' aquí para no abortar si git config falla
+set -u
+
+# Terminal por defecto. Cambia a "wezterm" o lo que uses.
+TERMINAL="${TERMINAL:-kitty}"
+SETUP_SCRIPT="$HOME/.local/bin/setup-git-gh.sh"
+
+# Si git no está, no hacemos nada.
+if ! command -v git >/dev/null 2>&1; then
+  exit 0
+fi
+
+# Si el script de setup no existe, no hacemos nada.
+if [[ ! -x "$SETUP_SCRIPT" ]]; then
+  exit 0
+fi
+
+# ¿Ya está configurado Git para este usuario?
+if git config --global user.name >/dev/null 2>&1 && \
+   git config --global user.email >/dev/null 2>&1; then
+  # Ya configurado: no molestamos.
+  exit 0
+fi
+
+# Si gh no está, tampoco tiene sentido abrir el setup (según tu flujo)
+if ! command -v gh >/dev/null 2>&1; then
+  # Podrías hacer notify-send aquí si quieres.
+  exit 0
+fi
+
+# ¿Tenemos terminal?
+if ! command -v "$TERMINAL" >/dev/null 2>&1; then
+  # Sin terminal gráfico disponible, salimos.
+  exit 0
+fi
+
+# Abrimos la terminal con el script interactivo.
+# Kitty / Alacritty / foot usan "-e". Si usas wezterm,
+# cambia esta línea a: wezterm start -- "$SETUP_SCRIPT"
+"$TERMINAL" -e "$SETUP_SCRIPT" &
+

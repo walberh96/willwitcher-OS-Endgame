@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ============================================================
+# WillwitcherOS custom power script
+# Cierra Steam de forma limpia antes de apagar / reiniciar / salir
+# ============================================================
+
+ACTION="${1:-}"
+
+if [[ -z "$ACTION" ]]; then
+  echo "Uso: $0 {poweroff|reboot|logout}"
+  exit 1
+fi
+
+STEAM_TIMEOUT=20        # segundos a esperar por Steam
+CHECK_INTERVAL=1        # intervalo entre chequeos (segundos)
+STEAM_BIN="$(command -v steam || true)"
+
+close_steam() {
+  # ¿Hay un proceso "steam" corriendo?
+  if ! pgrep -x steam >/dev/null 2>&1; then
+    echo "[steam] No está corriendo, nada que cerrar."
+    return 0
+  fi
+
+  echo "[steam] Pidiendo cierre limpio…"
+
+  if [[ -n "$STEAM_BIN" ]]; then
+    "$STEAM_BIN" -shutdown >/dev/null 2>&1 || true
+  else
+    # fallback si no encuentra el binario (muy raro)
+    pkill -TERM -x steam || true
+  fi
+
+  local waited=0
+  while pgrep -x steam >/dev/null 2>&1; do
+    if (( waited >= STEAM_TIMEOUT )); then
+      echo "[steam] Sigue vivo después de ${STEAM_TIMEOUT}s."
+      echo "[steam] (Opcional) podrías forzar kill aquí si quieres."
+      # Descomenta si quieres forzar:
+      # pkill -KILL -x steam || true
+      break
+    fi
+    sleep "$CHECK_INTERVAL"
+    (( waited += CHECK_INTERVAL ))
+  done
+
+  if ! pgrep -x steam >/dev/null 2>&1; then
+    echo "[steam] Cerrado correctamente."
+  fi
+}
+
+case "$ACTION" in
+  poweroff|shutdown)
+    close_steam
+    echo "[power] Apagando el sistema…"
+    systemctl poweroff
+    ;;
+
+  reboot)
+    close_steam
+    echo "[power] Reiniciando el sistema…"
+    systemctl reboot
+    ;;
+
+  logout|exit)
+    close_steam
+    echo "[power] Cerrando sesión…"
+    if command -v hyprctl >/dev/null 2>&1; then
+      hyprctl dispatch exit
+    else
+      # fallback genérico
+      loginctl terminate-session "${XDG_SESSION_ID:-self}" || true
+    fi
+    ;;
+
+  *)
+    echo "Acción no válida: $ACTION"
+    echo "Uso: $0 {poweroff|reboot|logout}"
+    exit 1
+    ;;
+esac
+

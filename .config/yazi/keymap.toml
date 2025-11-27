@@ -1,0 +1,25 @@
+# Drag & drop files from and to Yazi
+
+# Alt + d  -> copy without override
+[[mgr.prepend_keymap]]
+on   = "<A-d>"
+run  = '''shell --
+  ripdrag --no-click --and-exit --icon-size 64 --target --all "$@" \
+  | while read filepath; do cp -nR "$filepath" .; done
+'''
+desc = "Drag-n-drop files from and to Yazi (no overwrite)"
+
+# Alt + Shift + d  -> copy with override
+[[mgr.prepend_keymap]]
+on   = "<A-D>"
+run  = '''shell --
+  ripdrag --no-click --and-exit --icon-size 64 --target --all "$@" \
+  | while read filepath; do cp -fR "$filepath" .; done
+'''
+desc = "Drag-n-drop files from and to Yazi (overwrite)"
+
+[[mgr.prepend_keymap]]
+on   = "M"
+run  = "plugin mount"
+desc = "Open mount manager"
+

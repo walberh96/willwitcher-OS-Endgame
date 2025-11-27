@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+# =============================================================================
+# ww-rec-rofi-region — Rofi menu for region recording with gpu-screen-recorder
+# =============================================================================
+# This script uses ONLY patterns described in the gpu-screen-recorder --help:
+#
+#   - Region capture:
+#       gpu-screen-recorder -w region -region $(slurp -f "%wx%h+%x+%y") -o video.mp4
+#
+#   - Audio devices:
+#       -a default_output
+#       -a default_input
+#       -a "default_output|default_input"
+#
+#   - Basic options we use:
+#       -w region
+#       -region WxH+X+Y
+#       -f <fps>           (we use 60 as a reasonable default)
+#       -a <audio_input>   (optional, can be omitted for no audio)
+#       -o <output_file>   (required for normal recording)
+#
+# Signals (for stopping):
+#   - Send SIGINT to gpu-screen-recorder to stop and save the recording:
+#       pkill -SIGINT -f gpu-screen-recorder
+#
+# Requirements:
+#   - gpu-screen-recorder
+#   - slurp       (for selecting the region)
+#   - rofi        (for the menu)
+#
+# Output:
+#   - Files are saved to: $HOME/Videos/Recordings/screenrecording-YYYY-MM-DD_HH-MM-SS.mp4
+#
+# Menu options:
+#   - Region (Output + Input)      → -a "default_output|default_input"
+#   - Region (Output only)         → -a default_output
+#   - Region (Input only)          → -a default_input
+#   - Region (No audio)            → no -a
+#   - If gpu-screen-recorder is running, also show: "Stop current recording"
+# =============================================================================
+
+set -euo pipefail
+
+GSR_BIN="gpu-screen-recorder"
+OUTPUT_DIR="$HOME/Videos/Recordings"
+FPS_DEFAULT=60
+
+# Ensure output directory exists
+mkdir -p "$OUTPUT_DIR"
+
+# Simple helper: show a rofi dmenu
+rofi_menu() {
+  rofi -dmenu -p "Region record" -no-fixed-num-lines -i
+}
+
+# Check if gpu-screen-recorder is running
+is_recording() {
+  pgrep -f "$GSR_BIN" >/dev/null 2>&1
+}
+
+# Stop current recording with SIGINT (as described in the documentation)
+stop_recording() {
+  pkill -SIGINT -f "$GSR_BIN" || true
+}
+
+# Start a region recording with a given "audio mode" (both/output/input/none)
+start_region_recording() {
+  local audio_mode="$1"
+
+  # Select region using the exact documented example:
+  #   -region $(slurp -f "%wx%h+%x+%y")
+  if ! command -v slurp >/dev/null 2>&1; then
+    notify-send "ww-rec-rofi-region" "slurp is required for region capture" -u critical || true
+    exit 1
+  fi
+
+  if ! region_geom=$(slurp -f "%wx%h+%x+%y"); then
+    # User cancelled or slurp failed
+    exit 1
+  fi
+
+  # Build output filename
+  local filename="$OUTPUT_DIR/screenrecording-$(date +'%Y-%m-%d_%H-%M-%S').mp4"
+
+  # Build audio args according to the documentation:
+  #   -a default_output
+  #   -a default_input
+  #   -a "default_output|default_input"
+  #
+  # If no audio is desired, we simply don't pass -a.
+  local audio_args=()
+  case "$audio_mode" in
+    both)
+      audio_args=(-a "default_output|default_input")
+      ;;
+    output)
+      audio_args=(-a "default_output")
+      ;;
+    input)
+      audio_args=(-a "default_input")
+      ;;
+    none)
+      audio_args=()
+      ;;
+    *)
+      audio_args=()
+      ;;
+  esac
+
+  # Finally, run gpu-screen-recorder exactly as per documentation:
+  #   gpu-screen-recorder -w region -region "$region_geom" -f 60 [audio] -o "$filename"
+  "$GSR_BIN" -w region -region "$region_geom" -f "$FPS_DEFAULT" "${audio_args[@]}" -o "$filename" &
+}
+
+# -----------------------------------------------------------------------------
+# Main logic:
+#   - If a recording is running: show a menu that includes "Stop current recording".
+#   - If no recording is running: show menu of region + audio profiles.
+# -----------------------------------------------------------------------------
+
+if is_recording; then
+  # Recording active: offer to stop it
+  choice=$(printf " Stop current recording\n Cancel\n" | rofi_menu || true)
+
+  case "$choice" in
+    " Stop current recording")
+      stop_recording
+      ;;
+    *)
+      # Cancel or empty selection
+      ;;
+  esac
+  exit 0
+fi
+
+# No recording active: show full region menu
+choice=$(printf "%s\n" \
+  " Region (Output + Input)" \
+  " Region (Output only)" \
+  " Region (Input only)" \
+  " Region (No audio)" \
+  "Open App" \
+  " Cancel" | rofi_menu || true)
+
+case "$choice" in
+  " Region (Output + Input)")
+    start_region_recording "both"
+    ;;
+  " Region (Output only)")
+    start_region_recording "output"
+    ;;
+  " Region (Input only)")
+    start_region_recording "input"
+    ;;
+  " Region (No audio)")
+    start_region_recording "none"
+    ;;
+    "Open App")
+    gpu-screen-recorder-gtk >/dev/null 2>&1 &
+    ;;
+  *)
+    # Cancel or empty selection
+    ;;
+esac
+

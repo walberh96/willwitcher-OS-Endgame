@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+SINK='@DEFAULT_AUDIO_SINK@'
+STEP='5%'   # 5% por “click” / scroll
+
+case "$1" in
+  up)
+    wpctl set-volume "$SINK" "$STEP+"
+    ;;
+  down)
+    wpctl set-volume "$SINK" "$STEP-"
+    ;;
+  mute|toggle-mute)
+    wpctl set-mute "$SINK" toggle
+    ;;
+  *)
+    echo "Uso: $0 {up|down|mute}" >&2
+    exit 1
+    ;;
+esac
+
+INFO="$(wpctl get-volume "$SINK")"
+
+# Segundo campo = 0.xx
+VOL="$(printf '%s\n' "$INFO" | awk '{print $2}')"
+
+# Porcentaje = 0.xx * 100
+PCT="$(awk -v v="$VOL" 'BEGIN { printf("%d", v * 100) }')"
+
+# ¿Está muteado?
+if printf '%s\n' "$INFO" | grep -q '\[MUTED\]'; then
+  ICON=""         # Nerd Font mute
+  TITLE="$ICON  Volume"
+  TEXT="Muted"
+  PCT=0
+else
+  if [ "$PCT" -lt 50 ]; then
+    ICON=""       # bajo
+  else
+    ICON=""       # alto
+  fi
+  TITLE="$ICON  Volume"
+  TEXT="${PCT}%"
+fi
+
+# Notificación SOLO con texto (Nerd Font), sin -i (sin imagen del icon theme)
+notify-send -t 1500 \
+  "$TITLE" "$TEXT" \
+  -h int:value:"$PCT" \
+  -h string:x-canonical-private-synchronous:volume
+

@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Necesitamos hyprctl para aplicar el cursor en Hyprland
+if ! command -v hyprctl >/dev/null 2>&1; then
+  echo "ww-apply-cursor: hyprctl not found, skipping." >&2
+  exit 0
+fi
+
+CONFIG_HOME="${XDG_CONFIG_HOME:-"$HOME/.config"}"
+GTK3_DIR="$CONFIG_HOME/gtk-3.0"
+GTK3_INI="$GTK3_DIR/settings.ini"
+
+# Si no existe settings.ini, no hacemos nada
+if [ ! -f "$GTK3_INI" ]; then
+  echo "ww-apply-cursor: $GTK3_INI not found, skipping." >&2
+  exit 0
+fi
+
+# Leer cursor theme desde settings.ini
+cursor=$(
+  awk -F= '
+    /^[[:space:]]*gtk-cursor-theme-name[[:space:]]*=/ {
+      # $2 es el valor después del '='
+      gsub(/^[ \t]+|[ \t]+$/, "", $2);
+      print $2
+    }
+  ' "$GTK3_INI" | tail -n1
+)
+
+# Leer cursor size desde settings.ini
+size_raw=$(
+  awk -F= '
+    /^[[:space:]]*gtk-cursor-theme-size[[:space:]]*=/ {
+      gsub(/^[ \t]+|[ \t]+$/, "", $2);
+      print $2
+    }
+  ' "$GTK3_INI" | tail -n1
+)
+
+# Limpiar tamaño para dejar solo dígitos; fallback a 24
+size=$(printf '%s\n' "${size_raw:-}" | tr -dc '0-9')
+[ -z "$size" ] && size=24
+
+# Si no hay cursor definido, no hacemos nada
+if [ -z "${cursor:-}" ]; then
+  echo "ww-apply-cursor: no gtk-cursor-theme-name found in $GTK3_INI, skipping." >&2
+  exit 0
+fi
+
+# Aplicar cursor en Hyprland
+hyprctl setcursor "$cursor" "$size" || {
+  echo "ww-apply-cursor: failed to set cursor \"$cursor\" size $size" >&2
+}
+

@@ -1,0 +1,80 @@
+[opener]
+edit = [
+  # Default editor -> nvim
+  { run = 'nvim "$@"', block = true, for = "unix", desc = "Edit with nvim" },
+]
+
+# Generic archive extractor using Yazi's built-in extract plugin
+extract = [
+  { run = 'ya pub extract --list "$@"', desc = "Extract here", for = "unix" },
+  { run = 'ya pub extract --list %*',   desc = "Extract here", for = "windows" },
+]
+
+# Tar / tar.* archives extracted with tar directly (handles .tar, .tar.gz, .tar.xz, etc.)
+extract_tar = [
+  { run = 'for path in "$@"; do tar -xf "$path"; done', desc = "Extract tar/tar.* archive here", for = "unix" },
+]
+
+# Open archives in a GUI (Xarchiver)
+archive_gui = [
+  { run = 'xarchiver "$@"', desc = "Open in Xarchiver", orphan = true, for = "unix" },
+]
+
+pdf = [
+  # PDF reader -> zathura
+  { run = 'zathura "$@"', block = false, orphan = true, for = "unix", desc = "Open PDF with zathura" },
+]
+
+image = [
+  # Image viewer -> qimgv
+  { run = 'qimgv "$@"', block = false, orphan = true, for = "unix", desc = "Open image with qimgv" },
+]
+
+video = [
+  # Video (and audio) -> mpv
+  { run = 'mpv "$@"', block = false, orphan = true, for = "unix", desc = "Play media with mpv" },
+]
+
+# Generic fallback to system default
+open = [
+  { run = 'xdg-open "$@"', block = false, orphan = true, for = "unix", desc = "System default" },
+]
+
+[open]
+rules = [
+  # Any text file -> nvim
+  { mime = "text/*", use = "edit" },
+
+  # PDF files -> zathura
+  { mime = "application/pdf", use = "pdf" },
+
+  # Images -> qimgv
+  { mime = "image/*", use = "image" },
+
+  # Audio and video -> mpv
+  { mime = "audio/*", use = "video" },
+  { mime = "video/*", use = "video" },
+
+  # Tar archives -> use tar-based extractor + optional GUI
+  { name = "*.tar",     use = [ "extract_tar", "archive_gui" ] },
+  { name = "*.tar.gz",  use = [ "extract_tar", "archive_gui" ] },
+  { name = "*.tgz",     use = [ "extract_tar", "archive_gui" ] },
+  { name = "*.tar.bz2", use = [ "extract_tar", "archive_gui" ] },
+  { name = "*.tbz2",    use = [ "extract_tar", "archive_gui" ] },
+  { name = "*.tar.xz",  use = [ "extract_tar", "archive_gui" ] },
+  { name = "*.txz",     use = [ "extract_tar", "archive_gui" ] },
+
+  # Other archives - default: extract, interactive: choose GUI as well
+  { mime = "application/zip",              use = [ "extract", "archive_gui" ] },
+  { mime = "application/x-zip-compressed", use = [ "extract", "archive_gui" ] },
+  { mime = "application/gzip",             use = [ "extract", "archive_gui" ] },
+  { mime = "application/x-bzip2",          use = [ "extract", "archive_gui" ] },
+  { mime = "application/x-xz",             use = [ "extract", "archive_gui" ] },
+  { mime = "application/x-7z-compressed",  use = [ "extract", "archive_gui" ] },
+  { mime = "application/x-rar-compressed", use = [ "extract", "archive_gui" ] },
+  { mime = "application/vnd.rar",          use = [ "extract", "archive_gui" ] },
+
+  # Anything else -> xdg-open
+  { name = "*", use = "open" },
+]
+

@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Set default apps for common MIME types using xdg-mime
+
+set -e
+
+# Browser -> Firefox
+xdg-mime default firefox.desktop x-scheme-handler/http
+xdg-mime default firefox.desktop x-scheme-handler/https
+xdg-mime default firefox.desktop text/html
+
+# File manager -> Yazi
+xdg-mime default yazi.desktop inode/directory
+
+# Text editor -> Neovim
+xdg-mime default nvim.desktop text/plain
+
+# PDF -> Zathura
+xdg-mime default org.pwmt.zathura.desktop application/pdf
+
+# Images -> qimgv
+for mime in image/png image/jpeg image/jpg image/gif image/webp; do
+  xdg-mime default qimgv.desktop "$mime"
+done
+
+# Video -> mpv
+for mime in video/mp4 video/x-matroska video/x-msvideo video/webm; do
+  xdg-mime default mpv.desktop "$mime"
+done
+
+# Audio -> mpv
+for mime in audio/mpeg audio/flac audio/wav audio/ogg; do
+  xdg-mime default mpv.desktop "$mime"
+done
+
+# Archives -> xarchiver
+for mime in application/zip application/x-tar application/x-7z-compressed application/x-bzip2 application/x-xz; do
+  xdg-mime default xarchiver.desktop "$mime"
+done
+
+# Office -> LibreOffice
+# Writer
+xdg-mime default libreoffice-writer.desktop application/vnd.oasis.opendocument.text
+xdg-mime default libreoffice-writer.desktop application/msword
+xdg-mime default libreoffice-writer.desktop application/vnd.openxmlformats-officedocument.wordprocessingml.document
+
+# Calc
+xdg-mime default libreoffice-calc.desktop application/vnd.oasis.opendocument.spreadsheet
+xdg-mime default libreoffice-calc.desktop application/vnd.ms-excel
+xdg-mime default libreoffice-calc.desktop application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+# Impress
+xdg-mime default libreoffice-impress.desktop application/vnd.oasis.opendocument.presentation
+xdg-mime default libreoffice-impress.desktop application/vnd.ms-powerpoint
+xdg-mime default libreoffice-impress.desktop application/vnd.openxmlformats-officedocument.presentationml.presentation
+

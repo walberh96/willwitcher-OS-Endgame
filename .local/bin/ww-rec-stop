@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# =============================================================================
+# ww-rec-stop — Stop gpu-screen-recorder if running, otherwise do nothing
+# =============================================================================
+# Basado únicamente en la documentación de gpu-screen-recorder:
+#
+#   "Send signal SIGINT to gpu-screen-recorder (Ctrl+C, or
+#    pkill -SIGINT -f gpu-screen-recorder) to stop and save the recording.
+#    When in replay mode this stops recording without saving."
+#
+# Comportamiento:
+#   - Si gpu-screen-recorder está corriendo:
+#       pkill -SIGINT -f gpu-screen-recorder
+#   - Si no está corriendo:
+#       no hace nada (sin salida, sin notificaciones).
+# =============================================================================
+
+set -euo pipefail
+
+GSR_BIN="gpu-screen-recorder"
+
+if pgrep -f "$GSR_BIN" >/dev/null 2>&1; then
+  pkill -SIGINT -f "$GSR_BIN" || true
+fi
+

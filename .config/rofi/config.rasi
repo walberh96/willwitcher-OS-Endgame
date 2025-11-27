@@ -1,0 +1,22 @@
+configuration {
+  /* Which “modes” rofi has */
+  modes: [ drun, run, window ];
+
+  /* Font (you can change size or family) */
+  font: "Hack Nerd Font 14";
+
+  /* Show app icons in drun mode */
+  show-icons: true;
+  icon-theme: "Dracula";
+
+  /* How entries look in drun mode */
+  drun-display-format: "{name}";
+
+  /* General behavior tweaks */
+  lines: 12;                /* max visible rows before scrolling */
+  cycle: true;              /* wrap-around navigation */
+  case-sensitive: false;    /* case-insensitive matching */
+}
+
+/* Load our custom Catppuccin Mocha theme */
+@theme "~/.config/rofi/themes/catppuccin-mocha.rasi"

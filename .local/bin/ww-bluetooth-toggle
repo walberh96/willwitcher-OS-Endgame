@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# ww-bluetooth-toggle: toggle Bluetooth on/off using bluetoothctl
+
+set -euo pipefail
+
+if ! command -v bluetoothctl >/dev/null 2>&1; then
+  echo "bluetoothctl not found (BlueZ is required)" >&2
+  exit 1
+fi
+
+powered="$(bluetoothctl show 2>/dev/null | awk -F': ' '/Powered:/ {print $2; exit}')"
+
+if [[ "$powered" == "yes" ]]; then
+  echo "power off" | bluetoothctl >/dev/null 2>&1
+else
+  echo "power on" | bluetoothctl >/dev/null 2>&1
+fi
+
