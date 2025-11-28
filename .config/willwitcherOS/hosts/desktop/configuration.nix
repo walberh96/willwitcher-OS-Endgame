@@ -161,11 +161,6 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   ############################
-  # GNOME Keyring
-  ############################
-  services.gnome.gnome-keyring.enable = true;
-
-  ############################
   # QMK / Keychron
   ############################
   hardware.keyboard.qmk.enable = true;
