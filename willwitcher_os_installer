@@ -3,11 +3,13 @@ set -euo pipefail
 
 ###############################################################################
 # WillwitcherOS installer
-# - Clona/actualiza el repo de dotfiles en ~/dotfiles (shallow clone)
-# - Ejecuta nixos-rebuild switch --flake .#desktop (con flakes habilitados)
-# - Borra la copia local de este installer dentro de ~/dotfiles
-# - Limpia conflictos y aplica GNU stow
-# - Recarga Hyprland si está corriendo
+# - If ~/dotfiles exists and IS this repo: delete it
+# - If ~/dotfiles exists and is NOT this repo: move it aside (dotfiles_user, etc.)
+# - Shallow-clones the WillwitcherOS repo into ~/dotfiles
+# - Runs nixos-rebuild switch --flake .#desktop (with flakes enabled)
+# - Removes the local copy of this installer from the cloned repo
+# - Cleans conflicts and applies GNU stow
+# - Reloads Hyprland (best-effort) and reboots the system
 ###############################################################################
 
 DOTFILES_REPO="${DOTFILES_REPO:-https://github.com/walberh96/willwitcher-OS-Endgame.git}"
@@ -42,9 +44,9 @@ move_existing_dotfiles_dir() {
     i=$((i + 1))
   done
 
-  echo_sub "Existing '$src' will be moved to '$dst' to avoid conflicts."
+  echo_sub "Existing non-WillwitcherOS dotfiles will be moved to '$dst'."
   mv "$src" "$dst"
-  echo_sub "Done. Backup kept at '$dst'."
+  echo_sub "Backup kept at '$dst'."
 }
 
 # --- Checks ----------------------------------------------------------------
@@ -55,49 +57,33 @@ need_cmd stow
 echo_step "WillwitcherOS dotfiles installer"
 
 ###############################################################################
-# 1) Clone or update repo into ~/dotfiles (with remote validation + backup)
+# 1) Handle existing ~/dotfiles
+#    - If it is this repo: delete
+#    - If it is not this repo: move aside
 ###############################################################################
-echo_step "Preparing dotfiles repo in '$DOTFILES_DIR'"
+echo_step "Preparing fresh dotfiles repo in '$DOTFILES_DIR'"
 
-if [ -d "$DOTFILES_DIR/.git" ]; then
-  echo_sub "Existing git repo detected in '$DOTFILES_DIR'. Checking remote origin..."
+if [ -e "$DOTFILES_DIR" ]; then
+  if [ -d "$DOTFILES_DIR/.git" ]; then
+    echo_sub "'$DOTFILES_DIR' is a git repo. Checking its origin remote..."
+    remote="$(git -C "$DOTFILES_DIR" remote get-url origin 2>/dev/null || echo "")"
 
-  remote="$(git -C "$DOTFILES_DIR" remote get-url origin 2>/dev/null || echo "")"
-
-  if [ -z "$remote" ]; then
-    echo_sub "Repo has no 'origin' remote configured."
-    move_existing_dotfiles_dir
-    echo_sub "Shallow-cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
-    git clone --depth 1 --single-branch "$DOTFILES_REPO" "$DOTFILES_DIR"
-    echo_sub "Clone complete."
-  elif [ "$remote" != "$DOTFILES_REPO" ]; then
-    echo_sub "Current repo origin does not match WillwitcherOS:"
-    echo_sub "  current origin: $remote"
-    echo_sub "  expected:       $DOTFILES_REPO"
-    move_existing_dotfiles_dir
-    echo_sub "Shallow-cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
-    git clone --depth 1 --single-branch "$DOTFILES_REPO" "$DOTFILES_DIR"
-    echo_sub "Clone complete."
-  else
-    echo_sub "Remote matches expected repo. Updating from remote (git pull --ff-only)..."
-    if git -C "$DOTFILES_DIR" pull --ff-only; then
-      echo_sub "Repo updated successfully."
+    if [ "$remote" = "$DOTFILES_REPO" ]; then
+      echo_sub "Existing repo matches WillwitcherOS. It will be deleted and replaced."
+      rm -rf "$DOTFILES_DIR"
     else
-      echo_sub "WARNING: git pull failed (non-fast-forward or offline). Using local copy."
+      echo_sub "Existing repo does NOT match WillwitcherOS (origin: '$remote')."
+      move_existing_dotfiles_dir
     fi
+  else
+    echo_sub "'$DOTFILES_DIR' exists but is not a git repo."
+    move_existing_dotfiles_dir
   fi
-
-elif [ -e "$DOTFILES_DIR" ]; then
-  echo_sub "'$DOTFILES_DIR' exists but is not a git repo."
-  move_existing_dotfiles_dir
-  echo_sub "Shallow-cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
-  git clone --depth 1 --single-branch "$DOTFILES_REPO" "$DOTFILES_DIR"
-  echo_sub "Clone complete."
-else
-  echo_sub "Shallow-cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
-  git clone --depth 1 --single-branch "$DOTFILES_REPO" "$DOTFILES_DIR"
-  echo_sub "Clone complete."
 fi
+
+echo_sub "Shallow-cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
+git clone --depth 1 --single-branch "$DOTFILES_REPO" "$DOTFILES_DIR"
+echo_sub "Clone complete."
 
 cd "$DOTFILES_DIR"
 
@@ -144,7 +130,7 @@ fi
 ###############################################################################
 echo_step "Cleaning installer script from cloned repo (to avoid stowing it)"
 
-INSTALLER_NAME="${INSTALLER_NAME:-install_willwitcher_os}"
+INSTALLER_NAME="${INSTALLER_NAME:-willwitcher_os_installer}"
 if [ -f "$DOTFILES_DIR/$INSTALLER_NAME" ]; then
   echo_sub "Removing '$DOTFILES_DIR/$INSTALLER_NAME' from repo working tree."
   rm -f "$DOTFILES_DIR/$INSTALLER_NAME"
@@ -182,8 +168,6 @@ for pkg_dir in */; do
     printf '%s\n' "$conflicts" | while IFS= read -r line; do
       case "$line" in
         CONFLICT:\ *)
-          # Example line:
-          # CONFLICT: .config/hypr/hyprland.conf already exists but is not a symlink
           rel="${line#CONFLICT: }"
           rel="${rel%% already exists*}"
           rel="$(printf '%s\n' "$rel" | sed 's/^[[:space:]]*//')"
@@ -205,25 +189,41 @@ for pkg_dir in */; do
 done
 
 ###############################################################################
-# 5) Reload Hyprland (if running)
+# 5) Reload Hyprland and reboot
 ###############################################################################
-echo_step "Reloading Hyprland config (if Hyprland is running)"
+echo_step "Reloading Hyprland config (best effort)"
 
 if command -v hyprctl >/dev/null 2>&1; then
-  if pgrep -x Hyprland >/dev/null 2>&1; then
-    echo_sub "Hyprland detected. Running 'hyprctl reload'..."
-    if hyprctl reload; then
-      echo_sub "Hyprland reloaded successfully."
-    else
-      echo_sub "WARNING: 'hyprctl reload' failed."
-    fi
-  else
-    echo_sub "Hyprland does not appear to be running. Skipping reload."
+  # Do not fail the installer if Hyprland is not running or reload fails
+  if ! hyprctl reload >/dev/null 2>&1; then
+    echo_sub "hyprctl reload failed (Hyprland may not be running). Continuing to reboot."
   fi
 else
-  echo_sub "Command 'hyprctl' not found. Skipping Hyprland reload."
+  echo_sub "Command 'hyprctl' not found. Skipping reload."
 fi
 
-echo_step "Done. Your WillwitcherOS system and dotfiles should now be installed."
-echo
+echo_step "Rebooting system"
+
+if command -v systemctl >/dev/null 2>&1; then
+  if [ "$(id -u)" -eq 0 ]; then
+    systemctl reboot
+  else
+    if command -v sudo >/dev/null 2>&1; then
+      sudo systemctl reboot
+    else
+      echo_sub "WARNING: 'sudo' not found. Trying plain 'reboot'."
+      reboot || true
+    fi
+  fi
+else
+  if [ "$(id -u)" -eq 0 ]; then
+    reboot
+  else
+    if command -v sudo >/dev/null 2>&1; then
+      sudo reboot
+    else
+      echo_sub "WARNING: neither 'systemctl' nor 'sudo' found. Manual reboot required."
+    fi
+  fi
+fi
 
