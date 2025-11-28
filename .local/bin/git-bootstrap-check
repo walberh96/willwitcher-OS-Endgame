@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -u
 
-SETUP_SCRIPT="$HOME/.local/bin/setup-git-gh.sh"
+SETUP_SCRIPT="$HOME/.local/bin/setup-git-gh"
 
 msg() {
   local text="git-bootstrap: $*"
