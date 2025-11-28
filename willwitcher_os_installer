@@ -3,11 +3,11 @@ set -euo pipefail
 
 ###############################################################################
 # WillwitcherOS installer
-# - Clones/updates the dotfiles repo into ~/dotfiles
-# - Runs nixos-rebuild switch --flake .#desktop (with flakes enabled)
-# - Removes the local copy of this installer from the cloned repo
-# - Cleans conflicts and applies GNU stow
-# - Reloads Hyprland if it is running
+# - Clona/actualiza el repo de dotfiles en ~/dotfiles (shallow clone)
+# - Ejecuta nixos-rebuild switch --flake .#desktop (con flakes habilitados)
+# - Borra la copia local de este installer dentro de ~/dotfiles
+# - Limpia conflictos y aplica GNU stow
+# - Recarga Hyprland si está corriendo
 ###############################################################################
 
 DOTFILES_REPO="${DOTFILES_REPO:-https://github.com/walberh96/willwitcher-OS-Endgame.git}"
@@ -67,16 +67,16 @@ if [ -d "$DOTFILES_DIR/.git" ]; then
   if [ -z "$remote" ]; then
     echo_sub "Repo has no 'origin' remote configured."
     move_existing_dotfiles_dir
-    echo_sub "Cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
-    git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+    echo_sub "Shallow-cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
+    git clone --depth 1 --single-branch "$DOTFILES_REPO" "$DOTFILES_DIR"
     echo_sub "Clone complete."
   elif [ "$remote" != "$DOTFILES_REPO" ]; then
     echo_sub "Current repo origin does not match WillwitcherOS:"
     echo_sub "  current origin: $remote"
     echo_sub "  expected:       $DOTFILES_REPO"
     move_existing_dotfiles_dir
-    echo_sub "Cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
-    git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+    echo_sub "Shallow-cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
+    git clone --depth 1 --single-branch "$DOTFILES_REPO" "$DOTFILES_DIR"
     echo_sub "Clone complete."
   else
     echo_sub "Remote matches expected repo. Updating from remote (git pull --ff-only)..."
@@ -90,12 +90,12 @@ if [ -d "$DOTFILES_DIR/.git" ]; then
 elif [ -e "$DOTFILES_DIR" ]; then
   echo_sub "'$DOTFILES_DIR' exists but is not a git repo."
   move_existing_dotfiles_dir
-  echo_sub "Cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
-  git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+  echo_sub "Shallow-cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
+  git clone --depth 1 --single-branch "$DOTFILES_REPO" "$DOTFILES_DIR"
   echo_sub "Clone complete."
 else
-  echo_sub "Cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
-  git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+  echo_sub "Shallow-cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
+  git clone --depth 1 --single-branch "$DOTFILES_REPO" "$DOTFILES_DIR"
   echo_sub "Clone complete."
 fi
 
