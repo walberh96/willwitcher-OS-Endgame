@@ -1,0 +1,229 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+###############################################################################
+# WillwitcherOS installer
+# - Clones/updates the dotfiles repo into ~/dotfiles
+# - Runs nixos-rebuild switch --flake .#desktop (with flakes enabled)
+# - Removes the local copy of this installer from the cloned repo
+# - Cleans conflicts and applies GNU stow
+# - Reloads Hyprland if it is running
+###############################################################################
+
+DOTFILES_REPO="${DOTFILES_REPO:-https://github.com/walberh96/willwitcher-OS-Endgame.git}"
+DOTFILES_DIR="${HOME}/dotfiles"
+
+# --- Helpers ---------------------------------------------------------------
+
+need_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "ERROR: required command '$1' is not installed." >&2
+    exit 1
+  fi
+}
+
+echo_step() {
+  echo
+  echo "==> $*"
+}
+
+echo_sub() {
+  echo "   $*"
+}
+
+move_existing_dotfiles_dir() {
+  local src="$DOTFILES_DIR"
+  local base="${HOME}/dotfiles_user"
+  local dst="$base"
+  local i=1
+
+  while [ -e "$dst" ]; do
+    dst="${base}_$i"
+    i=$((i + 1))
+  done
+
+  echo_sub "Existing '$src' will be moved to '$dst' to avoid conflicts."
+  mv "$src" "$dst"
+  echo_sub "Done. Backup kept at '$dst'."
+}
+
+# --- Checks ----------------------------------------------------------------
+
+need_cmd git
+need_cmd stow
+
+echo_step "WillwitcherOS dotfiles installer"
+
+###############################################################################
+# 1) Clone or update repo into ~/dotfiles (with remote validation + backup)
+###############################################################################
+echo_step "Preparing dotfiles repo in '$DOTFILES_DIR'"
+
+if [ -d "$DOTFILES_DIR/.git" ]; then
+  echo_sub "Existing git repo detected in '$DOTFILES_DIR'. Checking remote origin..."
+
+  remote="$(git -C "$DOTFILES_DIR" remote get-url origin 2>/dev/null || echo "")"
+
+  if [ -z "$remote" ]; then
+    echo_sub "Repo has no 'origin' remote configured."
+    move_existing_dotfiles_dir
+    echo_sub "Cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
+    git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+    echo_sub "Clone complete."
+  elif [ "$remote" != "$DOTFILES_REPO" ]; then
+    echo_sub "Current repo origin does not match WillwitcherOS:"
+    echo_sub "  current origin: $remote"
+    echo_sub "  expected:       $DOTFILES_REPO"
+    move_existing_dotfiles_dir
+    echo_sub "Cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
+    git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+    echo_sub "Clone complete."
+  else
+    echo_sub "Remote matches expected repo. Updating from remote (git pull --ff-only)..."
+    if git -C "$DOTFILES_DIR" pull --ff-only; then
+      echo_sub "Repo updated successfully."
+    else
+      echo_sub "WARNING: git pull failed (non-fast-forward or offline). Using local copy."
+    fi
+  fi
+
+elif [ -e "$DOTFILES_DIR" ]; then
+  echo_sub "'$DOTFILES_DIR' exists but is not a git repo."
+  move_existing_dotfiles_dir
+  echo_sub "Cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
+  git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+  echo_sub "Clone complete."
+else
+  echo_sub "Cloning repo from '$DOTFILES_REPO' into '$DOTFILES_DIR'..."
+  git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+  echo_sub "Clone complete."
+fi
+
+cd "$DOTFILES_DIR"
+
+###############################################################################
+# 2) Full NixOS rebuild from the WillwitcherOS flake (if available)
+###############################################################################
+echo_step "Attempting full NixOS rebuild from WillwitcherOS flake (if available)"
+
+FLAKE_DIR="$DOTFILES_DIR/.config/willwitcherOS"
+
+if command -v nixos-rebuild >/dev/null 2>&1 && [ -d "$FLAKE_DIR" ]; then
+  echo_sub "Found 'nixos-rebuild' and flake directory '$FLAKE_DIR'."
+
+  (
+    cd "$FLAKE_DIR"
+
+    # Always enable flakes/nix-command via --option for live ISO / default setups
+    if [ "$(id -u)" -eq 0 ]; then
+      echo_sub "Running: nixos-rebuild --option experimental-features 'nix-command flakes' switch --flake .#desktop"
+      nixos-rebuild \
+        --option experimental-features "nix-command flakes" \
+        switch --flake ".#desktop"
+    else
+      if command -v sudo >/dev/null 2>&1; then
+        echo_sub "Running: sudo nixos-rebuild --option experimental-features 'nix-command flakes' switch --flake .#desktop"
+        sudo nixos-rebuild \
+          --option experimental-features "nix-command flakes" \
+          switch --flake ".#desktop"
+      else
+        echo_sub "WARNING: 'sudo' not found, cannot run nixos-rebuild as root. Skipping NixOS rebuild."
+      fi
+    fi
+  )
+else
+  if ! command -v nixos-rebuild >/dev/null 2>&1; then
+    echo_sub "WARNING: 'nixos-rebuild' not found. Skipping NixOS rebuild."
+  elif [ ! -d "$FLAKE_DIR" ]; then
+    echo_sub "WARNING: flake directory '$FLAKE_DIR' not found. Skipping NixOS rebuild."
+  fi
+fi
+
+###############################################################################
+# 3) Remove local copy of installer from the cloned repo
+###############################################################################
+echo_step "Cleaning installer script from cloned repo (to avoid stowing it)"
+
+INSTALLER_NAME="${INSTALLER_NAME:-install_willwitcher_os}"
+if [ -f "$DOTFILES_DIR/$INSTALLER_NAME" ]; then
+  echo_sub "Removing '$DOTFILES_DIR/$INSTALLER_NAME' from repo working tree."
+  rm -f "$DOTFILES_DIR/$INSTALLER_NAME"
+else
+  echo_sub "No local installer script '$INSTALLER_NAME' found in repo (nothing to remove)."
+fi
+
+###############################################################################
+# 4) Apply stow per package, removing all conflicting files/dirs in $HOME
+###############################################################################
+echo_step "Applying stow packages (removing conflicts first)"
+
+for pkg_dir in */; do
+  [ -d "$pkg_dir" ] || continue
+
+  case "$pkg_dir" in
+    .git/ )
+      continue
+      ;;
+  esac
+
+  pkg="${pkg_dir%/}"
+
+  echo
+  echo_sub "Processing package: $pkg"
+
+  echo_sub "Dry-run with stow to detect conflicts..."
+  conflicts="$(stow -n -v -t "$HOME" "$pkg" 2>&1 || true)"
+
+  # Show stow's dry-run output so the user can see what is happening
+  echo "$conflicts"
+
+  if printf '%s\n' "$conflicts" | grep -q '^CONFLICT:'; then
+    echo_sub "Conflicts detected. Removing conflicting paths:"
+    printf '%s\n' "$conflicts" | while IFS= read -r line; do
+      case "$line" in
+        CONFLICT:\ *)
+          # Example line:
+          # CONFLICT: .config/hypr/hyprland.conf already exists but is not a symlink
+          rel="${line#CONFLICT: }"
+          rel="${rel%% already exists*}"
+          rel="$(printf '%s\n' "$rel" | sed 's/^[[:space:]]*//')"
+
+          [ -n "$rel" ] || continue
+
+          target="$HOME/$rel"
+          echo_sub "  rm -rf '$target'"
+          rm -rf -- "$target"
+          ;;
+      esac
+    done
+  else
+    echo_sub "No conflicts for package '$pkg'."
+  fi
+
+  echo_sub "Applying stow for '$pkg'..."
+  stow -R -t "$HOME" "$pkg"
+done
+
+###############################################################################
+# 5) Reload Hyprland (if running)
+###############################################################################
+echo_step "Reloading Hyprland config (if Hyprland is running)"
+
+if command -v hyprctl >/dev/null 2>&1; then
+  if pgrep -x Hyprland >/dev/null 2>&1; then
+    echo_sub "Hyprland detected. Running 'hyprctl reload'..."
+    if hyprctl reload; then
+      echo_sub "Hyprland reloaded successfully."
+    else
+      echo_sub "WARNING: 'hyprctl reload' failed."
+    fi
+  else
+    echo_sub "Hyprland does not appear to be running. Skipping reload."
+  fi
+else
+  echo_sub "Command 'hyprctl' not found. Skipping Hyprland reload."
+fi
+
+echo_step "Done. Your WillwitcherOS system and dotfiles should now be installed."
+echo
+

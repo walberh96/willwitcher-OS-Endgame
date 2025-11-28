@@ -6,7 +6,6 @@
   ############################
   imports = [
     ./hardware-configuration.nix
-    ./init_service.nix
   ];
 
   ############################

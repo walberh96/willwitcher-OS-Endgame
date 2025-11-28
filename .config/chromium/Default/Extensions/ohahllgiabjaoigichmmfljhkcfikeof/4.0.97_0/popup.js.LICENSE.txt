@@ -1,0 +1,37 @@
+/*!
+     * XRegExp 5.1.1
+     * <xregexp.com>
+     * Steven Levithan (c) 2007-present MIT License
+     */
+
+/*!
+     * XRegExp Unicode Base 5.1.1
+     * <xregexp.com>
+     * Steven Levithan (c) 2008-present MIT License
+     */
+
+/*!
+     * XRegExp.build 5.1.1
+     * <xregexp.com>
+     * Steven Levithan (c) 2012-present MIT License
+     */
+
+/*!
+     * XRegExp.matchRecursive 5.1.1
+     * <xregexp.com>
+     * Steven Levithan (c) 2009-present MIT License
+     */
+
+/*!
+     * isobject <https://github.com/jonschlinkert/isobject>
+     *
+     * Copyright (c) 2014-2017, Jon Schlinkert.
+     * Released under the MIT License.
+     */
+
+/*!
+     * shallow-clone <https://github.com/jonschlinkert/shallow-clone>
+     *
+     * Copyright (c) 2015-present, Jon Schlinkert.
+     * Released under the MIT License.
+     */
