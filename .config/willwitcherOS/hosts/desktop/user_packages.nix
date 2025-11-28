@@ -65,13 +65,12 @@ with pkgs; [
   neovim
   swww
   vesktop
-  firefox
   networkmanagerapplet
   ripdrag
   btop
   headsetcontrol
-  brave
   gnused
   nwg-look
   waypaper
+  chromium
 ]

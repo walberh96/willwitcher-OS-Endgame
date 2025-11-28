@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+FLAG_FILE="$HOME/.ww_initialized_flag"
+
+# Always try to restore the last wallpaper
+waypaper --restore
+
+# If the flag file does NOT exist, open Waypaper UI
+if [ ! -f "$FLAG_FILE" ]; then
+  waypaper
+fi
+

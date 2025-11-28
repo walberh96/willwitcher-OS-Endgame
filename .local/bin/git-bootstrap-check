@@ -1,42 +1,46 @@
 #!/usr/bin/env bash
-# NO usamos 'set -e' aquí para no abortar si git config falla
 set -u
 
-# Terminal por defecto. Cambia a "wezterm" o lo que uses.
-TERMINAL="${TERMINAL:-kitty}"
 SETUP_SCRIPT="$HOME/.local/bin/setup-git-gh.sh"
 
-# Si git no está, no hacemos nada.
+msg() {
+  local text="git-bootstrap: $*"
+  echo "$text"
+ }
+
+msg "Starting git-bootstrap-check..."
+
 if ! command -v git >/dev/null 2>&1; then
+  msg "git is not installed or not in PATH. Exiting."
   exit 0
 fi
 
-# Si el script de setup no existe, no hacemos nada.
 if [[ ! -x "$SETUP_SCRIPT" ]]; then
-  exit 0
+  msg "Setup script not found or not executable: $SETUP_SCRIPT"
+  msg "Make sure it exists and run: chmod +x \"$SETUP_SCRIPT\""
+  exit 1
 fi
 
-# ¿Ya está configurado Git para este usuario?
 if git config --global user.name >/dev/null 2>&1 && \
    git config --global user.email >/dev/null 2>&1; then
-  # Ya configurado: no molestamos.
+  msg "Git is already configured for this user (user.name and user.email present). Nothing to do."
   exit 0
 fi
 
-# Si gh no está, tampoco tiene sentido abrir el setup (según tu flujo)
 if ! command -v gh >/dev/null 2>&1; then
-  # Podrías hacer notify-send aquí si quieres.
+  msg "gh (GitHub CLI) is not installed or not in PATH."
+  msg "You can still run the setup script manually in a terminal:"
+  msg "  \"$SETUP_SCRIPT\""
   exit 0
 fi
 
-# ¿Tenemos terminal?
-if ! command -v "$TERMINAL" >/dev/null 2>&1; then
-  # Sin terminal gráfico disponible, salimos.
-  exit 0
+if ! command -v wezterm >/dev/null 2>&1; then
+  msg "wezterm not found in PATH. Cannot open terminal."
+  msg "Run the setup manually:"
+  msg "  \"$SETUP_SCRIPT\""
+  exit 1
 fi
 
-# Abrimos la terminal con el script interactivo.
-# Kitty / Alacritty / foot usan "-e". Si usas wezterm,
-# cambia esta línea a: wezterm start -- "$SETUP_SCRIPT"
-"$TERMINAL" -e "$SETUP_SCRIPT" &
+msg "Git is not configured yet. Launching wezterm with setup-git-gh.sh..."
+wezterm start -- "$SETUP_SCRIPT" &
 
