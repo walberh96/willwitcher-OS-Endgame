@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 
-FLAG_FILE="$HOME/.ww_initialized_flag"
+# Waypaper config directory (honors XDG_CONFIG_HOME if set)
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/waypaper"
+FLAG_FILE="$CONFIG_DIR/.ww_initialized_flag"
 
 # Always try to restore the last wallpaper
 waypaper --restore
 
-# If the flag file does NOT exist, open Waypaper UI
+# If our custom flag file does NOT exist, this is the first run of this script
 if [ ! -f "$FLAG_FILE" ]; then
+  # Make sure the config directory exists
+  mkdir -p "$CONFIG_DIR"
+
+  # Open Waypaper UI so the user can pick a wallpaper
   waypaper
+
+  # Create the flag so next time we know initialization already happened
+  touch "$FLAG_FILE"
 fi
 

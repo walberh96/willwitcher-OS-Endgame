@@ -16,8 +16,11 @@ let
       #!/usr/bin/env bash
       set -euo pipefail
 
-      DOTFILES_REPO="https://github.com/TU-USUARIO/dotfiles.git"
+      # Dotfiles repository (change this to your real repo URL)
+      DOTFILES_REPO="https://github.com/walberh96/willwitcher-OS-Endgame.git"
       DOTFILES_DIR="$HOME/dotfiles"
+
+      # Marker in $HOME (you can chown it to root manually with sudo if you want)
       MARKER_FILE="$HOME/.ww_initialized_flag"
 
       echo "ww-dotfiles-sync: starting..."
@@ -47,7 +50,7 @@ let
       cd "$DOTFILES_DIR"
 
       ####################################################################
-      # Apply stow packages
+      # Apply stow packages (aggressive, your repo wins)
       ####################################################################
       echo "ww-dotfiles-sync: applying stow packages..."
       for dir in */; do
@@ -58,17 +61,20 @@ let
 
         pkg="$(basename "$dir")"
 
-        # Special handling for Hyprland: remove default config
+        # Special handling for Hyprland: remove default config completely
         if [ "$pkg" = "hypr" ]; then
           echo "  -> cleaning existing Hyprland config at $HOME/.config/hypr"
           rm -rf "$HOME/.config/hypr"
         fi
 
         echo "  -> checking conflicts for package '$pkg' (dry-run)..."
+        # Dry-run to detect conflicts; do not abort on non-zero here
         conflicts="$(stow -n -v -t "$HOME" "$pkg" 2>&1 || true)"
 
+        # Show dry-run output (useful when inspecting logs)
         echo "$conflicts"
 
+        # Remove any paths that stow marks as CONFLICT
         if printf '%s\n' "$conflicts" | grep -q '^CONFLICT:'; then
           echo "    conflicts found, removing conflicting paths..."
           printf '%s\n' "$conflicts" | while IFS= read -r line; do
@@ -127,19 +133,14 @@ in
   # Systemd user service
   ############################
   systemd.user.services."ww-dotfiles-sync" = {
-    Unit = {
-      Description = "Sync dotfiles with GNU stow at login";
-      After = [ "graphical-session.target" ];
-      PartOf = [ "graphical-session.target" ];
-    };
+    description = "Sync dotfiles with GNU stow at login";
+    wantedBy = [ "graphical-session.target" ];
+    after = [ "graphical-session.target" ];
+    partOf = [ "graphical-session.target" ];
 
-    Service = {
+    serviceConfig = {
       Type = "oneshot";
       ExecStart = "${wwDotfilesSync}/bin/ww-dotfiles-sync";
-    };
-
-    Install = {
-      WantedBy = [ "graphical-session.target" ];
     };
   };
 }
