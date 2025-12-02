@@ -7,6 +7,7 @@ with pkgs; [
   zathura
   qimgv
   libreoffice
+  xfce.thunar
 
   # Hyprland / Wayland related tools
   hyprpaper
@@ -73,4 +74,5 @@ with pkgs; [
   nwg-look
   waypaper
   chromium
+  lazygit
 ]

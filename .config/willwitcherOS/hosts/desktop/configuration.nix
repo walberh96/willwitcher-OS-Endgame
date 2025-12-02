@@ -5,7 +5,7 @@
   # Imports
   ############################
   imports = [
-    ./hardware-configuration.nix
+    /etc/nixos/hardware-configuration.nix
   ];
 
   ############################
@@ -69,11 +69,12 @@
   ############################
   # Display Manager
   ############################
-  services.gnome.gnome-keyring.enable = true;
-  security.pam.services.ly.enableGnomeKeyring = true;
-  services.displayManager.ly.enable = true;
+ services.gnome.gnome-keyring.enable = true;
+ security.pam.services.ly.enableGnomeKeyring = true;
+ environment.systemPackages = [ pkgs.libsecret ];
+ environment.variables.XDG_RUNTIME_DIR = "/run/user/$UID";
 
-  ############################
+ ############################
   # Hyprland (Wayland compositor)
   ############################
   programs.hyprland = {
