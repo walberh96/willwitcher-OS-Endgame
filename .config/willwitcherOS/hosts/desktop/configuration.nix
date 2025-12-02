@@ -71,7 +71,6 @@
   ############################
  services.gnome.gnome-keyring.enable = true;
  security.pam.services.ly.enableGnomeKeyring = true;
- environment.systemPackages = [ pkgs.libsecret ];
  environment.variables.XDG_RUNTIME_DIR = "/run/user/$UID";
 
  ############################

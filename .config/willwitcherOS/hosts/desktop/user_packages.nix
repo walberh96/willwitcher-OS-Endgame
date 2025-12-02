@@ -8,6 +8,7 @@ with pkgs; [
   qimgv
   libreoffice
   xfce.thunar
+  libsecret
 
   # Hyprland / Wayland related tools
   hyprpaper
