@@ -69,11 +69,10 @@
   ############################
   # Display Manager
   ############################
- services.gnome.gnome-keyring.enable = true;
- security.pam.services.ly.enableGnomeKeyring = true;
- environment.variables.XDG_RUNTIME_DIR = "/run/user/$UID";
-
- ############################
+  services.gnome.gnome-keyring.enable = true;
+  security.pam.services.ly.enableGnomeKeyring = true;
+  services.displayManager.ly.enable = true;
+  ############################
   # Hyprland (Wayland compositor)
   ############################
   programs.hyprland = {
@@ -102,12 +101,14 @@
   ############################
   # XDG Portals
   ############################
-  xdg.portal.extraPortals = with pkgs; [
-    xdg-desktop-portal-hyprland
-    xdg-desktop-portal-gtk
-    xdg-desktop-portal-gnome
+  xdg.portal = {
+  enable = true;
+  extraPortals = with pkgs; [
+    	xdg-desktop-portal-hyprland
+    	xdg-desktop-portal-gtk
   ];
-  xdg.portal.config.common.default = [ "hyprland" "gnome" "gtk" ];
+  config.Hyprland.default = [ "hyprland" "gtk" ];
+  };
 
   ############################
   # Icons and Fonts

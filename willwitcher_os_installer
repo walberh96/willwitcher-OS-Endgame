@@ -105,13 +105,13 @@ if command -v nixos-rebuild >/dev/null 2>&1 && [ -d "$FLAKE_DIR" ]; then
       echo_sub "Running: nixos-rebuild --option experimental-features 'nix-command flakes' switch --flake .#desktop"
       nixos-rebuild \
         --option experimental-features "nix-command flakes" \
-        switch --flake ".#desktop"
+        switch --flake ".#desktop" --impure
     else
       if command -v sudo >/dev/null 2>&1; then
         echo_sub "Running: sudo nixos-rebuild --option experimental-features 'nix-command flakes' switch --flake .#desktop"
         sudo nixos-rebuild \
           --option experimental-features "nix-command flakes" \
-          switch --flake ".#desktop"
+          switch --flake ".#desktop" --impure
       else
         echo_sub "WARNING: 'sudo' not found, cannot run nixos-rebuild as root. Skipping NixOS rebuild."
       fi
