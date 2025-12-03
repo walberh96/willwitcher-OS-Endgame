@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Interactive Git setup script (per user).
-# - Asks for Git user.name and user.email
+# Interactive Git + GitHub setup script (per user).
+# - Optionally updates Git user.name and user.email
 # - Sets GitHub CLI (gh) as the credential helper
-# - Optionally runs `gh auth login` if you're not authenticated
+# - Offers to run `gh auth login` if you are not authenticated
 
-# Check dependencies
+# 1) Check dependencies
 if ! command -v git >/dev/null 2>&1; then
   echo "Error: git is not installed or not in PATH."
   exit 1
@@ -19,61 +19,114 @@ if ! command -v gh >/dev/null 2>&1; then
 fi
 
 echo "=== Git global configuration ==="
-
-# Ask for user.name
-read -rp "Git user.name (your name): " GIT_NAME
-# Ask for user.email
-read -rp "Git user.email (your email): " GIT_EMAIL
-
-echo
-echo "You entered:"
-echo "  user.name  = \"$GIT_NAME\""
-echo "  user.email = \"$GIT_EMAIL\""
 echo
 
-read -rp "Apply these settings? [y/N]: " CONFIRM
-CONFIRM=${CONFIRM:-n}
+# 2) Read existing Git config (if any)
+EXISTING_NAME="$(git config --global user.name 2>/dev/null || true)"
+EXISTING_EMAIL="$(git config --global user.email 2>/dev/null || true)"
 
-if [[ "$CONFIRM" != [yY] ]]; then
-  echo "Aborted. No changes were made."
-  exit 0
+HAS_GIT_CONFIG=false
+if [[ -n "${EXISTING_NAME}" && -n "${EXISTING_EMAIL}" ]]; then
+  HAS_GIT_CONFIG=true
 fi
 
-# Apply git configs (per user: --global)
-git config --global user.name "$GIT_NAME"
-git config --global user.email "$GIT_EMAIL"
+if "$HAS_GIT_CONFIG"; then
+  echo "Current Git configuration:"
+  echo "  user.name  = \"${EXISTING_NAME}\""
+  echo "  user.email = \"${EXISTING_EMAIL}\""
+  echo
 
-# Set GitHub CLI as credential helper
-git config --global credential.helper "!gh auth git-credential"
+  read -rp "Do you want to keep this Git configuration? [Y/n]: " KEEP
+  KEEP=${KEEP:-y}
 
-echo
-echo "✅ Git global config updated for this user."
-echo "   user.name          = $(git config --global user.name)"
-echo "   user.email         = $(git config --global user.email)"
-echo "   credential.helper  = $(git config --global credential.helper)"
+  if [[ "$KEEP" =~ ^[Yy]$ ]]; then
+    echo "Keeping existing Git user.name and user.email."
+  else
+    echo
+    read -rp "New Git user.name (your name): " GIT_NAME
+    read -rp "New Git user.email (your email): " GIT_EMAIL
 
-echo
-echo "=== GitHub authentication via gh ==="
+    echo
+    echo "You entered:"
+    echo "  user.name  = \"$GIT_NAME\""
+    echo "  user.email = \"$GIT_EMAIL\""
+    echo
 
-# Check if already authenticated
-if gh auth status >/dev/null 2>&1; then
-  echo "You are already authenticated with GitHub (gh auth status OK)."
+    read -rp "Apply these new settings? [y/N]: " CONFIRM
+    CONFIRM=${CONFIRM:-n}
+
+    if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
+      git config --global user.name "$GIT_NAME"
+      git config --global user.email "$GIT_EMAIL"
+      echo "Git global user.name and user.email updated."
+    else
+      echo "Aborted changing Git user.name/user.email. Keeping previous values."
+    fi
+  fi
 else
-  echo "You are NOT authenticated with GitHub yet."
+  # No previous Git config: ask from scratch
+  read -rp "Git user.name (your name): " GIT_NAME
+  read -rp "Git user.email (your email): " GIT_EMAIL
+
+  echo
+  echo "You entered:"
+  echo "  user.name  = \"$GIT_NAME\""
+  echo "  user.email = \"$GIT_EMAIL\""
+  echo
+
+  read -rp "Apply these settings? [y/N]: " CONFIRM
+  CONFIRM=${CONFIRM:-n}
+
+  if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
+    git config --global user.name "$GIT_NAME"
+    git config --global user.email "$GIT_EMAIL"
+    echo "Git global user.name and user.email set."
+  else
+    echo "Aborted. No changes were made to Git user.name/user.email."
+  fi
+fi
+
+echo
+echo "Final Git identity:"
+echo "  user.name  = \"$(git config --global user.name 2>/dev/null || echo "<unset>")\""
+echo "  user.email = \"$(git config --global user.email 2>/dev/null || echo "<unset>")\""
+echo
+
+# 3) Set GitHub CLI as credential helper
+git config --global credential.helper "!gh auth git-credential"
+echo "GitHub CLI has been set as the Git credential helper:"
+echo "  credential.helper = \"$(git config --global credential.helper 2>/dev/null || echo "<unset>")\""
+echo
+
+# 4) GitHub authentication section
+echo "=== GitHub authentication via gh ==="
+echo
+
+if gh auth status >/dev/null 2>&1; then
+  echo "You are already authenticated with GitHub CLI (gh auth status OK)."
+else
+  echo "You are NOT authenticated with GitHub CLI yet."
+  echo "Authentication is required to:"
+  echo "  - Push to GitHub using HTTPS (git push origin ...)"
+  echo "  - Use tools like lazygit with GitHub"
+  echo "  - Access private repositories from the terminal"
+  echo
+
   read -rp "Run 'gh auth login' now? [Y/n]: " GH_CONFIRM
   GH_CONFIRM=${GH_CONFIRM:-y}
 
-  if [[ "$GH_CONFIRM" == [yY] ]]; then
+  if [[ "$GH_CONFIRM" =~ ^[Yy]$ ]]; then
     echo
     echo "Running: gh auth login"
     echo "Follow the interactive prompts to log in to GitHub."
     echo
     gh auth login
+
     echo
     if gh auth status >/dev/null 2>&1; then
       echo "✅ GitHub authentication completed successfully."
     else
-      echo "⚠️  gh auth login finished, but gh auth status still fails."
+      echo "⚠️  'gh auth login' finished, but 'gh auth status' still fails."
       echo "   You may need to re-run 'gh auth login' manually."
     fi
   else

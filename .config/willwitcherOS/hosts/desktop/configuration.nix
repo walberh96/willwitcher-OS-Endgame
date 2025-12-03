@@ -69,9 +69,11 @@
   ############################
   # Display Manager
   ############################
-  services.gnome.gnome-keyring.enable = true;
-  security.pam.services.ly.enableGnomeKeyring = true;
-  services.displayManager.ly.enable = true;
+  services.displayManager.gdm = {
+    enable = true;
+    wayland = true;
+  };
+
   ############################
   # Hyprland (Wayland compositor)
   ############################
@@ -79,6 +81,10 @@
     enable = true;
     xwayland.enable = true;
   };
+  services.displayManager.defaultSession = "hyprland";
+
+  services.gnome.gnome-keyring.enable = true;
+  security.pam.services.gdm.enableGnomeKeyring = true;
 
   ############################
   # Audio (PipeWire)
@@ -178,6 +184,6 @@
   ############################
   # State Version
   ############################
-  system.stateVersion = "25.05";
+  system.stateVersion = "25.11";
 }
 

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Keychron Launcher
+Comment=Keychron Launcher Web App
+Exec=chromium --app=https://launcher.keychron.com/
+Terminal=false
+Icon=preferences-desktop-mouse
+Categories=Network;WebBrowser;
+StartupNotify=true
+

@@ -26,11 +26,6 @@ local opts = { noremap = true, silent = true }
 vim.keymap.set('v', '<C-c>', '"+y', opts)
 vim.keymap.set('v', '<C-v>', '"+p', opts)
 vim.keymap.set('n', '<C-a>', 'ggVG', opts) -- select all
-vim.keymap.set("n", "<C-n>", "<cmd>Neotree toggle<CR>", { silent = true, noremap = true })
-vim.keymap.set("n", "<leader>ff", function() require("telescope.builtin").find_files({ hidden = true }) end,
-    { desc = "Find files" })
-vim.keymap.set("n", "<leader>fg", function() require("telescope.builtin").live_grep() end, { desc = "Live grep" })
-
 vim.keymap.set("i", "<C-Space>", "<C-x><C-o>", { silent = true })
 vim.keymap.set("i", "<C-@>", "<C-x><C-o>", { silent = true }) -- some terminals send C-@
 

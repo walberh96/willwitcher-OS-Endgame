@@ -4,43 +4,76 @@ set -u
 SETUP_SCRIPT="$HOME/.local/bin/setup-git-gh"
 
 msg() {
+  # Simple logging helper, printed to stdout.
   local text="git-bootstrap: $*"
   echo "$text"
- }
+}
 
 msg "Starting git-bootstrap-check..."
 
+# 1) Check if git is available
 if ! command -v git >/dev/null 2>&1; then
   msg "git is not installed or not in PATH. Exiting."
   exit 0
 fi
 
+# 2) Check if gh is available
+if ! command -v gh >/dev/null 2>&1; then
+  msg "gh (GitHub CLI) is not installed or not in PATH."
+  msg "You can still configure Git manually by running:"
+  msg "  git config --global user.name \"Your Name\""
+  msg "  git config --global user.email \"you@example.com\""
+  exit 0
+fi
+
+# 3) Check if setup script exists and is executable
 if [[ ! -x "$SETUP_SCRIPT" ]]; then
   msg "Setup script not found or not executable: $SETUP_SCRIPT"
   msg "Make sure it exists and run: chmod +x \"$SETUP_SCRIPT\""
   exit 1
 fi
 
+# 4) Check if Git global config (user.name + user.email) is present
+HAS_GIT_CONFIG=0
 if git config --global user.name >/dev/null 2>&1 && \
    git config --global user.email >/dev/null 2>&1; then
-  msg "Git is already configured for this user (user.name and user.email present). Nothing to do."
-  exit 0
+  HAS_GIT_CONFIG=1
 fi
 
-if ! command -v gh >/dev/null 2>&1; then
-  msg "gh (GitHub CLI) is not installed or not in PATH."
-  msg "You can still run the setup script manually in a terminal:"
-  msg "  \"$SETUP_SCRIPT\""
-  exit 0
+# 5) Check if GitHub CLI is authenticated
+GH_AUTH_OK=0
+if gh auth status >/dev/null 2>&1; then
+  GH_AUTH_OK=1
 fi
 
+# 6) We need a terminal (wezterm) to run the interactive wizard
 if ! command -v wezterm >/dev/null 2>&1; then
-  msg "wezterm not found in PATH. Cannot open terminal."
-  msg "Run the setup manually:"
+  msg "wezterm not found in PATH. Cannot open interactive setup."
+  msg "Run the setup manually in a terminal with:"
   msg "  \"$SETUP_SCRIPT\""
   exit 1
 fi
 
-msg "Git is not configured yet. Launching wezterm with setup-git-gh.sh..."
-wezterm start -- "$SETUP_SCRIPT" &
+# 7) Decide what to do based on Git config and gh auth
+
+if [[ "$HAS_GIT_CONFIG" -eq 0 ]]; then
+  # Git is not configured yet: run full setup
+  msg "Git is not configured yet (missing user.name and/or user.email)."
+  msg "Launching wezterm with setup-git-gh..."
+  wezterm start -- "$SETUP_SCRIPT" &
+  exit 0
+fi
+
+if [[ "$GH_AUTH_OK" -eq 0 ]]; then
+  # Git is configured, but GitHub CLI is not authenticated
+  msg "Git is configured, but GitHub CLI is NOT authenticated."
+  msg "This is required to use GitHub from the terminal (git push, lazygit, etc)."
+  msg "Launching wezterm with setup-git-gh to complete GitHub login..."
+  wezterm start -- "$SETUP_SCRIPT" &
+  exit 0
+fi
+
+# If we reach this point, everything is ready
+msg "Git is configured and GitHub CLI is authenticated. Nothing to do."
+exit 0
 

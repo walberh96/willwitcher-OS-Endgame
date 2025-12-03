@@ -9,6 +9,7 @@ with pkgs; [
   libreoffice
   xfce.thunar
   libsecret
+  seahorse
 
   # Hyprland / Wayland related tools
   hyprpaper
