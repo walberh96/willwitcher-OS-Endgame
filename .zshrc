@@ -19,6 +19,10 @@ alias grep='rg'
 # Use fd instead of find
 alias find='fd'
 
+# Alias for rebuild the flake
+alias ww-rebuild='sudo nixos-rebuild switch --impure --flake "$HOME/.config/willwitcherOS#desktop"'
+
+
 # ============================
 # Lightweight git info (vcs_info)
 # ============================
