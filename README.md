@@ -115,6 +115,11 @@ To update all packages and the system configuration, navigate to your repository
     ```sh
     nixos-rebuild switch --flake .config/willwitcherOS#desktop --impure
     ```
+3.  **Alias for Rebuilding (ww-rebuild):**
+    For convenience, an alias `ww-rebuild` has been added to the Zsh configuration. You can simply run this command from anywhere in your terminal to rebuild and apply your NixOS flake configuration.
+    ```sh
+    ww-rebuild
+    ```
 
 ## Initial Setup & Bootstrap Scripts
 
