@@ -1,0 +1,39 @@
+2025/12/03-11:24:43.012 2b8f Reusing MANIFEST /home/willwitcher/.config/chromium/Default/IndexedDB/https_www.youtube.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/12/03-11:24:43.012 2b8f Recovering log #4
+2025/12/03-11:24:43.016 2b8f Reusing old log /home/willwitcher/.config/chromium/Default/IndexedDB/https_www.youtube.com_0.indexeddb.leveldb/000004.log 
+2025/12/03-11:24:44.203 2b7c Level-0 table #8: started
+2025/12/03-11:24:44.507 2b7c Level-0 table #8: 1487666 bytes OK
+2025/12/03-11:24:44.611 2b7c Delete type=0 #4
+2025/12/03-11:24:49.249 2b79 Compacting 1@1 + 1@2 files
+2025/12/03-11:24:49.323 2b79 Generated table #9@1: 539 keys, 160597 bytes
+2025/12/03-11:24:49.323 2b79 Compacted 1@1 + 1@2 files => 160597 bytes
+2025/12/03-11:24:49.376 2b79 compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/12/03-11:24:49.377 2b79 Delete type=2 #8
+2025/12/03-11:24:49.377 2b79 Delete type=2 #5
+2025/12/03-11:27:21.868 2b7a Level-0 table #11: started
+2025/12/03-11:27:21.969 2b7a Level-0 table #11: 1136359 bytes OK
+2025/12/03-11:27:22.029 2b7a Delete type=0 #7
+2025/12/03-11:30:58.258 2b7c Compacting 1@1 + 1@2 files
+2025/12/03-11:30:58.374 2b7c Generated table #12@1: 545 keys, 124976 bytes
+2025/12/03-11:30:58.374 2b7c Compacted 1@1 + 1@2 files => 124976 bytes
+2025/12/03-11:30:58.549 2b7c compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/12/03-11:30:58.550 2b7c Delete type=2 #9
+2025/12/03-11:30:58.550 2b7c Delete type=2 #11
+2025/12/03-11:31:54.169 2b7a Level-0 table #14: started
+2025/12/03-11:31:54.977 2b7a Level-0 table #14: 1351348 bytes OK
+2025/12/03-11:31:55.039 2b7a Delete type=0 #10
+2025/12/03-11:32:57.194 2b7c Compacting 1@1 + 1@2 files
+2025/12/03-11:32:57.326 2b7c Generated table #15@1: 573 keys, 132655 bytes
+2025/12/03-11:32:57.326 2b7c Compacted 1@1 + 1@2 files => 132655 bytes
+2025/12/03-11:32:57.380 2b7c compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/12/03-11:36:02.504 2b7a Level-0 table #17: started
+2025/12/03-11:36:02.622 2b7a Level-0 table #17: 1358090 bytes OK
+2025/12/03-11:36:02.676 2b7a Delete type=2 #12
+2025/12/03-11:36:02.677 2b7a Delete type=0 #13
+2025/12/03-11:36:02.677 2b7a Delete type=2 #14
+2025/12/03-11:38:53.258 2b7a Compacting 1@1 + 1@2 files
+2025/12/03-11:38:53.322 2b7a Generated table #18@1: 594 keys, 129551 bytes
+2025/12/03-11:38:53.323 2b7a Compacted 1@1 + 1@2 files => 129551 bytes
+2025/12/03-11:38:53.376 2b7a compacted to: files[ 0 0 1 0 0 0 0 ]
+2025/12/03-11:38:53.376 2b7a Delete type=2 #17
+2025/12/03-11:38:53.377 2b7a Delete type=2 #15

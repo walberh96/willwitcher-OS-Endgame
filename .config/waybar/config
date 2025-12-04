@@ -129,7 +129,7 @@
       "format-icons": {
         "default": [
           "",
-          ""
+          " "
         ]
       },
       // Use your custom ww-volume helper for volume control

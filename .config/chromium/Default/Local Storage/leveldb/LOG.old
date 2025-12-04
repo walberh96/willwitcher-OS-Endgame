@@ -1,2 +1,66 @@
-2025/11/28-10:34:21.738 5 Creating DB /home/willwitcher/.config/chromium/Default/Local Storage/leveldb since it was missing.
-2025/11/28-10:34:22.724 5 Reusing MANIFEST /home/willwitcher/.config/chromium/Default/Local Storage/leveldb/MANIFEST-000001
+2025/12/03-09:15:43.943 5 Reusing MANIFEST /home/willwitcher/.config/chromium/Default/Local Storage/leveldb/MANIFEST-000001
+2025/12/03-09:15:43.948 5 Recovering log #21
+2025/12/03-09:15:43.948 5 Reusing old log /home/willwitcher/.config/chromium/Default/Local Storage/leveldb/000021.log 
+2025/12/03-10:13:52.814 7 Level-0 table #24: started
+2025/12/03-10:13:52.868 7 Level-0 table #24: 18613 bytes OK
+2025/12/03-10:13:52.925 7 Delete type=0 #21
+2025/12/03-10:14:16.465 7 Level-0 table #26: started
+2025/12/03-10:14:16.529 7 Level-0 table #26: 151476 bytes OK
+2025/12/03-10:14:16.584 7 Delete type=0 #23
+2025/12/03-10:14:16.584 7 Compacting 4@0 + 1@1 files
+2025/12/03-10:14:16.671 7 Generated table #27@0: 47 keys, 162282 bytes
+2025/12/03-10:14:16.671 7 Compacted 4@0 + 1@1 files => 162282 bytes
+2025/12/03-10:14:16.724 7 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/12/03-10:14:16.725 7 Delete type=2 #16
+2025/12/03-10:14:16.725 7 Delete type=2 #18
+2025/12/03-10:14:16.725 7 Delete type=2 #20
+2025/12/03-10:14:16.725 7 Delete type=2 #26
+2025/12/03-10:14:16.725 7 Delete type=2 #24
+2025/12/03-10:14:52.817 7 Level-0 table #29: started
+2025/12/03-10:14:52.893 7 Level-0 table #29: 268221 bytes OK
+2025/12/03-10:14:52.951 7 Delete type=0 #25
+2025/12/03-10:15:16.468 7 Level-0 table #31: started
+2025/12/03-10:15:16.529 7 Level-0 table #31: 273236 bytes OK
+2025/12/03-10:15:16.585 7 Delete type=0 #28
+2025/12/03-10:15:52.811 7 Level-0 table #33: started
+2025/12/03-10:15:52.883 7 Level-0 table #33: 382616 bytes OK
+2025/12/03-10:15:52.944 7 Delete type=0 #30
+2025/12/03-10:20:52.811 7 Level-0 table #35: started
+2025/12/03-10:20:52.898 7 Level-0 table #35: 384014 bytes OK
+2025/12/03-10:20:52.959 7 Delete type=0 #32
+2025/12/03-10:20:52.960 7 Compacting 4@0 + 1@1 files
+2025/12/03-10:20:53.057 7 Generated table #36@0: 47 keys, 394321 bytes
+2025/12/03-10:20:53.057 7 Compacted 4@0 + 1@1 files => 394321 bytes
+2025/12/03-10:20:53.116 7 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/12/03-10:20:53.116 7 Delete type=2 #27
+2025/12/03-10:20:53.116 7 Delete type=2 #31
+2025/12/03-10:20:53.116 7 Delete type=2 #29
+2025/12/03-10:20:53.117 7 Delete type=2 #35
+2025/12/03-10:20:53.117 7 Delete type=2 #33
+2025/12/03-10:23:52.811 7 Level-0 table #38: started
+2025/12/03-10:23:52.893 7 Level-0 table #38: 383712 bytes OK
+2025/12/03-10:23:52.949 7 Delete type=0 #34
+2025/12/03-10:25:52.810 7 Level-0 table #40: started
+2025/12/03-10:25:52.890 7 Level-0 table #40: 386846 bytes OK
+2025/12/03-10:25:52.950 7 Delete type=0 #37
+2025/12/03-10:42:14.448 7 Level-0 table #42: started
+2025/12/03-10:42:14.558 7 Level-0 table #42: 387685 bytes OK
+2025/12/03-10:42:14.619 7 Delete type=0 #39
+2025/12/03-11:07:18.019 7 Level-0 table #44: started
+2025/12/03-11:07:18.182 7 Level-0 table #44: 393813 bytes OK
+2025/12/03-11:07:18.244 7 Delete type=0 #41
+2025/12/03-11:07:18.245 7 Compacting 4@0 + 1@1 files
+2025/12/03-11:07:18.349 7 Generated table #45@0: 47 keys, 404667 bytes
+2025/12/03-11:07:18.349 7 Compacted 4@0 + 1@1 files => 404667 bytes
+2025/12/03-11:07:18.409 7 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/12/03-11:07:18.410 7 Delete type=2 #38
+2025/12/03-11:07:18.410 7 Delete type=2 #44
+2025/12/03-11:07:18.410 7 Delete type=2 #42
+2025/12/03-11:07:18.410 7 Delete type=2 #40
+2025/12/03-11:07:18.410 7 Delete type=2 #36
+2025/12/03-11:24:22.274 7 Level-0 table #47: started
+2025/12/03-11:24:22.356 7 Level-0 table #47: 408921 bytes OK
+2025/12/03-11:24:22.414 7 Delete type=0 #43
+2025/12/03-11:24:35.946 7 Level-0 table #49: started
+2025/12/03-11:24:36.046 7 Level-0 table #49: 416841 bytes OK
+2025/12/03-11:24:36.106 7 Delete type=0 #46

@@ -37,6 +37,5 @@ gnugrep
 papirus-icon-theme
 gnused
 stow
-
 #------------------------------------------------------
 ]

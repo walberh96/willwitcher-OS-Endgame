@@ -18,5 +18,5 @@ configuration {
   case-sensitive: false;    /* case-insensitive matching */
 }
 
-/* Load our custom Catppuccin Mocha theme */
-@theme "~/.config/rofi/themes/catppuccin-mocha.rasi"
+/* Load our custom theme */
+@theme "~/.config/rofi/themes/ww-mocha.rasi"
